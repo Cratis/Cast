@@ -32,6 +32,10 @@ export type GitHubView = {
     github: GitHubSnapshot;
     /** Merged pull requests across the configured organizations, falling back to a stat written in cast.yaml. */
     mergedPrTotal: number;
+    /** Where {@link mergedPrTotal} comes from: 'as of' the capture date, or 'self-reported' for the cast.yaml fallback. */
+    mergedPrStatus: string;
+    /** True when {@link mergedPrTotal} is the cast.yaml fallback: never captured, so never shown as a snapshot or as live. */
+    mergedPrSelfReported: boolean;
     /** Floors to hundreds for an honest "3,100+" style figure. */
     mergedPrFloor: number;
     /** Per-repository figures prefer the snapshot; values written in cast.yaml are fallbacks only. */
@@ -48,7 +52,9 @@ export type GitHubView = {
 
 /** Builds the GitHub view for one profile. */
 export function gitHubView(config: CastConfig, github: GitHubSnapshot): GitHubView {
-    const mergedPrTotal = github.mergedPullRequests.total || (config.stats.find(stat => stat.live === 'mergedPullRequests')?.value ?? 0);
+    const captured = github.mergedPullRequests.total;
+    // The cast.yaml figure was never captured: it carries no capture date, so it is labelled as the owner's own.
+    const mergedPrTotal = captured || (config.stats.find(stat => stat.live === 'mergedPullRequests')?.value ?? 0);
     const cratisRepos = (config.cratis?.repos ?? []).map(repo => {
         const counts = repo.url ? github.repositories[`Cratis/${repo.name}`] : undefined;
         if (!counts) return { ...repo, role: repo.role ?? roleFor(repo, repo.rank) };
@@ -62,6 +68,8 @@ export function gitHubView(config: CastConfig, github: GitHubSnapshot): GitHubVi
     return {
         github,
         mergedPrTotal,
+        mergedPrStatus: captured ? `as of ${formatSnapshotDate(github.fetchedAt)}` : 'self-reported',
+        mergedPrSelfReported: !captured && mergedPrTotal > 0,
         mergedPrFloor: mergedPrTotal >= 100 ? Math.floor(mergedPrTotal / 100) * 100 : mergedPrTotal,
         cratisRepos,
         liveProjects,

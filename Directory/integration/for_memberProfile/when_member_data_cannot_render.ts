@@ -45,6 +45,8 @@ describe('when member data cannot render', () => {
         const page = () => memberProfile(core, castJson(profile => { profile.github!.contributions.weeks[0]!.start = '2026-99-99'; }), undefined, builtAt, warn);
 
         it('should fall back to GitHub', () => page().kind.should.equal(ProfileKind.GitHub));
+        it('should not use the merged pull requests from the cast.json', () => page().data.github.mergedPullRequests.total.should.equal(3));
+        it('should not use the calendar from the cast.json', () => page().data.github.contributions.weeks.should.be.empty);
     });
 
     describe('and the captured GitHub data has counts that are not counts', () => {

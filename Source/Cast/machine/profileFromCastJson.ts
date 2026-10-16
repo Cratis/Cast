@@ -184,6 +184,7 @@ function finish(data: z.output<typeof castJsonSchema>, document: Record<string, 
     };
 
     // Rendered without the captures when only they cannot be: the directory then uses its own GitHub data.
+    // A refused file keeps nothing, captures included: rejected member data never feeds the GitHub-only page.
     const problem = renderProblem(profile);
     if (!problem) return { dropped, profile };
     const { github: _github, writing: _writing, ...withoutCaptures } = profile;

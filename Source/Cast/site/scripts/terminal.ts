@@ -123,11 +123,18 @@ class Terminal {
 
     private greet(): void {
         this.greeted = true;
-        const { careerEvents, mergedPrTotal, feedOrg, snapshotDate } = this.cast;
-        this.print(c.ev(this.prompt), c.faint(` · stream position ${careerEvents.length} · ${(getLiveMerged()?.total ?? mergedPrTotal).toLocaleString('en-US')} PRs merged in ${feedOrg}`));
+        const { careerEvents, feedOrg, snapshotDate } = this.cast;
+        this.print(c.ev(this.prompt), c.faint(` · stream position ${careerEvents.length} · ${this.mergedTotal()} PRs merged in ${feedOrg}`));
         this.print(c.faint(`GitHub snapshot taken ${snapshotDate}. Everything here is real data.`));
         this.print('Type ', c.fg('help'), ' to see what you can do, or tap a suggestion below.');
         this.blank();
+    }
+
+    /** The merged pull request total: live once the browser has it, else the snapshot, marked when self-reported. */
+    private mergedTotal(): string {
+        const live = getLiveMerged();
+        const total = (live?.total ?? this.cast.mergedPrTotal).toLocaleString('en-US');
+        return !live && this.cast.mergedPrSelfReported ? `${total} (self-reported)` : total;
     }
 
     // --- lifecycle ----------------------------------------------------------------
@@ -284,7 +291,7 @@ class Terminal {
 
     // --- commands -------------------------------------------------------------------
     private buildCommands(): Record<string, Command> {
-        const { person, now, careerEvents, skills, cratis, talks, profileLinks, firstName, feedOrg, projects, mergedPrTotal, snapshotDate, themes: blogThemes, posts: blogPosts, blogHost } = this.cast;
+        const { person, now, careerEvents, skills, cratis, talks, profileLinks, firstName, feedOrg, projects, snapshotDate, themes: blogThemes, posts: blogPosts, blogHost } = this.cast;
         const SECTIONS = ALL_SECTIONS.filter(([id]) => id === 'top' || this.cast.sections.includes(id));
         const LINKS: Record<string, string> = {
             ...Object.fromEntries(profileLinks.map((profile) => [profile.key.toLowerCase(), profile.url])),
@@ -404,7 +411,7 @@ class Terminal {
                     const live = getLiveMerged();
                     const prs = live?.latest ?? this.cast.pullRequests;
                     const count = flag === '-n' ? Math.max(1, Math.min(prs.length, Number(n) || prs.length)) : prs.length;
-                    this.print(c.faint(`tail ${feedOrg} · ${live ? 'live' : `snapshot taken ${snapshotDate}`} · ${(live?.total ?? mergedPrTotal).toLocaleString('en-US')} merged in total`));
+                    this.print(c.faint(`tail ${feedOrg} · ${live ? 'live' : `snapshot taken ${snapshotDate}`} · ${this.mergedTotal()} merged in total`));
                     prs.slice(0, count).forEach((pr, i) => {
                         this.print(
                             c.faint(pad(i === 0 ? 'HEAD' : `HEAD~${i}`, 8)),
@@ -510,7 +517,7 @@ class Terminal {
                 run: () => {
                     if (!cratis) return this.print(c.faint('Cratis makes event sourcing practical. '), link('https://cratis.io'));
                     if (cratis.pitch) this.print(c.fg(cratis.pitch.replace(/\*/g, '')));
-                    this.print(c.faint(`${(getLiveMerged()?.total ?? mergedPrTotal).toLocaleString('en-US')} merged PRs · `), link(LINKS['cratis'] ?? 'https://cratis.io'));
+                    this.print(c.faint(`${this.mergedTotal()} merged PRs · `), link(LINKS['cratis'] ?? 'https://cratis.io'));
                     for (const r of cratis.repos) this.print(c.cmd(pad(r.name, 21)), c.faint(pad(r.role, 16)), r.url ? link(r.url, r.desc) : r.desc);
                 },
             },
