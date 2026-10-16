@@ -22,28 +22,22 @@ describe('when resolving the tier a site shows', () => {
         it('should use the snapshot', () => usableSnapshot(snapshotFor('Ada', 1), 'ada')!.login.should.equal('Ada'));
     });
 
-    describe('from a snapshot claiming merged pull requests', () => {
-        const resolved = siteTier('ada', registry, 'snapshot', snapshotFor('ada', 12));
+    describe('without fresh evidence', () => {
+        const resolved = siteTier('ada', registry, undefined);
 
-        it('should not raise the tier', () => (resolved.tier === undefined).should.be.true);
+        it('should have no tier', () => (resolved.tier === undefined).should.be.true);
         it('should say there is no source', () => resolved.source.should.equal(TierSource.None));
     });
 
-    describe('from live data for the same login', () => {
-        const resolved = siteTier('ada', registry, 'live', snapshotFor('ada', 2));
-
-        it('should make a contributor', () => resolved.tier!.should.equal(Tier.Contributor));
+    describe('with a fresh count of zero', () => {
+        it('should have no tier', () => (siteTier('ada', registry, 0).tier === undefined).should.be.true);
     });
 
-    describe('from live data for a different login', () => {
-        const resolved = siteTier('ada', registry, 'live', snapshotFor('woksin', 3000));
-
-        it('should not make a contributor', () => (resolved.tier === undefined).should.be.true);
+    describe('with a fresh count of one', () => {
+        it('should make a contributor', () => siteTier('ada', registry, 1).tier!.should.equal(Tier.Contributor));
     });
 
-    describe('for a registry member without any GitHub data', () => {
-        const resolved = siteTier('WOKSIN', registry, 'none', emptySnapshot('woksin', ['Cratis']));
-
-        it('should take the tier from the registry by login', () => resolved.tier!.should.equal(Tier.Core));
+    describe('for a registry member without fresh evidence', () => {
+        it('should take the tier from the registry by login', () => siteTier('WOKSIN', registry, undefined).tier!.should.equal(Tier.Core));
     });
 });

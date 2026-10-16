@@ -14,7 +14,21 @@ export type GitHubRequest = {
     releases: string[];
     stars: string[];
     feedLimit?: number;
+    /** Spacing between search requests (search has its own 30-per-minute limit). Default 2100 ms. */
+    searchDelayMilliseconds?: number;
 };
+
+/**
+ * Evidence fetched in this call only, for granting tiers. Never persisted: a snapshot is owner-editable, so
+ * nothing read from one may grant a tier.
+ */
+export type FreshEvidence = {
+    /** Merged public pull requests in the Cratis organization, when the search succeeded in this call. */
+    cratisMergedPullRequests?: number;
+};
+
+/** A fetch result: the snapshot to render and persist, and the evidence that is used for tiers and then dropped. */
+export type GitHubFetchResult = { snapshot: GitHubSnapshot; fresh: FreshEvidence };
 
 /** Receives warnings; the fetch itself never throws. */
 export type Warn = (message: string) => void;
@@ -57,8 +71,8 @@ export async function graphql<T>(query: string, variables: Record<string, unknow
 }
 
 /** Counts search results. Search has its own 30-per-minute limit, so calls are spaced out. */
-export async function searchCount(query: string, token: string): Promise<number> {
-    await sleep(2100);
+export async function searchCount(query: string, token: string, delayMilliseconds = 2100): Promise<number> {
+    await sleep(delayMilliseconds);
     const body = await (await rest(`/search/issues?q=${encodeURIComponent(query)}&per_page=1`, token)).json() as { total_count?: number; incomplete_results?: boolean };
     if (!Number.isInteger(body.total_count) || body.incomplete_results) throw new Error('incomplete search response');
     return body.total_count!;
@@ -95,7 +109,8 @@ const split = (repository: string): [string, string] => {
  * Captures public GitHub data. Returns undefined when nothing could be captured; per-repository failures keep
  * that repository's previous values. Never throws.
  */
-export async function fetchGitHub(request: GitHubRequest, token: string, previous: GitHubSnapshot | undefined, warn: Warn): Promise<GitHubSnapshot | undefined> {
+export async function fetchGitHub(request: GitHubRequest, token: string, previous: GitHubSnapshot | undefined, warn: Warn): Promise<GitHubFetchResult | undefined> {
+    const delay = request.searchDelayMilliseconds ?? 2100;
     const tracked = [...new Set([...request.releases, ...request.stars, ...request.repositories])];
     const repositoryFields = tracked.map((repository, index) => {
         const [owner, name] = split(repository);
@@ -165,7 +180,7 @@ export async function fetchGitHub(request: GitHubRequest, token: string, previou
         if (kept) repositories[repository] = kept;
         try {
             const standing = standingAmongHumans(await contributors(repository, token), request.login);
-            const prs = await searchCount(`author:${request.login} repo:${repository} is:public is:pr is:merged`, token);
+            const prs = await searchCount(`author:${request.login} repo:${repository} is:public is:pr is:merged`, token, delay);
             repositories[repository] = { ...standing, prs };
         } catch (error) {
             warn(`${repository}: ${error instanceof Error ? error.message : String(error)} (keeping previous values)`);
@@ -173,10 +188,13 @@ export async function fetchGitHub(request: GitHubRequest, token: string, previou
     }
 
     const byOrg: Record<string, number> = {};
+    const fresh: FreshEvidence = {};
     for (const org of new Set([...request.orgs, cratisOrganization])) {
         try {
-            byOrg[org] = await searchCount(mergedPullRequestQuery(request.login, [org]), token);
+            byOrg[org] = await searchCount(mergedPullRequestQuery(request.login, [org]), token, delay);
+            if (org === cratisOrganization && data.user.login.toLowerCase() === request.login.toLowerCase()) fresh.cratisMergedPullRequests = byOrg[org];
         } catch (error) {
+            // The previous count is kept for display only; it never becomes evidence.
             const kept = previous?.mergedPullRequests.byOrg[org];
             if (kept !== undefined) byOrg[org] = kept;
             warn(`${org} merged pull requests: ${error instanceof Error ? error.message : String(error)}`);
@@ -185,7 +203,7 @@ export async function fetchGitHub(request: GitHubRequest, token: string, previou
 
     const user = data.user;
     const calendar = user.contributionsCollection.contributionCalendar;
-    return {
+    const snapshot: GitHubSnapshot = {
         fetchedAt: new Date().toISOString(),
         login: user.login,
         orgs: request.orgs,
@@ -213,4 +231,5 @@ export async function fetchGitHub(request: GitHubRequest, token: string, previou
         releases,
         stars,
     };
+    return { snapshot, fresh };
 }

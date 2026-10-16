@@ -12,7 +12,7 @@ import type { GitHubSnapshot } from '../github/GitHubSnapshot';
 import type { CastConfig } from '../config/CastConfig';
 import { parseCast } from '../config/parseCast';
 import { resolveSections } from '../config/resolveSections';
-import { fetchGitHub, gitHubToken } from '../github/fetchGitHub';
+import { fetchGitHub, gitHubToken, type FreshEvidence } from '../github/fetchGitHub';
 import { emptySnapshot } from '../github/GitHubSnapshot';
 import { fetchWriting } from '../writing/fetchWriting';
 import type { CastData } from './CastData';
@@ -45,12 +45,11 @@ export const usableSnapshot = (github: GitHubSnapshot | undefined, identity: str
 
 /**
  * The tier a site shows: a claim, linked to the directory, which is the authority. Core and Partner come from
- * the registry by the GitHub login. Contributor comes only from merged pull requests fetched live in this build
- * for that login: never from `.cast/snapshot.json`, which the site owner controls.
+ * the registry by the GitHub login. Contributor comes only from `freshCratisMergedPullRequests`: the count a
+ * search returned in this build for that login. It is never read from a snapshot and never persisted.
  */
-export function siteTier(identity: string, registry: readonly RegistryMember[], githubSource: CastData['build']['githubSource'], github: GitHubSnapshot): ResolvedTier {
-    const liveCount = githubSource === 'live' && sameLogin(github.login, identity) ? github.mergedPullRequests.byOrg[cratisOrganization] : undefined;
-    return resolveTier(identity, registry, liveCount);
+export function siteTier(identity: string, registry: readonly RegistryMember[], freshCratisMergedPullRequests: number | undefined): ResolvedTier {
+    return resolveTier(identity, registry, freshCratisMergedPullRequests);
 }
 
 /**
@@ -72,23 +71,26 @@ export async function resolveData(options: ResolveDataOptions): Promise<Resolved
     let githubSource: CastData['build']['githubSource'] = github ? 'snapshot' : 'none';
     let writing = snapshot.writing;
     let changed = false;
+    let freshEvidence: FreshEvidence = {};
 
     if (options.fetch) {
         const token = gitHubToken();
         if (!token) {
             warn('no GITHUB_TOKEN or GH_TOKEN in the environment; using the snapshot for GitHub data');
         } else {
-            const fresh = await fetchGitHub({
+            const result = await fetchGitHub({
                 login: config.github.login,
                 orgs: config.github.orgs,
                 repositories: trackedCratisRepositories(config),
                 releases: config.github.releases,
                 stars: config.github.stars,
             }, token, github, warn);
+            const fresh = result?.snapshot;
             if (fresh && !sameLogin(fresh.login, identity)) {
                 warn(`GitHub answered for '${fresh.login}', not '${identity}'; ignoring it`);
-            } else if (fresh) {
+            } else if (result && fresh) {
                 github = fresh;
+                freshEvidence = result.fresh;
                 githubSource = 'live';
                 changed = true;
                 options.log.info(`GitHub: ${fresh.contributions.total} contributions, ${fresh.mergedPullRequests.total} merged pull requests, ${Object.keys(fresh.repositories).length} repositories`);
@@ -112,7 +114,7 @@ export async function resolveData(options: ResolveDataOptions): Promise<Resolved
 
     const registry = await loadRegistry(options.fetch, warn);
     const githubData = github ?? emptySnapshot(identity, config.github.orgs);
-    const tier = siteTier(identity, registry.members, githubSource, githubData);
+    const tier = siteTier(identity, registry.members, freshEvidence.cratisMergedPullRequests);
 
     const photo = config.person.photo;
     const photoUrl = photo && /^https:\/\//.test(photo) ? photo : undefined;

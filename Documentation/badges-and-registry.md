@@ -31,7 +31,7 @@ On every build, a Cast site:
 
 1. Reads the registry from `https://raw.githubusercontent.com/Cratis/Cast/main/Registry/members.yaml`. If it cannot be read, or does not validate, the copy bundled in the installed `@cratis/cast` package is used.
 2. If the login is in the registry, the claim is the registry's tier.
-3. Otherwise, if GitHub was reached during this build and reports one or more merged public pull requests in the Cratis organization for that login, the claim is Contributor. Numbers from `.cast/snapshot.json` never set a tier, and a snapshot captured for another login is ignored entirely.
+3. Otherwise, if the search for that login's merged public pull requests in the Cratis organization succeeded during this build and found one or more, the claim is Contributor. That count is used for the claim and never saved. Numbers from `.cast/snapshot.json` never set a tier (when the search fails, the snapshot's count is still shown, but not used), and a snapshot captured for another login is ignored entirely.
 4. Otherwise there is no claim, and no badge is shown.
 
 Nothing written in `cast.yaml` takes part. There is no tier field, and a `tier` key makes the build fail.
