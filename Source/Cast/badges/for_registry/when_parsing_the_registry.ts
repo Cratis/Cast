@@ -3,7 +3,7 @@
 
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { parseRegistry, RegistryError } from '../registry';
+import { parseRegistry, profileUrlOf, RegistryError } from '../registry';
 import { Tier } from '../Tier';
 
 const parseError = (yamlText: string): RegistryError => {
@@ -34,6 +34,31 @@ describe('when parsing the registry', () => {
         const error = parseError('- { github: ada, tier: contributor }\n');
 
         it('should refuse it, because contributor is computed', () => error.should.be.instanceOf(RegistryError));
+    });
+
+    describe('with a profile url', () => {
+        const [member] = parseRegistry('- { github: ada, tier: partner, site: "https://ada.dev", profile: "https://cdn.ada.dev/profile/cast.json" }\n');
+
+        it('should keep it', () => member!.profile!.should.equal('https://cdn.ada.dev/profile/cast.json'));
+        it('should read the profile from it', () => profileUrlOf(member!)!.should.equal('https://cdn.ada.dev/profile/cast.json'));
+    });
+
+    describe('with a site and no profile url', () => {
+        const [member] = parseRegistry('- { github: ada, tier: partner, site: "https://ada.dev/about/" }\n');
+
+        it('should read the profile from the site root', () => profileUrlOf(member!)!.should.equal('https://ada.dev/cast.json'));
+    });
+
+    describe('with neither a site nor a profile url', () => {
+        const [member] = parseRegistry('- { github: ada, tier: partner }\n');
+
+        it('should have no profile to read', () => (profileUrlOf(member!) === undefined).should.be.true);
+    });
+
+    describe('with a profile url that is not https', () => {
+        const error = parseError('- { github: ada, tier: partner, profile: "http://ada.dev/cast.json" }\n');
+
+        it('should refuse it', () => error.should.be.instanceOf(RegistryError));
     });
 
     describe('with an unknown field', () => {

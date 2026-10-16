@@ -12,6 +12,7 @@ export const registryMemberSchema = z.object({
     since: z.string().regex(/^\d{4}-\d{2}$/, 'Use YYYY-MM').optional(),
     role: z.string().min(1).optional(),
     site: z.url({ protocol: /^https$/ }).optional(),
+    profile: z.url({ protocol: /^https$/ }).optional(),
     company: z.string().min(1).optional(),
 }).strict();
 
@@ -57,6 +58,10 @@ function entryLines(document: ReturnType<typeof parseDocument>, yamlText: string
         return offset === undefined ? undefined : yamlText.slice(0, offset).split('\n').length;
     });
 }
+
+/** Where the directory reads a member's profile: `profile`, else `<site>/cast.json`, else nowhere. */
+export const profileUrlOf = (member: Pick<RegistryMember, 'site' | 'profile'>): string | undefined =>
+    member.profile ?? (member.site ? new URL('/cast.json', member.site).toString() : undefined);
 
 /** Finds a member by GitHub login, case-insensitively. */
 export const findMember = (members: readonly RegistryMember[], handle: string): RegistryMember | undefined =>
