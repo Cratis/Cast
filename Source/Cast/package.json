@@ -36,7 +36,8 @@
         "registry/members.yaml",
         "!**/for_*/**",
         "!vitest.config.ts",
-        "!scripts/**"
+        "!scripts/**",
+        "README.md"
     ],
     "exports": {
         ".": "./index.ts",

@@ -4,7 +4,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
-import { parseRegistry, type RegistryMember } from '@cratis/cast/badges/index';
+import { parseRegistry, type RegistryMember } from '@cratis/cast/badges';
 
 const file = fileURLToPath(new URL('../members.yaml', import.meta.url));
 const schema = JSON.parse(readFileSync(fileURLToPath(new URL('../members.schema.json', import.meta.url)), 'utf8')) as {

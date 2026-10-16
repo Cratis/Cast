@@ -1,14 +1,24 @@
 {
   "version": 1,
   "github": {
-    "fetchedAt": "2026-10-16T08:05:36.774Z",
+    "fetchedAt": "2026-10-16T09:43:57.918Z",
     "login": "woksin",
     "orgs": [
       "Cratis"
     ],
+    "profile": {
+      "login": "woksin",
+      "name": "Sindre Alstad Wilting",
+      "bio": "Software Engineer from Norway who loves coding. ",
+      "location": "Oslo",
+      "blog": "https://www.linkedin.com/in/sindrewilting/",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/13407188?u=9245447357886096f26f85f957f980016b988116&v=4",
+      "followers": 12,
+      "publicRepositories": 83
+    },
     "contributions": {
-      "total": 32046,
-      "commits": 17691,
+      "total": 32123,
+      "commits": 17722,
       "weeks": [
         {
           "start": "2025-10-12",
@@ -220,112 +230,112 @@
         },
         {
           "start": "2026-10-11",
-          "counts": [849, 673, 900, 1043, 714, 190]
+          "counts": [849, 673, 900, 1043, 717, 264]
         }
       ]
     },
     "mergedPullRequests": {
-      "total": 3124,
+      "total": 3128,
       "byOrg": {
-        "Cratis": 3124
+        "Cratis": 3128
       },
       "latest": [
         {
+          "title": "Show reducers as self-reducing read models in the samples",
+          "repository": "Cratis/Samples",
+          "number": 652,
+          "url": "https://github.com/Cratis/Samples/pull/652",
+          "mergedAt": "2026-10-16T09:31:19Z"
+        },
+        {
+          "title": "Protected command reads (ESM v25)",
+          "repository": "Cratis/Screenplay",
+          "number": 822,
+          "url": "https://github.com/Cratis/Screenplay/pull/822",
+          "mergedAt": "2026-10-16T08:41:27Z"
+        },
+        {
+          "title": "Start, stop and delete jobs safely while two releases share a cluster",
+          "repository": "Cratis/Orleans",
+          "number": 79,
+          "url": "https://github.com/Cratis/Orleans/pull/79",
+          "mergedAt": "2026-10-16T08:30:06Z"
+        },
+        {
+          "title": "Rename clashing Handle locals instead of refusing generated command properties",
+          "repository": "Cratis/Stage",
+          "number": 462,
+          "url": "https://github.com/Cratis/Stage/pull/462",
+          "mergedAt": "2026-10-16T08:13:26Z"
+        },
+        {
           "title": "Resume jobs left running by a crashed silo",
+          "repository": "Cratis/Orleans",
           "number": 78,
           "url": "https://github.com/Cratis/Orleans/pull/78",
-          "mergedAt": "2026-10-16T07:45:42Z",
-          "repository": "Cratis/Orleans"
+          "mergedAt": "2026-10-16T07:45:42Z"
         },
         {
           "title": "Accept ESM v23 models and refuse described command handlers",
+          "repository": "Cratis/Stage",
           "number": 461,
           "url": "https://github.com/Cratis/Stage/pull/461",
-          "mergedAt": "2026-10-16T07:38:48Z",
-          "repository": "Cratis/Stage"
+          "mergedAt": "2026-10-16T07:38:48Z"
         },
         {
           "title": "Public generation strategy catalog and single-concept check",
+          "repository": "Cratis/Screenplay",
           "number": 819,
           "url": "https://github.com/Cratis/Screenplay/pull/819",
-          "mergedAt": "2026-10-16T06:49:44Z",
-          "repository": "Cratis/Screenplay"
+          "mergedAt": "2026-10-16T06:49:44Z"
         },
         {
           "title": "Refuse validation rules of unknown kind",
+          "repository": "Cratis/Stage",
           "number": 460,
           "url": "https://github.com/Cratis/Stage/pull/460",
-          "mergedAt": "2026-10-16T06:42:14Z",
-          "repository": "Cratis/Stage"
+          "mergedAt": "2026-10-16T06:42:14Z"
         },
         {
           "title": "Use short type names in generated Common concept and type files",
+          "repository": "Cratis/Stage",
           "number": 459,
           "url": "https://github.com/Cratis/Stage/pull/459",
-          "mergedAt": "2026-10-16T06:29:28Z",
-          "repository": "Cratis/Stage"
+          "mergedAt": "2026-10-16T06:29:28Z"
         },
         {
           "title": "Allow rules and requirements on commands with generated properties",
+          "repository": "Cratis/Stage",
           "number": 458,
           "url": "https://github.com/Cratis/Stage/pull/458",
-          "mergedAt": "2026-10-16T05:38:40Z",
-          "repository": "Cratis/Stage"
+          "mergedAt": "2026-10-16T05:38:40Z"
         },
         {
           "title": "Resolve grouped proxy imports by full type name",
+          "repository": "Cratis/Arc",
           "number": 3326,
           "url": "https://github.com/Cratis/Arc/pull/3326",
-          "mergedAt": "2026-10-16T04:40:10Z",
-          "repository": "Cratis/Arc"
+          "mergedAt": "2026-10-16T04:40:10Z"
         },
         {
           "title": "Run composite command inputs in the specification executor",
+          "repository": "Cratis/Stage",
           "number": 453,
           "url": "https://github.com/Cratis/Stage/pull/453",
-          "mergedAt": "2026-10-16T03:26:07Z",
-          "repository": "Cratis/Stage"
-        },
-        {
-          "title": "Public value-level rule check for executable model consumers",
-          "number": 814,
-          "url": "https://github.com/Cratis/Screenplay/pull/814",
-          "mergedAt": "2026-10-16T03:21:18Z",
-          "repository": "Cratis/Screenplay"
-        },
-        {
-          "title": "First-class text rules and Studio pattern desugaring",
-          "number": 813,
-          "url": "https://github.com/Cratis/Screenplay/pull/813",
-          "mergedAt": "2026-10-16T03:05:04Z",
-          "repository": "Cratis/Screenplay"
-        },
-        {
-          "title": "Render and execute generate pattern and generate random concepts",
-          "number": 450,
-          "url": "https://github.com/Cratis/Stage/pull/450",
-          "mergedAt": "2026-10-16T02:24:43Z",
-          "repository": "Cratis/Stage"
-        },
-        {
-          "title": "Recover pattern, random and rule generation in Screenplay",
-          "number": 3325,
-          "url": "https://github.com/Cratis/Arc/pull/3325",
-          "mergedAt": "2026-10-16T01:58:44Z",
-          "repository": "Cratis/Arc"
+          "mergedAt": "2026-10-16T03:26:07Z"
         }
       ]
     },
     "repositories": {
       "Cratis/Screenplay": {
-        "commits": 2190,
+        "commits": 2206,
         "rank": 1,
-        "prs": 310
+        "prs": 311
       },
       "Cratis/Stage": {
-        "commits": 1057,
+        "commits": 1069,
         "rank": 1,
-        "prs": 201
+        "prs": 202
       },
       "Cratis/Arc": {
         "commits": 2190,
@@ -406,7 +416,7 @@
     }
   },
   "writing": {
-    "fetchedAt": "2026-10-16T09:35:54.990Z",
+    "fetchedAt": "2026-10-16T09:43:57.967Z",
     "sources": [
       "https://blog.cratis.io/authors/sindre-alstad-wilting/"
     ],

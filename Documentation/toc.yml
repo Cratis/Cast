@@ -1,0 +1,21 @@
+- name: Cast
+  href: index.md
+
+- name: Vision
+  href: vision.md
+
+- name: Start
+  items:
+    - name: Getting started
+      href: getting-started.md
+
+- name: Reference
+  items:
+    - name: cast.yaml
+      href: cast-yaml.md
+    - name: Badges and the registry
+      href: badges-and-registry.md
+    - name: The directory
+      href: directory.md
+    - name: Theming
+      href: theming.md
