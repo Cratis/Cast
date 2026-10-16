@@ -1,0 +1,143 @@
+---
+// Copyright (c) Cratis. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+import '@fontsource-variable/inter/wght.css';
+import '@fontsource-variable/jetbrains-mono/wght.css';
+import '@fontsource-variable/fraunces/opsz-italic.css';
+import '../styles/global.css';
+import interUrl from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
+import monoUrl from '@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url';
+import { ClientRouter } from 'astro:transitions';
+import { config, person, githubUrl, profileLinks } from '../data';
+import { plainText } from '../lib/inline';
+import { accentTokens } from '../lib/accent';
+import CommandPalette from '../components/CommandPalette.astro';
+import Terminal from '../components/Terminal.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  /** Path of the OG image. */
+  image?: string;
+  noindex?: boolean;
+  bodyClass?: string;
+}
+
+const { title, description, image = '/og.png', noindex = false, bodyClass = '' } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL(image, Astro.site);
+const [firstName, ...rest] = (person.fullName ?? person.name).split(/\s+/);
+const themeMode = config.theme.mode;
+const accent = accentTokens(config.theme.accent);
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: person.name,
+  alternateName: [person.fullName, person.handle].filter(Boolean),
+  jobTitle: person.title,
+  ...(person.email ? { email: `mailto:${person.email}` } : {}),
+  url: Astro.site?.toString(),
+  image: new URL('/apple-touch-icon.png', Astro.site).toString(),
+  ...(person.location ? { address: { '@type': 'PostalAddress', addressLocality: person.location.split(',')[0]?.trim(), ...(person.country ? { addressCountry: person.country } : {}) } } : {}),
+  knowsAbout: person.interests,
+  sameAs: [githubUrl, ...profileLinks.filter((link) => link.key !== 'github').map((link) => link.url)],
+};
+---
+
+<!doctype html>
+<html lang={config.site.language} data-theme-default={themeMode}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={plainText(description)} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" content="#08080e" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="author" content={person.name} />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="cast:handle" content={person.handle} />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="alternate" type="application/json" href="/cast.json" title="Cast profile" />
+    <link rel="alternate" type="text/plain" href="/llms.txt" title="Profile for AI agents" />
+
+    <link rel="preload" href={interUrl} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={monoUrl} as="font" type="font/woff2" crossorigin />
+
+    <meta property="og:type" content="profile" />
+    <meta property="og:site_name" content={person.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={plainText(description)} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${person.name}: ${plainText(person.tagline)}`} />
+    {firstName && <meta property="profile:first_name" content={firstName} />}
+    {rest.length > 0 && <meta property="profile:last_name" content={rest[rest.length - 1]} />}
+    <meta property="profile:username" content={person.handle} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={plainText(description)} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <style set:html={`:root{--color-accent:${accent.dark};--color-accent-soft:${accent.darkSoft};--color-accent-ink:${accent.ink}}html[data-theme='light']{--color-accent:${accent.light};--color-accent-soft:${accent.lightSoft}}`}></style>
+
+    <script is:inline>
+      /* eslint-disable no-var, no-empty, @typescript-eslint/no-unused-vars -- runs before anything else loads, so it stays ES5 */
+      // Apply the stored theme and motion preference before first paint, and carry them
+      // over to every page the view-transition router swaps in.
+      (function () {
+        function apply(d) {
+          var preference = document.documentElement.getAttribute('data-theme-default') || 'dark';
+          var t = preference === 'light' ? 'light' : 'dark';
+          if (preference === 'system') t = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          try {
+            var m = localStorage.getItem('cast:motion');
+            if (m === 'reduced' || m === 'full') d.dataset.motion = m;
+            var stored = localStorage.getItem('cast:theme');
+            if (stored === 'light' || stored === 'dark') t = stored;
+          } catch (e) {}
+          d.dataset.theme = t;
+          d.style.colorScheme = t;
+          var reduced =
+            d.dataset.motion === 'reduced' ||
+            (d.dataset.motion !== 'full' && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+          if (!reduced) d.classList.add('js-motion');
+          d.classList.add('js');
+          var meta = d.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', t === 'light' ? '#faf9f6' : '#08080e');
+        }
+        apply(document.documentElement);
+        document.addEventListener('astro:before-swap', function (e) {
+          apply(e.newDocument.documentElement);
+        });
+      })();
+    </script>
+    <ClientRouter fallback="swap" />
+  </head>
+  <body class:list={['grain', bodyClass]}>
+    <a
+      href="#main"
+      class="sr-only-focusable fixed top-3 left-3 z-[100] rounded-lg bg-accent px-4 py-2 font-medium text-accent-ink"
+      >Skip to content</a
+    >
+    <slot name="nav" />
+    <main id="main" tabindex="-1" class="outline-none">
+      <slot />
+    </main>
+    <slot name="footer" />
+    <CommandPalette />
+    <Terminal />
+    <script>
+      import '../scripts/ambient';
+    </script>
+  </body>
+</html>

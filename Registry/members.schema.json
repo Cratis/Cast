@@ -1,0 +1,45 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://raw.githubusercontent.com/Cratis/Cast/main/Registry/members.schema.json",
+    "title": "Cratis Cast registry",
+    "description": "Reviewed Core and Partner members of the Cratis Cast. Contributor is computed, never listed.",
+    "type": "array",
+    "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["github", "tier"],
+        "properties": {
+            "github": {
+                "type": "string",
+                "description": "GitHub login. Unique in the file, compared case-insensitively.",
+                "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$"
+            },
+            "tier": {
+                "type": "string",
+                "enum": ["core", "partner"],
+                "description": "core: founders and maintainers. partner: consultants and companies Cratis vouches for."
+            },
+            "since": {
+                "type": "string",
+                "pattern": "^\\d{4}-\\d{2}$",
+                "description": "When the membership started, YYYY-MM. Leave out when unknown."
+            },
+            "role": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Role in relation to Cratis, as shown on the verification page."
+            },
+            "site": {
+                "type": "string",
+                "format": "uri",
+                "pattern": "^https://",
+                "description": "The member's Cast site. The directory reads its /cast.json."
+            },
+            "company": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Company, for partners."
+            }
+        }
+    }
+}

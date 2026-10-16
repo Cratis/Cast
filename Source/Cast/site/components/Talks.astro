@@ -1,0 +1,73 @@
+---
+// Copyright (c) Cratis. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+import { talks, community } from '../data';
+import { formatMonth } from '../lib/career';
+import { renderInline } from '../lib/inline';
+import SectionHeader from './SectionHeader.astro';
+
+interface Props {
+  index: string;
+  title?: string;
+  label?: string;
+}
+const { index, title = 'Talks & *community.*', label = 'TalkGiven' } = Astro.props;
+const talksNewest = [...talks].sort((a, b) => b.date.localeCompare(a.date));
+const day = (d: string) =>
+  d.length === 10 ? new Date(`${d}T00:00:00Z`).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : formatMonth(d);
+const languageName = (lang: string) => {
+  try {
+    return new Intl.DisplayNames(['en'], { type: 'language' }).of(lang) ?? lang;
+  } catch {
+    return lang;
+  }
+};
+---
+
+<section id="talks" class="relative py-24 md:py-32" aria-labelledby="talks-title">
+  <div class="container-x grid grid-cols-1 items-start gap-x-12 lg:grid-cols-12">
+    <div class="lg:sticky lg:top-[calc(var(--nav-h)+2rem)] lg:col-span-5 [&>header]:mb-10 lg:[&>header]:mb-0">
+      <SectionHeader index={index} label={label} title={title} id="talks-title" />
+    </div>
+    <div class="grid gap-4 lg:col-span-7">
+      {talksNewest.length > 0 && <ul class="grid grid-cols-1 gap-4">
+        {
+          talksNewest.map((t) => {
+            const Tag = t.url ? 'a' : 'div';
+            return (
+              <li data-reveal>
+                <Tag href={t.url} rel={t.url ? 'noopener' : undefined} class:list={['panel flex h-full flex-col gap-4 p-6 md:p-7', t.url && 'glow group']}>
+                  <span class="flex flex-wrap items-center justify-between gap-2 font-mono text-xs text-fg-faint">
+                    <span class="note">TalkGiven</span>
+                    <span><time datetime={t.date}>{day(t.date)}</time>{!t.lang.startsWith('en') && <> · in {languageName(t.lang)}</>}</span>
+                  </span>
+                  <span lang={t.lang} class="font-display text-2xl leading-tight font-[700] tracking-[-0.025em] transition-colors group-hover:text-event-soft md:text-[1.75rem]">{t.title}</span>
+                  <span class="text-fg-muted" set:html={renderInline(t.summary)} />
+                  <span class="mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 pt-2 text-sm text-fg-muted">
+                    {t.url && <svg viewBox="0 0 16 16" class="size-4 text-event" fill="currentColor" aria-hidden="true"><path d="M5 3.5v9a.5.5 0 0 0 .77.42l7-4.5a.5.5 0 0 0 0-.84l-7-4.5A.5.5 0 0 0 5 3.5Z" /></svg>}
+                    {t.url ? 'Watch · ' : ''}{t.host}
+                    {t.with && <span class="text-fg-faint">· with {t.with}</span>}
+                  </span>
+                </Tag>
+              </li>
+            );
+          })
+        }
+      </ul>}
+      {community.length > 0 && <div class="panel p-5 md:px-7" data-reveal>
+        <p class="note note-view">Community</p>
+        <ul class="mt-3 divide-y divide-line">
+          {
+            community.map((c) => (
+              <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2.5">
+                <span class="text-fg">{c.title}{c.detail && <span class="text-fg-muted"> · {c.detail}</span>}</span>
+                <span class="font-mono text-xs text-fg-faint">attended · {formatMonth(c.date)}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>}
+    </div>
+  </div>
+</section>

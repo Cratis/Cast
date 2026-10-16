@@ -1,0 +1,61 @@
+---
+// Copyright (c) Cratis. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+import Base from '../site/layouts/Base.astro';
+import Nav from '../site/components/Nav.astro';
+import Hero from '../site/components/Hero.astro';
+import Now from '../site/components/Now.astro';
+import Stats from '../site/components/Stats.astro';
+import CareerReplay from '../site/components/CareerReplay.astro';
+import EventModel from '../site/components/EventModel.astro';
+import Cratis from '../site/components/Cratis.astro';
+import Activity from '../site/components/Activity.astro';
+import Projects from '../site/components/Projects.astro';
+import Agentic from '../site/components/Agentic.astro';
+import Writing from '../site/components/Writing.astro';
+import Talks from '../site/components/Talks.astro';
+import Skills from '../site/components/Skills.astro';
+import Contact from '../site/components/Contact.astro';
+import Footer from '../site/components/Footer.astro';
+import { config, person, sections } from '../site/data';
+import { plainText } from '../site/lib/inline';
+
+const components = {
+  hero: Hero,
+  now: Now,
+  stats: Stats,
+  career: CareerReplay,
+  model: EventModel,
+  cratis: Cratis,
+  activity: Activity,
+  agentic: Agentic,
+  projects: Projects,
+  writing: Writing,
+  talks: Talks,
+  skills: Skills,
+  contact: Contact,
+} as const;
+
+const description = config.site.description ?? `${plainText(person.tagline)} ${plainText(person.intro)}`;
+---
+
+<Base title={`${person.name} · ${person.title}`} description={description}>
+  <Nav slot="nav" />
+  {
+    sections.map((section, position) => {
+      const Section = components[section.id];
+      const previous = sections[position - 1];
+      return (
+        <Section
+          index={section.index}
+          {...(section.title ? { title: section.title } : {})}
+          {...(section.label ? { label: section.label } : {})}
+          {...(section.intro ? { intro: section.intro } : {})}
+          compact={section.id === 'skills' && previous?.id === 'talks'}
+        />
+      );
+    })
+  }
+  <Footer slot="footer" />
+</Base>

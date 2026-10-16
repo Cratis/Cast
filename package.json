@@ -1,0 +1,51 @@
+{
+    "private": true,
+    "workspaces": [
+        "Source/*",
+        "Registry",
+        "Directory",
+        "Samples/*"
+    ],
+    "engines": {
+        "node": ">=23.0.0"
+    },
+    "scripts": {
+        "g:clean": "cd $INIT_CWD && rm -rf dist .astro",
+        "g:typecheck": "cd $INIT_CWD && tsc -p tsconfig.json --noEmit",
+        "g:tsx": "cd $INIT_CWD && tsx",
+        "g:lint": "cd $INIT_CWD && eslint --cache --quiet --fix .",
+        "g:lint:ci": "cd $INIT_CWD && eslint --cache --quiet .",
+        "g:test": "cd $INIT_CWD && vitest run",
+        "g:test:watch": "cd $INIT_CWD && vitest --watch",
+        "g:ci": "cd $INIT_CWD && yarn clean && yarn lint:ci && yarn build && yarn test",
+        "clean": "node ./run-task-on-workspaces.js clean",
+        "build": "node ./run-task-on-workspaces.js build",
+        "lint": "node ./run-task-on-workspaces.js lint",
+        "test": "node ./run-task-on-workspaces.js test",
+        "ci": "node ./run-task-on-workspaces.js ci",
+        "verify-packages": "node ./verify-package-contents.js",
+        "publish-version": "node ./run-task-on-workspaces.js publish-version $*"
+    },
+    "devDependencies": {
+        "@eslint/js": "10.0.1",
+        "@tony.ganchev/eslint-plugin-header": "3.4.4",
+        "@types/chai": "5.2.3",
+        "@types/node": "26.6.4",
+        "@types/sinon": "22.0.0",
+        "astro-eslint-parser": "3.2.0",
+        "chai": "6.3.0",
+        "edit-json-file": "1.8.1",
+        "eslint": "10.12.0",
+        "eslint-plugin-astro": "3.2.1",
+        "glob": "13.0.6",
+        "globals": "17.13.0",
+        "sinon": "22.1.0",
+        "tsx": "^4.21.0",
+        "typescript": "6.0.3",
+        "typescript-eslint": "8.59.4",
+        "vitest": "5.0.3"
+    },
+    "license": "MIT",
+    "version": "0.0.0",
+    "packageManager": "yarn@4.17.1"
+}
