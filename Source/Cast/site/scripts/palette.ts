@@ -2,12 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 // ⌘K command palette: fuzzy filtering, full keyboard navigation, focus return.
-import { person, sections, profileLinks, cratis, eventModel } from '../data';
-import { anchorFor } from '../lib/sections';
+import { readClientCast } from '../profile/clientCast';
 import { copyText } from '../lib/clipboard';
 import { motionReduced, toggleMotion } from '../lib/motion';
 import { currentTheme, toggleTheme } from '../lib/theme';
-import { go, goSection, openExternal, startReplay } from '../lib/nav';
+import { go, goSection, openExternal, profilePath, startReplay } from '../lib/nav';
 
 type Kind = 'command' | 'event' | 'view';
 type Item = {
@@ -53,11 +52,24 @@ export function fuzzyScore(query: string, text: string): number {
     return score;
 }
 
+type Controller = { show: () => void; hide: () => void; isOpen: () => boolean };
+
+// One controller per dialog: the dialog persists across pages of one profile and is replaced for another.
+const controllers = new WeakMap<HTMLDialogElement, Controller>();
+const current = (): Controller | undefined => {
+    const dialog = document.querySelector<HTMLDialogElement>('[data-palette]');
+    return dialog ? controllers.get(dialog) : undefined;
+};
+let documentBound = false;
+
+/** Mounts the palette of the page shown, once per dialog element. Safe to call on every page load. */
 export function mountPalette(): void {
     const dialog = document.querySelector<HTMLDialogElement>('[data-palette]');
     const input = dialog?.querySelector<HTMLInputElement>('[data-palette-input]');
     const list = dialog?.querySelector<HTMLUListElement>('[data-palette-list]');
-    if (!dialog || !input || !list) return;
+    const cast = readClientCast();
+    if (!dialog || !input || !list || !cast || controllers.has(dialog)) return;
+    const { person, sections, profileLinks, cratis } = cast;
 
     let toast: HTMLElement | null = null;
     const notify = (msg: string) => {
@@ -75,7 +87,7 @@ export function mountPalette(): void {
     const allItems: Item[] = [
         { id: 'about', group: 'Navigate', label: 'Now & about', keywords: 'read model projection photo', kind: 'view', run: () => goSection('about') },
         { id: 'career', group: 'Navigate', label: 'Career event stream', keywords: 'experience jobs timeline', kind: 'event', run: () => goSection('career') },
-        { id: 'model', group: 'Navigate', label: 'How I think: event model', keywords: `${eventModel?.name ?? ''} event modeling board slice`, kind: 'command', run: () => goSection('model') },
+        { id: 'model', group: 'Navigate', label: 'How I think: event model', keywords: `${cast.eventModelName ?? ''} event modeling board slice`, kind: 'command', run: () => goSection('model') },
         { id: 'cratis', group: 'Navigate', label: 'Cratis', keywords: 'open source chronicle arc', kind: 'command', run: () => goSection('cratis') },
         { id: 'activity', group: 'Navigate', label: 'Contribution event store', keywords: 'github heatmap activity calendar', kind: 'event', run: () => goSection('activity') },
         { id: 'agentic', group: 'Navigate', label: 'Agentic engineering', keywords: 'ai agents harness pi review workflow', kind: 'view', run: () => goSection('agentic') },
@@ -95,12 +107,12 @@ export function mountPalette(): void {
             hint: () => '`',
             run: () => void document.dispatchEvent(new CustomEvent('terminal:open')),
         },
-        { id: 'cv', group: 'Actions', label: 'Open CV', keywords: 'resume curriculum vitae', kind: 'view', run: () => go('/cv') },
+        { id: 'cv', group: 'Actions', label: 'Open CV', keywords: 'resume curriculum vitae', kind: 'view', run: () => go(profilePath('cv')) },
         {
             id: 'print', group: 'Actions', label: 'Print CV / save as PDF', keywords: 'resume pdf download', kind: 'view',
             run: () => {
-                if (location.pathname.startsWith('/cv')) window.print();
-                else void go('/cv?print');
+                if (location.pathname.startsWith(profilePath('cv'))) window.print();
+                else void go(profilePath('cv?print'));
             },
         },
         ...(person.email ? [<Item>{
@@ -126,9 +138,9 @@ export function mountPalette(): void {
         ...Object.entries(cratis?.links ?? {}).map(([label, url]): Item => ({
             id: `cratis-${label}`, group: 'Links' as const, label, keywords: 'cratis website docs repositories', kind: 'event', run: () => open(url),
         })),
-        { id: 'cast', group: 'Links' as const, label: 'Cast verification', keywords: 'badge cratis cast tier verified', kind: 'view', run: () => open(`https://cast.cratis.io/${person.handle.toLowerCase()}`) },
+        { id: 'cast', group: 'Links' as const, label: 'Cast verification', keywords: 'badge cratis cast tier verified', kind: 'view', run: () => open(cast.verificationUrl) },
     ];
-    const items = allItems.filter((item) => item.group !== 'Navigate' || item.id === 'top' || sections.some((section) => anchorFor[section.id] === item.id));
+    const items = allItems.filter((item) => item.group !== 'Navigate' || item.id === 'top' || sections.includes(item.id));
 
     let results: Item[] = items;
     let active = 0;
@@ -283,14 +295,19 @@ export function mountPalette(): void {
     });
     dialog.querySelector('[data-palette-close]')?.addEventListener('click', hide);
 
+    controllers.set(dialog, { show, hide, isOpen: () => dialog.open });
+    if (documentBound) return;
+    documentBound = true;
     document.addEventListener('click', (e) => {
-        if ((e.target as Element).closest('[data-palette-open]')) show();
+        if ((e.target as Element).closest('[data-palette-open]')) current()?.show();
     });
     document.addEventListener('keydown', (e) => {
         if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+            const palette = current();
+            if (!palette) return;
             e.preventDefault();
-            if (dialog.open) hide();
-            else show();
+            if (palette.isOpen()) palette.hide();
+            else palette.show();
         }
     });
 }

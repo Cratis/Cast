@@ -3,16 +3,12 @@
 
 // <handle>@stream:~$ — an interactive terminal over the same data the page renders.
 // Lazy-loaded by Terminal.astro on first open.
-import { person, now, careerEvents, skills, cratis, talks, profileLinks, firstName, feedOrg, sections } from '../data';
-import { anchorFor } from '../lib/sections';
-import { blogHost } from '../lib/blog';
-import { github, cratisRepos, liveProjects as projects, mergedPrTotal, snapshotDate } from '../lib/github';
+import { readClientCast, type ClientCast } from '../profile/clientCast';
 import { getLiveMerged } from './live';
 import { relativeTime } from '../lib/reltime';
-import { posts as blogPosts, themes as blogThemes } from '../lib/blog';
 import { copyText } from '../lib/clipboard';
 import { formatMonth } from '../lib/career';
-import { go, goSection, openExternal, startReplay } from '../lib/nav';
+import { go, goSection, openExternal, profilePath, startReplay } from '../lib/nav';
 import { currentTheme, setTheme } from '../lib/theme';
 
 type Part = string | Node;
@@ -38,13 +34,6 @@ const ALL_SECTIONS = [
     ['skills', 'toolbox'],
     ['contact', 'contact'],
 ] as const;
-const SECTIONS = ALL_SECTIONS.filter(([id]) => id === 'top' || sections.some((section) => anchorFor[section.id] === id));
-const LINKS: Record<string, string> = {
-    ...Object.fromEntries(profileLinks.map((link) => [link.key.toLowerCase(), link.url])),
-    ...(cratis ? { cratis: Object.values(cratis.links)[0] ?? 'https://cratis.io' } : {}),
-};
-const prompt = `${person.handle}@stream`;
-const brewable = projects.filter((p) => p.install?.startsWith('brew'));
 
 // --- tiny DOM helpers --------------------------------------------------------------
 const span = (cls: string, text: string): HTMLSpanElement => {
@@ -61,12 +50,13 @@ const c = {
     faint: (t: string) => span('text-fg-faint', t),
     fg: (t: string) => span('text-fg', t),
 };
+let linkRel = 'noopener';
 const link = (href: string, text = href.replace(/^https?:\/\/(www\.)?/, '')): HTMLAnchorElement => {
     const a = document.createElement('a');
-    a.href = href;
+    a.href = /^(https?:|mailto:)/i.test(href) ? href : '#';
     a.textContent = text;
     a.target = '_blank';
-    a.rel = 'noopener';
+    a.rel = linkRel;
     a.className = 'text-command-soft';
     return a;
 };
@@ -94,12 +84,15 @@ class Terminal {
     private returnFocus: HTMLElement | null = null;
     private greeted = false;
     private readonly commands: Record<string, Command>;
+    private readonly prompt: string;
 
     constructor(
+        private readonly cast: ClientCast,
         private readonly dialog: HTMLDialogElement,
         private readonly out: HTMLElement,
         private readonly input: HTMLInputElement,
     ) {
+        this.prompt = `${cast.person.handle}@stream`;
         try {
             this.history = JSON.parse(sessionStorage.getItem('cast:term-history') ?? '[]') as string[];
         } catch {
@@ -122,7 +115,7 @@ class Terminal {
         this.print(' ');
     }
     private echo(raw: string): void {
-        this.print(c.view(prompt), c.faint(':'), c.cmd('~'), c.faint('$ '), c.fg(raw));
+        this.print(c.view(this.prompt), c.faint(':'), c.cmd('~'), c.faint('$ '), c.fg(raw));
     }
     clear(): void {
         this.out.replaceChildren();
@@ -130,14 +123,16 @@ class Terminal {
 
     private greet(): void {
         this.greeted = true;
-        this.print(c.ev(prompt), c.faint(` · stream position ${careerEvents.length} · ${(getLiveMerged()?.total ?? mergedPrTotal).toLocaleString('en-US')} PRs merged in ${feedOrg}`));
-        this.print(c.faint(`GitHub snapshot taken ${snapshotDate()}. Everything here is real data.`));
+        const { careerEvents, mergedPrTotal, feedOrg, snapshotDate } = this.cast;
+        this.print(c.ev(this.prompt), c.faint(` · stream position ${careerEvents.length} · ${(getLiveMerged()?.total ?? mergedPrTotal).toLocaleString('en-US')} PRs merged in ${feedOrg}`));
+        this.print(c.faint(`GitHub snapshot taken ${snapshotDate}. Everything here is real data.`));
         this.print('Type ', c.fg('help'), ' to see what you can do, or tap a suggestion below.');
         this.blank();
     }
 
     // --- lifecycle ----------------------------------------------------------------
     open(): void {
+        linkRel = this.cast.rel;
         if (this.dialog.open) return;
         this.returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
         if (!this.greeted) this.greet();
@@ -289,6 +284,13 @@ class Terminal {
 
     // --- commands -------------------------------------------------------------------
     private buildCommands(): Record<string, Command> {
+        const { person, now, careerEvents, skills, cratis, talks, profileLinks, firstName, feedOrg, projects, mergedPrTotal, snapshotDate, themes: blogThemes, posts: blogPosts, blogHost } = this.cast;
+        const SECTIONS = ALL_SECTIONS.filter(([id]) => id === 'top' || this.cast.sections.includes(id));
+        const LINKS: Record<string, string> = {
+            ...Object.fromEntries(profileLinks.map((profile) => [profile.key.toLowerCase(), profile.url])),
+            ...(cratis ? { cratis: Object.values(cratis.links)[0] ?? 'https://cratis.io' } : {}),
+        };
+        const brewable = projects.filter((p) => p.install?.startsWith('brew'));
         const findProject = (q = '') => projects.find((p) => p.name.toLowerCase() === q.toLowerCase());
         const projectNames = () => projects.map((p) => p.name);
 
@@ -346,7 +348,7 @@ class Terminal {
                 run: ([to]) => {
                     const id = (to ?? '').replace(/\/$/, '');
                     if (!id || id === '~' || id === '/') return this.navigateSection('top');
-                    if (id === 'cv') return this.navigate('/cv');
+                    if (id === 'cv') return this.navigate(profilePath('cv'));
                     if (!SECTIONS.some(([s]) => s === id)) return this.print(c.ev('cd: '), `no such section: ${id}`);
                     this.navigateSection(id);
                 },
@@ -400,9 +402,9 @@ class Terminal {
                 run: ([sub, flag, n]) => {
                     if (sub !== 'tail') return this.print(c.ev('stream: '), 'try ', c.fg('stream tail'));
                     const live = getLiveMerged();
-                    const prs = live?.latest ?? github.mergedPullRequests.latest;
+                    const prs = live?.latest ?? this.cast.pullRequests;
                     const count = flag === '-n' ? Math.max(1, Math.min(prs.length, Number(n) || prs.length)) : prs.length;
-                    this.print(c.faint(`tail ${feedOrg} · ${live ? 'live' : `snapshot taken ${snapshotDate()}`} · ${(live?.total ?? mergedPrTotal).toLocaleString('en-US')} merged in total`));
+                    this.print(c.faint(`tail ${feedOrg} · ${live ? 'live' : `snapshot taken ${snapshotDate}`} · ${(live?.total ?? mergedPrTotal).toLocaleString('en-US')} merged in total`));
                     prs.slice(0, count).forEach((pr, i) => {
                         this.print(
                             c.faint(pad(i === 0 ? 'HEAD' : `HEAD~${i}`, 8)),
@@ -424,7 +426,7 @@ class Terminal {
             },
             cv: {
                 desc: 'open the printable CV',
-                run: () => this.navigate('/cv'),
+                run: () => this.navigate(profilePath('cv')),
             },
             skills: {
                 desc: 'the toolbox, grouped',
@@ -509,7 +511,7 @@ class Terminal {
                     if (!cratis) return this.print(c.faint('Cratis makes event sourcing practical. '), link('https://cratis.io'));
                     if (cratis.pitch) this.print(c.fg(cratis.pitch.replace(/\*/g, '')));
                     this.print(c.faint(`${(getLiveMerged()?.total ?? mergedPrTotal).toLocaleString('en-US')} merged PRs · `), link(LINKS['cratis'] ?? 'https://cratis.io'));
-                    for (const r of cratisRepos) this.print(c.cmd(pad(r.name, 21)), c.faint(pad(r.role, 16)), r.url ? link(r.url, r.desc) : r.desc);
+                    for (const r of cratis.repos) this.print(c.cmd(pad(r.name, 21)), c.faint(pad(r.role, 16)), r.url ? link(r.url, r.desc) : r.desc);
                 },
             },
             clear: { desc: 'clear the screen (Ctrl+L)', run: () => this.clear() },
@@ -546,10 +548,11 @@ export function openTerminal(): void {
     const dialog = document.querySelector<HTMLDialogElement>('[data-terminal]');
     const out = dialog?.querySelector<HTMLElement>('[data-terminal-out]');
     const input = dialog?.querySelector<HTMLInputElement>('[data-terminal-input]');
-    if (!dialog || !out || !input) return;
+    const cast = readClientCast();
+    if (!dialog || !out || !input || !cast) return;
     let term = instances.get(dialog);
     if (!term) {
-        term = new Terminal(dialog, out, input);
+        term = new Terminal(cast, dialog, out, input);
         instances.set(dialog, term);
     }
     term.open();

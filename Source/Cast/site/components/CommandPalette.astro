@@ -2,11 +2,16 @@
 // Copyright (c) Cratis. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import { config } from '../data';
-const host = new URL(config.site.url).host;
+import type { CastView } from '../profile/CastView';
+
+interface Props {
+  cast: CastView;
+}
+const { cast } = Astro.props;
+const host = new URL(cast.config.site.url).host;
 ---
 
-<dialog class="palette" data-palette aria-label="Command palette" transition:persist="palette">
+<dialog class="palette" data-palette aria-label="Command palette" transition:persist={`palette-${cast.person.handle.toLowerCase()}`}>
   <div class="sheet panel overflow-hidden">
     <div class="flex items-center gap-3 border-b border-line px-4">
       <svg viewBox="0 0 20 20" class="size-4 shrink-0 text-fg-faint" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
@@ -111,6 +116,7 @@ const host = new URL(config.site.url).host;
 </style>
 
 <script>
+  import { onPageLoad } from '../lib/lifecycle';
   import { mountPalette } from '../scripts/palette';
-  mountPalette();
+  onPageLoad(() => mountPalette());
 </script>

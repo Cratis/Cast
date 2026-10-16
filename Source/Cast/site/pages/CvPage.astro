@@ -2,14 +2,21 @@
 // Copyright (c) Cratis. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import Base from '../site/layouts/Base.astro';
-import Nav from '../site/components/Nav.astro';
-import Footer from '../site/components/Footer.astro';
-import CastBadge from '../site/components/CastBadge.astro';
-import { config, person, careerEvents, cratis, skills, education, certifications, talks, firstName, githubUrl, profileLinks, tier } from '../site/data';
-import { liveProjects as projects, mergedPrFloor, mergedPrTotal, cratisRepos } from '../site/lib/github';
-import { project, formatMonth, normalizeDate } from '../site/lib/career';
-import { plainText, renderInline } from '../site/lib/inline';
+// The printable CV of one profile. A Cast site serves it at /cv; the directory at /<login>/cv.
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import CastBadge from '../components/CastBadge.astro';
+import Inline from '../components/Inline.astro';
+import type { CastView } from '../profile/CastView';
+import { project, formatMonth, normalizeDate } from '../lib/career';
+import { plainText } from '../lib/inline';
+
+interface Props {
+  cast: CastView;
+}
+const { cast } = Astro.props;
+const { config, person, careerEvents, cratis, skills, education, certifications, talks, firstName, githubUrl, profileLinks, tier, liveProjects: projects, mergedPrFloor, mergedPrTotal, cratisRepos } = cast;
 
 const projection = project(careerEvents);
 
@@ -50,17 +57,18 @@ const talkYear = (date: string) => date.slice(0, 4);
 ---
 
 <Base
+  cast={cast}
   title={`CV · ${person.name}`}
   description={`Curriculum vitae of ${person.fullName ?? person.name}, ${person.title}${person.location ? `, ${person.location}` : ''}.`}
   bodyClass="cv-page"
 >
-  <Nav slot="nav" home={false} />
+  <Nav slot="nav" cast={cast} home={false}><slot name="lead" slot="lead" /></Nav>
 
   <div class="container-x max-w-5xl pt-[calc(var(--nav-h)+2.5rem)] pb-24 print:p-0">
     <div class="no-print mb-6 flex flex-wrap items-center justify-between gap-3">
-      <a href="/" class="link-quiet font-mono text-xs">← {siteHost}</a>
+      <a href={cast.href()} class="link-quiet font-mono text-xs">← {cast.host.verified ? `${person.name}'s profile` : siteHost}</a>
       <div class="flex flex-wrap gap-2">
-        {careerEvents.length > 0 && <a href="/#career" class="btn btn-sm">Replay as event stream</a>}
+        {careerEvents.length > 0 && <a href={cast.href('#career')} class="btn btn-sm">Replay as event stream</a>}
         <button type="button" class="btn btn-sm btn-primary" data-print>
           <svg viewBox="0 0 16 16" class="size-4" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4.5 6V2.5h7V6M4.5 11.5h-2v-5h11v5h-2M4.5 9.5h7v4h-7z" stroke-linejoin="round"></path></svg>
           Print / Save as PDF
@@ -71,16 +79,16 @@ const talkYear = (date: string) => date.slice(0, 4);
     <article class="cv panel p-6 sm:p-10 md:p-14" aria-labelledby="cv-name">
       <header class="cv-head flex flex-col gap-6 border-b border-line pb-8 md:flex-row md:items-end md:justify-between">
         <div>
-          <p class="no-print mb-4 flex flex-wrap items-center gap-3"><span class="note">Projection: {firstName}.CV</span><CastBadge tier={tier.tier} handle={person.handle} size="compact" /></p>
+          <p class="no-print mb-4 flex flex-wrap items-center gap-3"><span class="note">Projection: {firstName}.CV</span><CastBadge tier={tier.tier} handle={person.handle} size="compact" claim={!cast.host.verified} /></p>
           <h1 id="cv-name" transition:name="person-name" class="text-[clamp(2.25rem,5vw,3.5rem)] leading-none font-[800] tracking-[-0.045em]">{person.fullName ?? person.name}</h1>
           <p class="mt-3 text-lg text-fg-muted">{person.title}</p>
         </div>
         <ul class="cv-contact space-y-1 font-mono text-[0.8125rem] text-fg-muted md:text-right">
           {person.location && <li>{person.location}</li>}
           {person.email && <li><a href={`mailto:${person.email}`} class="hover:text-fg" data-no-url>{person.email}</a></li>}
-          <li><a href={config.site.url} class="hover:text-fg" data-no-url>{siteHost}</a></li>
-          <li><a href={githubUrl} class="hover:text-fg" data-no-url>{host(githubUrl)}</a></li>
-          {profileLinks.filter((link) => link.key !== 'github').slice(0, 2).map((link) => <li><a href={link.url} class="hover:text-fg" data-no-url>{host(link.url)}</a></li>)}
+          <li><a href={config.site.url} rel={cast.host.rel} class="hover:text-fg" data-no-url>{siteHost}</a></li>
+          <li><a href={githubUrl} rel={cast.host.rel} class="hover:text-fg" data-no-url>{host(githubUrl)}</a></li>
+          {profileLinks.filter((link) => link.key !== 'github').slice(0, 2).map((link) => <li><a href={link.url} rel={cast.host.rel} class="hover:text-fg" data-no-url>{host(link.url)}</a></li>)}
         </ul>
       </header>
 
@@ -89,7 +97,7 @@ const talkYear = (date: string) => date.slice(0, 4);
           <section aria-labelledby="cv-summary">
             <h2 id="cv-summary" class="cv-h">Summary</h2>
             <div class="space-y-3 leading-relaxed text-fg-muted">
-              {(person.about.length ? person.about : [person.intro]).map((p) => <p set:html={renderInline(p)} />)}
+              {(person.about.length ? person.about : [person.intro]).map((p) => <p><Inline text={p} host={cast.host} /></p>)}
             </div>
           </section>
 
@@ -104,7 +112,7 @@ const talkYear = (date: string) => date.slice(0, 4);
                         {r.title}
                         <span class="font-sans font-normal text-fg-muted">
                           {' · '}
-                          {r.orgUrl ? <a href={r.orgUrl} data-print-url={host(r.orgUrl)} class="underline decoration-line-strong hover:text-fg">{r.org}</a> : r.org}
+                          {r.orgUrl ? <a href={r.orgUrl} rel={cast.host.rel} data-print-url={host(r.orgUrl)} class="underline decoration-line-strong hover:text-fg">{r.org}</a> : r.org}
                         </span>
                       </h3>
                       <p class="font-mono text-xs whitespace-nowrap text-fg-faint">
@@ -144,7 +152,7 @@ const talkYear = (date: string) => date.slice(0, 4);
                         {e.title}
                         <span class="font-sans font-normal text-fg-muted">
                           {' · '}
-                          {e.orgUrl ? <a href={e.orgUrl} data-print-url={host(e.orgUrl)} class="underline decoration-line-strong hover:text-fg">{e.org}</a> : e.org}
+                          {e.orgUrl ? <a href={e.orgUrl} rel={cast.host.rel} data-print-url={host(e.orgUrl)} class="underline decoration-line-strong hover:text-fg">{e.org}</a> : e.org}
                         </span>
                       </h3>
                       <p class="font-mono text-xs whitespace-nowrap text-fg-faint">{e.endDate ? range(e.date, e.endDate) : `from ${formatMonth(e.date)}`}</p>
@@ -163,7 +171,7 @@ const talkYear = (date: string) => date.slice(0, 4);
                 projects.map((p) => (
                   <li class="cv-item">
                     <h3 class="font-[620]">
-                      <a href={p.url} data-print-url={host(p.url)} class="hover:text-event-soft">{p.name}</a>
+                      <a href={p.url} rel={cast.host.rel} data-print-url={host(p.url)} class="hover:text-event-soft">{p.name}</a>
                       {p.version && <span class="ml-1.5 font-mono text-xs font-normal text-fg-faint">{p.version}</span>}
                     </h3>
                     <p class="mt-0.5 text-sm leading-relaxed text-fg-muted">{plainText(p.pitch)}</p>
@@ -209,7 +217,7 @@ const talkYear = (date: string) => date.slice(0, 4);
               {
                 certifications.map((c) => (
                   <li>
-                    {c.url ? <a href={c.url} class="font-medium text-fg hover:text-event-soft" data-no-url>{c.title}</a> : <span class="font-medium text-fg">{c.title}</span>}
+                    {c.url ? <a href={c.url} rel={cast.host.rel} class="font-medium text-fg hover:text-event-soft" data-no-url>{c.title}</a> : <span class="font-medium text-fg">{c.title}</span>}
                     <p class="font-mono text-xs text-fg-faint">{c.issuer} · {c.year}</p>
                   </li>
                 ))
@@ -222,7 +230,7 @@ const talkYear = (date: string) => date.slice(0, 4);
             {
               talks.map((t) => (
                 <div>
-                  {t.url ? <a href={t.url} class="font-medium text-fg hover:text-event-soft" data-no-url>{t.title}</a> : <span class="font-medium text-fg">{t.title}</span>}
+                  {t.url ? <a href={t.url} rel={cast.host.rel} class="font-medium text-fg hover:text-event-soft" data-no-url>{t.title}</a> : <span class="font-medium text-fg">{t.title}</span>}
                   <p class="text-fg-muted">{t.host}{t.with && `, with ${t.with}`}</p>
                   <p class="font-mono text-xs text-fg-faint">{talkYear(t.date)}</p>
                 </div>
@@ -241,7 +249,7 @@ const talkYear = (date: string) => date.slice(0, 4);
     </article>
   </div>
 
-  <Footer slot="footer" />
+  <slot name="footer" slot="footer"><Footer cast={cast} /></slot>
 </Base>
 
 <style>
@@ -356,7 +364,7 @@ const talkYear = (date: string) => date.slice(0, 4);
 </style>
 
 <script>
-  import { onPageLoad } from '../site/lib/lifecycle';
+  import { onPageLoad } from '../lib/lifecycle';
   onPageLoad(() => {
     if (!document.querySelector('.cv-page')) return;
     document.querySelector('[data-print]')?.addEventListener('click', () => window.print());

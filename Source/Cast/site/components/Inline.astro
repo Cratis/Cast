@@ -1,0 +1,45 @@
+---
+// Copyright (c) Cratis. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+// Inline markup from cast.yaml, rendered as elements with escaped text. Never set:html.
+import { parseInline, type InlineToken } from '../lib/inline';
+import type { CastHost } from '../profile/CastHost';
+
+interface Props {
+  text?: string;
+  tokens?: InlineToken[];
+  /** Class of `*emphasis*`, the italic serif accent by default. */
+  emphasisClass?: string;
+  /** Where the text is rendered; decides the rel of links and how relative links resolve. */
+  host?: CastHost;
+}
+const { text = '', tokens = parseInline(text), emphasisClass = 'serif', host } = Astro.props;
+const linkClass = 'text-fg underline decoration-line-strong hover:decoration-fg';
+
+const target = (href: string): string => {
+  if (!host?.linkOrigin || !href.startsWith('/')) return href;
+  try {
+    return new URL(href, host.linkOrigin).toString();
+  } catch {
+    return '#';
+  }
+};
+const relFor = (href: string): string | undefined => (/^https?:/i.test(href) ? (host?.rel ?? 'noopener') : undefined);
+---
+
+{
+  tokens.map((token) =>
+    token.kind === 'text' ? (
+      token.text
+    ) : token.kind === 'code' ? (
+      <code class="inline-code">{token.text}</code>
+    ) : token.kind === 'strong' ? (
+      <strong class="font-semibold text-fg"><Astro.self tokens={token.children} emphasisClass={emphasisClass} host={host} /></strong>
+    ) : token.kind === 'em' ? (
+      <em class={emphasisClass}><Astro.self tokens={token.children} emphasisClass={emphasisClass} host={host} /></em>
+    ) : (
+      <a href={target(token.href)} class={linkClass} rel={relFor(target(token.href))}><Astro.self tokens={token.children} emphasisClass={emphasisClass} host={host} /></a>
+    ),
+  )
+}

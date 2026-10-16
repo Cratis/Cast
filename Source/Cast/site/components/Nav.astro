@@ -2,17 +2,19 @@
 // Copyright (c) Cratis. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import { person, sections, tier } from '../data';
+import type { CastView } from '../profile/CastView';
 import { navLinks } from '../lib/sections';
 import CastBadge from './CastBadge.astro';
 import Monogram from './Monogram.astro';
 
 interface Props {
-  /** Prefix anchor links with '/' when not on the home page. */
+  cast: CastView;
+  /** Prefix anchor links with the home page path when not on the home page. */
   home?: boolean;
 }
-const { home = true } = Astro.props;
-const base = home ? '' : '/';
+const { cast, home = true } = Astro.props;
+const { person, sections, tier } = cast;
+const base = home ? '' : cast.href();
 const links = navLinks(sections);
 ---
 
@@ -21,12 +23,13 @@ const links = navLinks(sections);
   class="group/nav fixed inset-x-0 top-0 z-50 h-[var(--nav-h)] border-b border-transparent transition-[background-color,border-color,backdrop-filter] duration-300 data-[scrolled]:border-line data-[scrolled]:bg-ink-950/70 data-[scrolled]:backdrop-blur-xl data-[scrolled]:backdrop-saturate-150 print:hidden"
 >
   <nav class="container-x flex h-full items-center justify-between gap-4" aria-label="Primary">
-    <div class="flex items-center gap-3">
-      <a href={home ? '#top' : '/'} class="group flex items-center gap-2.5 rounded-md" aria-label={`${person.handle}, home`}>
-        <Monogram class="size-7 shrink-0 transition-transform duration-500 ease-[var(--ease-spring)] group-hover:-rotate-6" />
+    <div class="flex min-w-0 items-center gap-3">
+      <slot name="lead" />
+      <a href={home ? '#top' : cast.href()} class="group flex items-center gap-2.5 rounded-md" aria-label={`${person.handle}, home`}>
+        <Monogram cast={cast} class="size-7 shrink-0 transition-transform duration-500 ease-[var(--ease-spring)] group-hover:-rotate-6" />
         <span class="font-mono text-[0.9375rem] font-semibold tracking-tight">{person.handle}</span>
       </a>
-      <span class="hidden sm:inline-flex"><CastBadge tier={tier.tier} handle={person.handle} size="compact" /></span>
+      <span class="hidden sm:inline-flex"><CastBadge tier={tier.tier} handle={person.handle} size="compact" claim={!cast.host.verified} /></span>
     </div>
 
     <ul class="hidden items-center gap-1 md:flex">
@@ -44,7 +47,7 @@ const links = navLinks(sections);
         ))
       }
       <li>
-        <a href="/cv" class="rounded-lg px-3 py-2 text-sm text-fg-muted transition-colors hover:text-fg">CV</a>
+        <a href={cast.href('cv')} class="rounded-lg px-3 py-2 text-sm text-fg-muted transition-colors hover:text-fg">CV</a>
       </li>
     </ul>
 

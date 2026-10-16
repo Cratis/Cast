@@ -2,17 +2,20 @@
 // Copyright (c) Cratis. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+import type { CastView } from '../profile/CastView';
+import Inline from './Inline.astro';
 import SectionHeader from './SectionHeader.astro';
-import { eventModel } from '../data';
-import { renderInline } from '../lib/inline';
 import { safeJson } from '../lib/safeJson';
 
 interface Props {
+  cast: CastView;
   index: string;
   title?: string;
   label?: string;
   intro?: string;
 }
+const { cast } = Astro.props;
+const { eventModel } = cast;
 const m = eventModel!;
 type ModelCard = (typeof m.cards)[number];
 const { index, title = m.title, label = m.label, intro = m.intro } = Astro.props;
@@ -68,10 +71,10 @@ const stepsFor = (id: string) => m.steps.flatMap((s, i) => (s.cards.includes(id)
 
 <section id="model" class="relative py-24 md:py-36" aria-labelledby="model-title">
   <div class="container-x">
-    <SectionHeader index={index} kind="command" label={label} title={title} id="model-title">
+    <SectionHeader host={cast.host} index={index} kind="command" label={label} title={title} id="model-title">
       <p class="mt-6 max-w-[62ch] text-lg leading-relaxed text-fg-muted">
-        {intro ? <Fragment set:html={renderInline(intro)} /> : <>Before code, I draw how information flows: screens send commands, commands append events, events feed read models, read models feed screens.
-        This is a real slice from <a href={m.repo} class="text-fg underline decoration-line-strong hover:decoration-fg" rel="noopener">{m.name}</a>, and every name on it is a type in its source.</>}
+        {intro ? <Fragment><Inline text={intro} host={cast.host} /></Fragment> : <>Before code, I draw how information flows: screens send commands, commands append events, events feed read models, read models feed screens.
+        This is a real slice from <a href={m.repo} class="text-fg underline decoration-line-strong hover:decoration-fg" rel={cast.host.rel}>{m.name}</a>, and every name on it is a type in its source.</>}
       </p>
     </SectionHeader>
 

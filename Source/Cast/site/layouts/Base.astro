@@ -9,7 +9,8 @@ import '../styles/global.css';
 import interUrl from '@fontsource-variable/inter/files/inter-latin-wght-normal.woff2?url';
 import monoUrl from '@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url';
 import { ClientRouter } from 'astro:transitions';
-import { config, person, githubUrl, profileLinks } from '../data';
+import type { CastView } from '../profile/CastView';
+import { clientCast } from '../profile/clientCast';
 import { plainText } from '../lib/inline';
 import { accentTokens } from '../lib/accent';
 import { safeJson } from '../lib/safeJson';
@@ -17,17 +18,21 @@ import CommandPalette from '../components/CommandPalette.astro';
 import Terminal from '../components/Terminal.astro';
 
 interface Props {
+  cast: CastView;
   title: string;
   description: string;
-  /** Path of the OG image. */
+  /** Path of the OG image under the profile. Defaults to og.png on a Cast site and the portrait elsewhere. */
   image?: string;
   noindex?: boolean;
   bodyClass?: string;
 }
 
-const { title, description, image = '/og.png', noindex = false, bodyClass = '' } = Astro.props;
+const { cast, title, description, image, noindex = false, bodyClass = '' } = Astro.props;
+const { config, person, githubUrl, profileLinks, host } = cast;
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const ogImage = new URL(image, Astro.site);
+const ogImageUrl = image ? cast.href(image) : host.siteFiles ? cast.href('og.png') : cast.photoUrl;
+const ogImage = ogImageUrl ? new URL(ogImageUrl, Astro.site) : undefined;
+const iconUrl = host.siteFiles ? cast.href('favicon.svg') : '/favicon.svg';
 const [firstName, ...rest] = (person.fullName ?? person.name).split(/\s+/);
 const themeMode = config.theme.mode;
 const accent = accentTokens(config.theme.accent);
@@ -39,8 +44,8 @@ const jsonLd = {
   alternateName: [person.fullName, person.handle].filter(Boolean),
   jobTitle: person.title,
   ...(person.email ? { email: `mailto:${person.email}` } : {}),
-  url: Astro.site?.toString(),
-  image: new URL('/apple-touch-icon.png', Astro.site).toString(),
+  url: host.siteFiles ? Astro.site?.toString() : config.site.url,
+  ...(host.siteFiles ? { image: new URL(cast.href('apple-touch-icon.png'), Astro.site).toString() } : cast.photoUrl ? { image: cast.photoUrl } : {}),
   ...(person.location ? { address: { '@type': 'PostalAddress', addressLocality: person.location.split(',')[0]?.trim(), ...(person.country ? { addressCountry: person.country } : {}) } } : {}),
   knowsAbout: person.interests,
   sameAs: [githubUrl, ...profileLinks.filter((link) => link.key !== 'github').map((link) => link.url)],
@@ -62,11 +67,17 @@ const jsonLd = {
     <meta name="generator" content={Astro.generator} />
     <meta name="cast:handle" content={person.handle} />
 
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="sitemap" href="/sitemap-index.xml" />
-    <link rel="alternate" type="application/json" href="/cast.json" title="Cast profile" />
-    <link rel="alternate" type="text/plain" href="/llms.txt" title="Profile for AI agents" />
+    <link rel="icon" href={iconUrl} type="image/svg+xml" />
+    {
+      host.siteFiles && (
+        <>
+          <link rel="apple-touch-icon" href={cast.href('apple-touch-icon.png')} />
+          <link rel="sitemap" href={cast.href('sitemap-index.xml')} />
+          <link rel="alternate" type="application/json" href={cast.href('cast.json')} title="Cast profile" />
+          <link rel="alternate" type="text/plain" href={cast.href('llms.txt')} title="Profile for AI agents" />
+        </>
+      )
+    }
 
     <link rel="preload" href={interUrl} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={monoUrl} as="font" type="font/woff2" crossorigin />
@@ -76,17 +87,17 @@ const jsonLd = {
     <meta property="og:title" content={title} />
     <meta property="og:description" content={plainText(description)} />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={ogImage} />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content={`${person.name}: ${plainText(person.tagline)}`} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    {ogImage && host.siteFiles && <meta property="og:image:width" content="1200" />}
+    {ogImage && host.siteFiles && <meta property="og:image:height" content="630" />}
+    {ogImage && <meta property="og:image:alt" content={`${person.name}: ${plainText(person.tagline)}`} />}
     {firstName && <meta property="profile:first_name" content={firstName} />}
     {rest.length > 0 && <meta property="profile:last_name" content={rest[rest.length - 1]} />}
     <meta property="profile:username" content={person.handle} />
-    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:card" content={host.siteFiles ? 'summary_large_image' : 'summary'} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={plainText(description)} />
-    <meta name="twitter:image" content={ogImage} />
+    {ogImage && <meta name="twitter:image" content={ogImage} />}
 
     <script type="application/ld+json" set:html={safeJson(jsonLd)} />
     <style set:html={`:root{--color-accent:${accent.dark};--color-accent-soft:${accent.darkSoft};--color-accent-ink:${accent.ink}}html[data-theme='light']{--color-accent:${accent.light};--color-accent-soft:${accent.lightSoft}}`}></style>
@@ -135,8 +146,9 @@ const jsonLd = {
       <slot />
     </main>
     <slot name="footer" />
-    <CommandPalette />
-    <Terminal />
+    <script type="application/json" data-cast-client set:html={safeJson(clientCast(cast))} />
+    <CommandPalette cast={cast} />
+    <Terminal cast={cast} />
     <script>
       import '../scripts/ambient';
     </script>

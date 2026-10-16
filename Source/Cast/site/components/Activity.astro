@@ -2,19 +2,21 @@
 // Copyright (c) Cratis. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+import type { CastView } from '../profile/CastView';
+import Inline from './Inline.astro';
 import SectionHeader from './SectionHeader.astro';
 import PullRequestFeed from './PullRequestFeed.astro';
-import { cratis } from '../data';
-import { renderInline } from '../lib/inline';
 
 interface Props {
+  cast: CastView;
   index: string;
   title?: string;
   label?: string;
   intro?: string;
 }
 const { index, title = 'Every contribution, *appended.*', label = 'Event store', intro } = Astro.props;
-import { github, snapshotDate } from '../lib/github';
+const { cast } = Astro.props;
+const { cratis, github, snapshotDate } = cast;
 import { foldCalendar, formatDay, formatMonthLong } from '../lib/contributions';
 
 const fmt = new Intl.NumberFormat('en-US');
@@ -41,9 +43,9 @@ const summary = `Contribution heatmap: ${fmt.format(total)} contributions betwee
 
 <section id="activity" class="relative py-24 md:py-36" aria-labelledby="activity-title">
   <div class="container-x">
-    <SectionHeader index={index} label={label} title={title} id="activity-title">
+    <SectionHeader host={cast.host} index={index} label={label} title={title} id="activity-title">
       <p class="mt-6 max-w-[60ch] text-lg leading-relaxed text-fg-muted">
-        {intro ? <Fragment set:html={renderInline(intro)} /> : <>My GitHub contribution calendar, re-projected as an event store: one partition per day, brighter means more events appended.
+        {intro ? <Fragment><Inline text={intro} host={cast.host} /></Fragment> : <>My GitHub contribution calendar, re-projected as an event store: one partition per day, brighter means more events appended.
         Captured when the site was built.</>}
       </p>
     </SectionHeader>
@@ -121,7 +123,7 @@ const summary = `Contribution heatmap: ${fmt.format(total)} contributions betwee
         </tbody>
       </table>
     </div>}
-    {!cratis && <PullRequestFeed class="mt-6" />}
+    {!cratis && <PullRequestFeed cast={cast} class="mt-6" />}
   </div>
   <div class="hm-tip" role="presentation" data-heatmap-tip hidden></div>
 </section>

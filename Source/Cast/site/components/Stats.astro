@@ -2,8 +2,13 @@
 // Copyright (c) Cratis. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import { stats as siteStats, cratis } from '../data';
-import { github, cratisRepos, mergedPrFloor, snapshotDate } from '../lib/github';
+import type { CastView } from '../profile/CastView';
+
+interface Props {
+  cast: CastView;
+}
+const { cast } = Astro.props;
+const { stats: siteStats, cratis, github, cratisRepos, mergedPrFloor, snapshotDate } = cast;
 
 type Stat = (typeof siteStats)[number];
 const rankOne = cratisRepos.filter((r) => r.rank === 1).length;

@@ -2,18 +2,20 @@
 // Copyright (c) Cratis. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+import type { CastView } from '../profile/CastView';
+import Inline from './Inline.astro';
 import SectionHeader from './SectionHeader.astro';
-import { posts, themes, blogSource, blogHost, blogFetchedAt, readingMinutes } from '../lib/blog';
-import { snapshotDate } from '../lib/github';
-import { renderInline } from '../lib/inline';
 
 interface Props {
+  cast: CastView;
   index: string;
   title?: string;
   label?: string;
   intro?: string;
 }
 const { index, title = 'Appended to the *blog.*', label = 'PostPublished', intro } = Astro.props;
+const { cast } = Astro.props;
+const { snapshotDate, posts, themes, blogSource, blogHost, blogFetchedAt, readingMinutes } = cast;
 const hours = Math.round(readingMinutes / 60);
 const INITIAL = 8;
 const series = [...new Set(posts.map((p) => p.series).filter(Boolean))];
@@ -22,10 +24,10 @@ const day = (d: string) => new Date(d).toLocaleDateString('en-US', { day: 'numer
 
 <section id="writing" class="relative py-24 md:py-36" aria-labelledby="writing-title">
   <div class="container-x">
-    <SectionHeader index={index} label={label} title={title} id="writing-title">
+    <SectionHeader host={cast.host} index={index} label={label} title={title} id="writing-title">
       <p class="mt-6 max-w-[62ch] text-lg leading-relaxed text-fg-muted">
-        {posts.length} {posts.length === 1 ? 'post' : 'posts'}{blogHost && <> on <a href={blogSource} class="text-fg underline decoration-line-strong hover:decoration-fg" rel="noopener">{blogHost}</a></>}{hours > 0 && <>, about {hours} {hours === 1 ? 'hour' : 'hours'} of reading</>}{series.length > 0 && <>, including the <span class="text-fg">{series[0]}</span> series</>}.
-        {intro && <Fragment set:html={' ' + renderInline(intro)} />}
+        {posts.length} {posts.length === 1 ? 'post' : 'posts'}{blogHost && <> on <a href={blogSource} class="text-fg underline decoration-line-strong hover:decoration-fg" rel={cast.host.rel}>{blogHost}</a></>}{hours > 0 && <>, about {hours} {hours === 1 ? 'hour' : 'hours'} of reading</>}{series.length > 0 && <>, including the <span class="text-fg">{series[0]}</span> series</>}.
+        {intro && <> <Inline text={intro} host={cast.host} /></>}
       </p>
     </SectionHeader>
 
@@ -46,7 +48,7 @@ const day = (d: string) => new Date(d).toLocaleDateString('en-US', { day: 'numer
       {
         posts.map((p, i) => (
           <li class:list={['post', i >= INITIAL && 'extra']} data-themes={p.themes.join(' ')}>
-            <a href={p.url} rel="noopener" class="group grid gap-x-6 gap-y-2 px-5 py-5 transition-colors hover:bg-fg/[0.02] md:grid-cols-[7rem_1fr_auto] md:px-7">
+            <a href={p.url} rel={cast.host.rel} class="group grid gap-x-6 gap-y-2 px-5 py-5 transition-colors hover:bg-fg/[0.02] md:grid-cols-[7rem_1fr_auto] md:px-7">
               <span class="font-mono text-xs leading-6 text-fg-faint">
                 {p.part !== undefined ? <>Part <span class="text-event">{String(p.part).padStart(2, '0')}</span></> : <span class="text-event">Overview</span>}
               </span>

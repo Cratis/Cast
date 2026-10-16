@@ -5,11 +5,13 @@
 import Base from '../site/layouts/Base.astro';
 import Nav from '../site/components/Nav.astro';
 import Footer from '../site/components/Footer.astro';
-import { person } from '../site/data';
+import { cast } from '../site/data';
+
+const { person } = cast;
 ---
 
-<Base title={`EventNotFound · ${person.name}`} description="This page is not in the event stream." noindex>
-  <Nav slot="nav" home={false} />
+<Base cast={cast} title={`EventNotFound · ${person.name}`} description="This page is not in the event stream." noindex>
+  <Nav slot="nav" cast={cast} home={false} />
   <section class="relative isolate flex min-h-[100svh] items-center overflow-hidden pt-[var(--nav-h)]">
     <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
       <div class="absolute top-1/2 left-1/2 size-[40rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/10 blur-[120px]"></div>
@@ -36,5 +38,5 @@ import { person } from '../site/data';
       </div>
     </div>
   </section>
-  <Footer slot="footer" />
+  <Footer slot="footer" cast={cast} />
 </Base>

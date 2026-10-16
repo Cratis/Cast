@@ -3,14 +3,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 // The live feed of merged public pull requests: rendered from the build-time snapshot, refreshed in the browser.
-import { config } from '../data';
-import { github, snapshotDate } from '../lib/github';
+import type { CastView } from '../profile/CastView';
 import { relativeTime } from '../lib/reltime';
 
 interface Props {
+  cast: CastView;
   class?: string;
 }
 const { class: className = '' } = Astro.props;
+const { cast } = Astro.props;
+const { config, github, snapshotDate } = cast;
 // The section shows the newest eight; the terminal's `stream tail` gets the full snapshot.
 const feed = github.mergedPullRequests.latest.slice(0, 8);
 const builtAt = github.fetchedAt ? Date.parse(github.fetchedAt) : Date.now();
@@ -27,7 +29,7 @@ const orgs = config.github.orgs.join(', ');
     </div>
     <template data-pr-template>
       <li class="feed-row">
-        <a rel="noopener" class="group grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 px-5 py-3.5 transition-colors hover:bg-fg/[0.025] sm:grid-cols-[4.5rem_1fr_auto]">
+        <a rel={cast.host.rel} class="group grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 px-5 py-3.5 transition-colors hover:bg-fg/[0.025] sm:grid-cols-[4.5rem_1fr_auto]">
           <span data-pr-head class="font-mono text-xs leading-6 text-fg-faint tabular-nums"></span>
           <span class="min-w-0">
             <span class="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-xs">
@@ -46,7 +48,7 @@ const orgs = config.github.orgs.join(', ');
         <ol data-pr-feed class="divide-y divide-line" aria-label={`Latest merged pull requests in ${orgs}`}>
           {feed.map((pr, i) => (
             <li class="feed-row" style={`--i:${i}`}>
-              <a href={pr.url} rel="noopener" class="group grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 px-5 py-3.5 transition-colors hover:bg-fg/[0.025] sm:grid-cols-[4.5rem_1fr_auto]">
+              <a href={pr.url} rel={cast.host.rel} class="group grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 px-5 py-3.5 transition-colors hover:bg-fg/[0.025] sm:grid-cols-[4.5rem_1fr_auto]">
                 <span class="font-mono text-xs leading-6 text-fg-faint tabular-nums">{i === 0 ? 'HEAD' : `HEAD~${i}`}</span>
                 <span class="min-w-0">
                   <span class="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-xs">
