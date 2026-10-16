@@ -1,0 +1,45 @@
+{
+    "name": "@cratis/create-cast",
+    "version": "1.0.0",
+    "description": "npm create @cratis/cast: scaffold a Cratis Cast profile site from your GitHub profile.",
+    "keywords": [
+        "cratis",
+        "cast",
+        "create",
+        "astro",
+        "portfolio",
+        "cv"
+    ],
+    "author": "Cratis",
+    "license": "MIT",
+    "homepage": "https://cast.cratis.io/join",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Cratis/Cast.git",
+        "directory": "Source/CreateCast"
+    },
+    "publishConfig": {
+        "access": "public"
+    },
+    "type": "module",
+    "engines": {
+        "node": ">=23.0.0"
+    },
+    "bin": "dist/index.js",
+    "files": [
+        "dist",
+        "!dist/**/for_*/**",
+        "!dist/**/*.map"
+    ],
+    "scripts": {
+        "clean": "yarn g:clean",
+        "build": "yarn g:tsc -p tsconfig.build.json && chmod +x dist/index.js",
+        "lint": "yarn g:lint",
+        "lint:ci": "yarn g:lint:ci",
+        "test": "yarn g:test",
+        "ci": "yarn g:ci"
+    },
+    "devDependencies": {
+        "@cratis/cast": "workspace:*"
+    }
+}

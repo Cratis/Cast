@@ -1,0 +1,41 @@
+---
+// Copyright (c) Cratis. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+import { skills } from '../data';
+import SectionHeader from './SectionHeader.astro';
+
+interface Props {
+  index: string;
+  title?: string;
+  label?: string;
+  /** Sits directly under the talks section, so it needs less top padding there. */
+  compact?: boolean;
+}
+const { index, title = 'The *toolbox.*', label = 'Read model', compact = false } = Astro.props;
+const groups = Object.entries(skills);
+const accents = ['bg-event', 'bg-command', 'bg-view', 'bg-accent'];
+---
+
+<section id="skills" class:list={['relative pb-24 md:pb-36', compact ? '' : 'pt-24 md:pt-32']} aria-labelledby="skills-title">
+  <div class="container-x">
+    <SectionHeader index={index} kind="view" label={label} title={title} id="skills-title" />
+    <div class="grid grid-cols-1 gap-px overflow-hidden rounded-[1.25rem] border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+      {
+        groups.map(([group, list], i) => (
+          <div class="bg-ink-950 p-6 md:p-7" data-reveal style={`--reveal-delay:${(i % 3) * 60}ms`}>
+            <h3 class="mb-4 flex items-center gap-2.5 font-mono text-xs tracking-wider text-fg-muted uppercase">
+              <span class={`size-2 rounded-[2px] ${accents[i % accents.length]}`} aria-hidden="true" />
+              {group}
+            </h3>
+            <ul class="flex flex-wrap gap-1.5">
+              {list.map((s) => (
+                <li class="tag">{s}</li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

@@ -1,0 +1,16 @@
+# yaml-language-server: $schema=./members.schema.json
+#
+# The Cratis Cast registry. Every line here is reviewed by Cratis in a pull request.
+# Core and Partner tiers come only from this file. Contributor is never listed here:
+# it is computed from merged public pull requests in the Cratis organization.
+# See README.md in this folder for what each tier means and how to join.
+
+- github: woksin
+  tier: core
+  since: 2024-06
+  role: Co-founder & Chief Architect
+  site: https://www.woksin.com
+
+- github: einari
+  tier: core
+  role: Co-founder & CTO

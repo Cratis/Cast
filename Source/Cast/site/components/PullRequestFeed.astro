@@ -1,0 +1,86 @@
+---
+// Copyright (c) Cratis. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+// The live feed of merged public pull requests: rendered from the build-time snapshot, refreshed in the browser.
+import { config } from '../data';
+import { github, snapshotDate } from '../lib/github';
+import { relativeTime } from '../lib/reltime';
+
+interface Props {
+  class?: string;
+}
+const { class: className = '' } = Astro.props;
+// The section shows the newest eight; the terminal's `stream tail` gets the full snapshot.
+const feed = github.mergedPullRequests.latest.slice(0, 8);
+const builtAt = github.fetchedAt ? Date.parse(github.fetchedAt) : Date.now();
+const orgs = config.github.orgs.join(', ');
+---
+
+  <div class:list={['panel overflow-hidden', className]} data-reveal data-feed>
+    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-3.5">
+      <h3 class="flex items-center gap-2.5 font-mono text-sm">
+        <span class="size-1.5 animate-pulse-dot rounded-full bg-view" aria-hidden="true"></span>
+        <span class="text-fg-faint">tail -f</span> <span class="text-fg">Tailing the stream</span>
+      </h3>
+      <p data-pr-status class="font-mono text-xs text-fg-faint">as of <time datetime={github.fetchedAt}>{snapshotDate()}</time></p>
+    </div>
+    <template data-pr-template>
+      <li class="feed-row">
+        <a rel="noopener" class="group grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 px-5 py-3.5 transition-colors hover:bg-fg/[0.025] sm:grid-cols-[4.5rem_1fr_auto]">
+          <span data-pr-head class="font-mono text-xs leading-6 text-fg-faint tabular-nums"></span>
+          <span class="min-w-0">
+            <span class="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-xs">
+              <span class="text-event">PullRequestMerged</span>
+              <span data-pr-repo class="rounded-md border border-command/25 bg-command/8 px-1.5 py-px text-command-soft"></span>
+              <span data-pr-number class="text-fg-faint"></span>
+            </span>
+            <span data-pr-title class="mt-1 block text-[0.9375rem] leading-snug text-fg group-hover:underline"></span>
+          </span>
+          <time data-rel class="col-start-2 font-mono text-xs text-fg-faint sm:col-start-3 sm:leading-6"></time>
+        </a>
+      </li>
+    </template>
+    {
+      feed.length ? (
+        <ol data-pr-feed class="divide-y divide-line" aria-label={`Latest merged pull requests in ${orgs}`}>
+          {feed.map((pr, i) => (
+            <li class="feed-row" style={`--i:${i}`}>
+              <a href={pr.url} rel="noopener" class="group grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 px-5 py-3.5 transition-colors hover:bg-fg/[0.025] sm:grid-cols-[4.5rem_1fr_auto]">
+                <span class="font-mono text-xs leading-6 text-fg-faint tabular-nums">{i === 0 ? 'HEAD' : `HEAD~${i}`}</span>
+                <span class="min-w-0">
+                  <span class="flex flex-wrap items-center gap-x-2.5 gap-y-1 font-mono text-xs">
+                    <span class="text-event">PullRequestMerged</span>
+                    <span class="rounded-md border border-command/25 bg-command/8 px-1.5 py-px text-command-soft">{pr.repository}</span>
+                    <span class="text-fg-faint">#{pr.number}</span>
+                  </span>
+                  <span class="mt-1 block text-[0.9375rem] leading-snug text-fg group-hover:underline">{pr.title}</span>
+                </span>
+                <time datetime={pr.mergedAt} data-rel class="col-start-2 font-mono text-xs text-fg-faint sm:col-start-3 sm:leading-6">{relativeTime(pr.mergedAt, builtAt)}</time>
+              </a>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <ol data-pr-feed class="divide-y divide-line" aria-label={`Latest merged pull requests in ${orgs}`}>
+          <li class="px-5 py-8 font-mono text-sm text-fg-faint">EventNotFound: the snapshot has no merged pull requests yet.</li>
+        </ol>
+      )
+    }
+    <p class="border-t border-line px-5 py-3 font-mono text-[0.6875rem] text-fg-faint">
+      Public repositories only, newest first. Refreshed hourly and on page load.
+    </p>
+  </div>
+
+<style>
+  :global(.js-motion) [data-feed].is-visible :global(.feed-row) {
+    animation: feed-in 700ms var(--ease-out-expo) both;
+    animation-delay: calc(var(--i) * 45ms + 200ms);
+  }
+  @keyframes feed-in {
+    from {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+  }
+</style>

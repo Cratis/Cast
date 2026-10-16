@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.astro/
+.DS_Store
+# .cast/snapshot.json is the last good GitHub data. Commit it so builds without a token still show numbers.

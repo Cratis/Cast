@@ -1,0 +1,24 @@
+---
+// Copyright (c) Cratis. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+import SectionHeader from '@cratis/cast/site/components/SectionHeader.astro';
+
+interface Props {
+  id: string;
+  index: string;
+  kind: 'event' | 'command' | 'view';
+  label: string;
+  title: string;
+}
+const { id, index, kind, label, title } = Astro.props;
+---
+
+<section id={id} class="relative py-20 md:py-28" aria-labelledby={`${id}-title`}>
+  <div class="container-x">
+    <SectionHeader index={index} kind={kind} label={label} title={title} id={`${id}-title`}>
+      <slot name="intro" />
+    </SectionHeader>
+    <slot />
+  </div>
+</section>

@@ -1,0 +1,25 @@
+---
+// Copyright (c) Cratis. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+// The person's monogram: their initial on their accent, the same shape as the favicon.
+import { person } from '../data';
+
+interface Props {
+  class?: string;
+}
+const { class: className = 'size-7' } = Astro.props;
+const initial = (person.name.trim()[0] ?? person.handle[0] ?? 'C').toUpperCase();
+---
+
+<svg transition:name="monogram" viewBox="0 0 32 32" class={className} aria-hidden="true">
+  <defs>
+    <linearGradient id="monogram-sheen" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".22"></stop>
+      <stop offset=".6" stop-color="#fff" stop-opacity="0"></stop>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="28" height="28" rx="7" fill="var(--color-accent)"></rect>
+  <rect x="2" y="2" width="28" height="28" rx="7" fill="url(#monogram-sheen)"></rect>
+  <text x="16" y="22.2" text-anchor="middle" font-family="var(--font-serif)" font-style="italic" font-weight="600" font-size="19" fill="var(--color-accent-ink)">{initial}</text>
+</svg>

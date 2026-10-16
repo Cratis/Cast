@@ -1,0 +1,65 @@
+name: Directory Pages
+
+# Builds cast.cratis.io from the registry and public GitHub data, and deploys it to GitHub Pages.
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "Directory/**"
+      - "Registry/**"
+      - "Source/Cast/**"
+  # Hourly, so new contributors and fresh numbers show up without a push.
+  schedule:
+    - cron: '41 * * * *'
+  workflow_dispatch:
+
+# Least privilege by default; only the deploy job can write to Pages.
+permissions:
+  contents: read
+
+concurrency:
+  group: directory-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # Off until cast.cratis.io resolves to GitHub Pages and is set as the Pages domain
+    # (https://github.com/Cratis/Cast/issues/8). Turn on with the repository variable CAST_DIRECTORY_ENABLED=true.
+    if: vars.CAST_DIRECTORY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 23.x
+      - name: Yarn install
+        run: yarn install --immutable
+      - name: Build the engine (schema and bundled registry)
+        run: yarn workspace @cratis/cast build
+      - name: Build the directory
+        run: yarn workspace @cratis/cast-directory build
+        env:
+          # Read-only: public profiles, contributor discovery and merged pull request counts.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./Directory/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

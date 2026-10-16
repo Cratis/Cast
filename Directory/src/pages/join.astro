@@ -1,0 +1,80 @@
+---
+// Copyright (c) Cratis. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+import Directory from '../layouts/Directory.astro';
+import SectionHeader from '@cratis/cast/site/components/SectionHeader.astro';
+import { badgeSvg, Tier, tierStyles } from '@cratis/cast/badges';
+
+const steps = [
+  { command: 'npm create @cratis/cast@latest my-site', text: 'Asks for your GitHub handle, reads your public profile and writes a cast.yaml with every section ready to fill in.' },
+  { command: 'cd my-site && npm install && npm run dev', text: 'Edit cast.yaml and watch the site update: career events, projects, talks, writing.' },
+  { command: 'git push', text: 'The generated workflow builds on every push and every hour, and publishes to GitHub Pages.' },
+];
+const tiers = [
+  { tier: Tier.Core, how: 'Founders and maintainers of Cratis. Added by Cratis to the registry.' },
+  { tier: Tier.Partner, how: 'Consultants and companies Cratis vouches for. Open a pull request that adds you to the registry; Cratis reviews it and merges it only when we can vouch for the work.', anchor: 'partner' },
+  { tier: Tier.Contributor, how: 'Get a pull request merged in any public Cratis repository. Nothing to apply for: the next build of your site and of the directory shows it.' },
+];
+const badge = (tier: Tier) => `data:image/svg+xml;utf8,${encodeURIComponent(badgeSvg(tier))}`;
+---
+
+<Directory title="Join the Cratis Cast" description="Get a Cast site with one command, and learn how the Core, Partner and Contributor badges are verified.">
+  <section class="relative isolate overflow-hidden pt-[calc(var(--nav-h)+4rem)] pb-12">
+    <div class="pointer-events-none absolute -top-32 right-[-10rem] -z-10 size-[40rem] rounded-full bg-violet/15 blur-[140px]" aria-hidden="true"></div>
+    <div class="container-x">
+      <h1 class="max-w-[14ch] text-[clamp(2.75rem,7vw,6rem)] leading-[0.93] font-[800] tracking-[-0.045em]">Join the <em class="serif">Cast.</em></h1>
+      <p class="mt-6 max-w-[58ch] text-lg leading-relaxed text-fg-muted md:text-xl">
+        A Cast site is a personal site for people who build with Cratis. Your career is an event stream, every section is a projection of it, and your public work shows up as it happens.
+      </p>
+    </div>
+  </section>
+
+  <section class="py-16 md:py-24" aria-labelledby="site-title">
+    <div class="container-x">
+      <SectionHeader index="01" kind="command" label="Command" title="One command, *one file.*" id="site-title" />
+      <ol class="grid gap-4 lg:grid-cols-3">
+        {steps.map((step, index) => (
+          <li class="panel flex flex-col p-6" data-reveal style={`--reveal-delay:${index * 80}ms`}>
+            <span class="font-mono text-xs text-fg-faint">{String(index + 1).padStart(2, '0')}</span>
+            <div class="mt-4 flex items-stretch gap-2">
+              <code class="min-w-0 flex-1 rounded-lg border border-line bg-ink-950/70 px-3 py-2.5 font-mono text-[0.8125rem] break-words text-fg"><span class="text-view">$ </span>{step.command}</code>
+              <span class="relative inline-flex">
+                <button type="button" class="btn btn-sm h-full" data-copy={step.command} aria-label={`Copy ${step.command}`}><span data-copy-label>Copy</span></button>
+                <span class="sr-only" aria-live="polite" data-copy-status></span>
+              </span>
+            </div>
+            <p class="mt-4 text-sm leading-relaxed text-fg-muted">{step.text}</p>
+          </li>
+        ))}
+      </ol>
+      <p class="mt-6 max-w-[70ch] text-sm text-fg-muted">
+        Already have an Astro site? Add <code class="inline-code">@cratis/cast</code> and put <code class="inline-code">cast()</code> in your integrations. The full{' '}
+        <a href="https://github.com/Cratis/Cast/blob/main/Documentation/cast-yaml.md" class="text-fg underline decoration-line-strong hover:decoration-fg" rel="noopener">cast.yaml reference</a> lists every field.
+      </p>
+    </div>
+  </section>
+
+  <section class="py-16 md:py-24" aria-labelledby="tiers-title">
+    <div class="container-x">
+      <SectionHeader index="02" kind="view" label="Read model" title="How the badge is *earned.*" id="tiers-title">
+        <p class="mt-6 max-w-[62ch] text-lg text-fg-muted">
+          Your site cannot claim a tier: cast.yaml has no field for it. Each build checks the reviewed registry and GitHub, and so does the directory, which serves the badge everyone links to.
+        </p>
+      </SectionHeader>
+      <ul class="grid gap-4 lg:grid-cols-3">
+        {tiers.map((entry) => (
+          <li id={entry.anchor} class="panel flex flex-col p-6" data-reveal>
+            <img src={badge(entry.tier)} alt={`${tierStyles[entry.tier].label} badge`} height="20" class="h-5 w-auto self-start" />
+            <p class="mt-5 text-2xl font-[750] tracking-[-0.03em]">{tierStyles[entry.tier].label}</p>
+            <p class="mt-2 text-sm leading-relaxed text-fg-muted">{entry.how}</p>
+          </li>
+        ))}
+      </ul>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="https://github.com/Cratis/Cast/blob/main/Registry/README.md" class="btn" rel="noopener">Registry rules and removal policy</a>
+        <a href="https://github.com/Cratis/Cast/edit/main/Registry/members.yaml" class="btn" rel="noopener">Propose yourself as a partner</a>
+      </div>
+    </div>
+  </section>
+</Directory>

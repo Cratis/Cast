@@ -1,0 +1,395 @@
+{
+  "version": 1,
+  "builtAt": "2026-10-16T11:16:06.389Z",
+  "fetchedAt": "2026-10-16T10:45:36.360Z",
+  "members": [
+    {
+      "handle": "woksin",
+      "name": "Sindre Alstad Wilting",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/13407188?u=9245447357886096f26f85f957f980016b988116&v=4",
+      "bio": "Software Engineer from Norway who loves coding. ",
+      "location": "Oslo",
+      "mergedPullRequests": 3132,
+      "commits": 17998,
+      "repositories": [
+        "Chronicle",
+        "Screenplay",
+        "Arc",
+        "AI",
+        "Stage",
+        "Arc.TypeScript"
+      ],
+      "tier": "core",
+      "source": "registry",
+      "since": "2024-06",
+      "role": "Co-founder & Chief Architect",
+      "site": "https://www.woksin.com",
+      "registryLine": 8
+    },
+    {
+      "handle": "einari",
+      "name": "Einar Ingebrigtsen",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/134365?u=d35b0fe3b69e9735967dd548e5db0f2326eb9190&v=4",
+      "bio": "Event sourcerer and passionate software developer. Worked on a bunch of different tech and love working across different platforms. Technology Advisor @ Novanet",
+      "location": "Sandefjord, Norway",
+      "mergedPullRequests": 3147,
+      "commits": 26917,
+      "repositories": [
+        "Chronicle",
+        "Arc",
+        "Fundamentals",
+        "AI",
+        "Samples",
+        "Components"
+      ],
+      "tier": "core",
+      "source": "registry",
+      "role": "Co-founder & CTO",
+      "registryLine": 14
+    }
+  ],
+  "contributors": [
+    {
+      "handle": "tidemann",
+      "name": "Stig Salte Tidemandsen",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/2078564?v=4",
+      "location": "Porsgrunn, Norway",
+      "mergedPullRequests": 5,
+      "commits": 41,
+      "repositories": [
+        "Chronicle"
+      ],
+      "tier": "contributor",
+      "source": "contributions"
+    },
+    {
+      "handle": "torgeir-hansen",
+      "name": "Torgeir Hansen",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/58551036?u=98feb3ada27f5c3ea0b7de4501d16cafd23e574c&v=4",
+      "mergedPullRequests": 5,
+      "commits": 9,
+      "repositories": [
+        "Chronicle",
+        "Arc"
+      ],
+      "tier": "contributor",
+      "source": "contributions"
+    },
+    {
+      "handle": "nickprotop",
+      "name": "Nikolaos Protopapas",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/45642111?v=4",
+      "bio": "Neurologist, MD, MSc. Building .NET developer tools and terminal UIs on Linux. Coding since the KDE 3 era.",
+      "location": "Greece",
+      "mergedPullRequests": 3,
+      "commits": 3,
+      "repositories": [
+        "cli"
+      ],
+      "tier": "contributor",
+      "source": "contributions"
+    },
+    {
+      "handle": "smithmx",
+      "name": "Michael Smith",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/976158?u=0e438b7ddd88e6cc2ec1815afb4bd3be813b9d9a&v=4",
+      "location": "Nøtterøy, Norway",
+      "mergedPullRequests": 2,
+      "commits": 28,
+      "repositories": [
+        "Chronicle",
+        "Fundamentals",
+        "Arc"
+      ],
+      "tier": "contributor",
+      "source": "contributions"
+    },
+    {
+      "handle": "krisbiradar",
+      "name": "Kris",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/104765390?u=18e0f6d5b41cb1cd2007cf4609bf02e0d8769942&v=4",
+      "bio": "I'll update this once this becomes notable",
+      "location": "India",
+      "mergedPullRequests": 1,
+      "commits": 3,
+      "repositories": [
+        "Chronicle"
+      ],
+      "tier": "contributor",
+      "source": "contributions"
+    },
+    {
+      "handle": "maspasov",
+      "name": "Martin Spasov",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/1658659?u=fcd36931e454bd64641c23ed799853f8fbe856dc&v=4",
+      "mergedPullRequests": 1,
+      "commits": 2,
+      "repositories": [
+        "Arc"
+      ],
+      "tier": "contributor",
+      "source": "contributions"
+    },
+    {
+      "handle": "petteroe",
+      "name": "Morten Petterøe",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/5712277?u=24e8499fc6b398213c12d5144fbb250fa999a8c6&v=4",
+      "location": "Tønsberg, Norway",
+      "mergedPullRequests": 1,
+      "commits": 1,
+      "repositories": [
+        "Arc"
+      ],
+      "tier": "contributor",
+      "source": "contributions"
+    },
+    {
+      "handle": "rghvgrv",
+      "name": "Gaurav Ashish",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/71788323?u=04510ed65df048e3a4526188d6a860ebb977d908&v=4",
+      "bio": "Software Engineer ",
+      "location": "Bengaluru ",
+      "mergedPullRequests": 1,
+      "commits": 1,
+      "repositories": [
+        "Chronicle"
+      ],
+      "tier": "contributor",
+      "source": "contributions"
+    },
+    {
+      "handle": "smellilac",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/162062104?v=4",
+      "mergedPullRequests": 1,
+      "commits": 2,
+      "repositories": [
+        "Arc"
+      ],
+      "tier": "contributor",
+      "source": "contributions"
+    }
+  ],
+  "pending": 0,
+  "counts": {
+    "woksin": {
+      "mergedPullRequests": 3132,
+      "checkedAt": "2026-10-16T10:45:36.360Z"
+    },
+    "einari": {
+      "mergedPullRequests": 3147,
+      "checkedAt": "2026-10-16T10:45:36.360Z"
+    },
+    "claude": {
+      "mergedPullRequests": 0,
+      "checkedAt": "2026-10-16T09:52:29.178Z"
+    },
+    "tidemann": {
+      "mergedPullRequests": 5,
+      "checkedAt": "2026-10-16T09:52:29.178Z"
+    },
+    "smithmx": {
+      "mergedPullRequests": 2,
+      "checkedAt": "2026-10-16T09:52:29.178Z"
+    },
+    "panayot-ivanov-kongsberg": {
+      "mergedPullRequests": 0,
+      "checkedAt": "2026-10-16T09:52:29.178Z"
+    },
+    "torgeir-hansen": {
+      "mergedPullRequests": 5,
+      "checkedAt": "2026-10-16T09:52:29.178Z"
+    },
+    "krisbiradar": {
+      "mergedPullRequests": 1,
+      "checkedAt": "2026-10-16T09:52:29.178Z"
+    },
+    "rghvgrv": {
+      "mergedPullRequests": 1,
+      "checkedAt": "2026-10-16T09:52:29.178Z"
+    },
+    "maspasov": {
+      "mergedPullRequests": 1,
+      "checkedAt": "2026-10-16T09:52:29.178Z"
+    },
+    "smellilac": {
+      "mergedPullRequests": 1,
+      "checkedAt": "2026-10-16T09:52:29.178Z"
+    },
+    "petteroe": {
+      "mergedPullRequests": 1,
+      "checkedAt": "2026-10-16T09:52:29.178Z"
+    },
+    "nickprotop": {
+      "mergedPullRequests": 3,
+      "checkedAt": "2026-10-16T09:52:29.178Z"
+    },
+    "dilgerma": {
+      "mergedPullRequests": 0,
+      "checkedAt": "2026-10-16T09:52:29.178Z"
+    }
+  },
+  "profiles": {
+    "woksin": {
+      "name": "Sindre Alstad Wilting",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/13407188?u=9245447357886096f26f85f957f980016b988116&v=4",
+      "bio": "Software Engineer from Norway who loves coding. ",
+      "location": "Oslo"
+    },
+    "einari": {
+      "name": "Einar Ingebrigtsen",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/134365?u=d35b0fe3b69e9735967dd548e5db0f2326eb9190&v=4",
+      "bio": "Event sourcerer and passionate software developer. Worked on a bunch of different tech and love working across different platforms. Technology Advisor @ Novanet",
+      "location": "Sandefjord, Norway"
+    },
+    "tidemann": {
+      "name": "Stig Salte Tidemandsen",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/2078564?v=4",
+      "location": "Porsgrunn, Norway"
+    },
+    "smithmx": {
+      "name": "Michael Smith",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/976158?u=0e438b7ddd88e6cc2ec1815afb4bd3be813b9d9a&v=4",
+      "location": "Nøtterøy, Norway"
+    },
+    "torgeir-hansen": {
+      "name": "Torgeir Hansen",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/58551036?u=98feb3ada27f5c3ea0b7de4501d16cafd23e574c&v=4"
+    },
+    "krisbiradar": {
+      "name": "Kris",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/104765390?u=18e0f6d5b41cb1cd2007cf4609bf02e0d8769942&v=4",
+      "bio": "I'll update this once this becomes notable",
+      "location": "India"
+    },
+    "rghvgrv": {
+      "name": "Gaurav Ashish",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/71788323?u=04510ed65df048e3a4526188d6a860ebb977d908&v=4",
+      "bio": "Software Engineer ",
+      "location": "Bengaluru "
+    },
+    "maspasov": {
+      "name": "Martin Spasov",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/1658659?u=fcd36931e454bd64641c23ed799853f8fbe856dc&v=4"
+    },
+    "smellilac": {
+      "avatarUrl": "https://avatars.githubusercontent.com/u/162062104?v=4"
+    },
+    "petteroe": {
+      "name": "Morten Petterøe",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/5712277?u=24e8499fc6b398213c12d5144fbb250fa999a8c6&v=4",
+      "location": "Tønsberg, Norway"
+    },
+    "nickprotop": {
+      "name": "Nikolaos Protopapas",
+      "avatarUrl": "https://avatars.githubusercontent.com/u/45642111?v=4",
+      "bio": "Neurologist, MD, MSc. Building .NET developer tools and terminal UIs on Linux. Coding since the KDE 3 era.",
+      "location": "Greece"
+    }
+  },
+  "activity": {
+    "woksin": {
+      "commits": 17998,
+      "repositories": [
+        "Chronicle",
+        "Screenplay",
+        "Arc",
+        "AI",
+        "Stage",
+        "Arc.TypeScript"
+      ]
+    },
+    "einari": {
+      "commits": 26917,
+      "repositories": [
+        "Chronicle",
+        "Arc",
+        "Fundamentals",
+        "AI",
+        "Samples",
+        "Components"
+      ]
+    },
+    "claude": {
+      "commits": 78,
+      "repositories": [
+        "Screenplay",
+        "blog.cratis.io",
+        "Chronicle",
+        "Arc",
+        "AI",
+        "Automation"
+      ]
+    },
+    "tidemann": {
+      "commits": 41,
+      "repositories": [
+        "Chronicle"
+      ]
+    },
+    "smithmx": {
+      "commits": 28,
+      "repositories": [
+        "Chronicle",
+        "Fundamentals",
+        "Arc"
+      ]
+    },
+    "panayot-ivanov-kongsberg": {
+      "commits": 18,
+      "repositories": [
+        "Chronicle",
+        "Arc",
+        "Fundamentals"
+      ]
+    },
+    "torgeir-hansen": {
+      "commits": 9,
+      "repositories": [
+        "Chronicle",
+        "Arc"
+      ]
+    },
+    "krisbiradar": {
+      "commits": 3,
+      "repositories": [
+        "Chronicle"
+      ]
+    },
+    "rghvgrv": {
+      "commits": 1,
+      "repositories": [
+        "Chronicle"
+      ]
+    },
+    "maspasov": {
+      "commits": 2,
+      "repositories": [
+        "Arc"
+      ]
+    },
+    "smellilac": {
+      "commits": 2,
+      "repositories": [
+        "Arc"
+      ]
+    },
+    "petteroe": {
+      "commits": 1,
+      "repositories": [
+        "Arc"
+      ]
+    },
+    "nickprotop": {
+      "commits": 3,
+      "repositories": [
+        "cli"
+      ]
+    },
+    "dilgerma": {
+      "commits": 18,
+      "repositories": [
+        "Eventmodelers-Build-Kit-CSharp"
+      ]
+    }
+  }
+}

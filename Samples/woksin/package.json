@@ -1,0 +1,18 @@
+{
+    "name": "@cratis/cast-sample-woksin",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "description": "Sample Cast site: Sindre Wilting's www.woksin.com, built with the workspace @cratis/cast.",
+    "scripts": {
+        "clean": "rm -rf dist .astro",
+        "dev": "astro dev",
+        "build": "astro build",
+        "preview": "astro preview",
+        "ci": "yarn clean && yarn build"
+    },
+    "dependencies": {
+        "@cratis/cast": "workspace:*",
+        "astro": "^7.2.0"
+    }
+}

@@ -1,0 +1,28 @@
+---
+// Copyright (c) Cratis. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+import { config, person, tier } from '../data';
+import { castDirectoryUrl, verificationUrl } from '../../badges/constants';
+import CratisMark from './CratisMark.astro';
+const year = new Date().getFullYear();
+const castUrl = tier.tier ? verificationUrl(person.handle) : castDirectoryUrl;
+---
+
+<footer class="border-t border-line print:hidden">
+  <div class="container-x flex flex-col gap-6 py-10 text-sm text-fg-muted md:flex-row md:items-center md:justify-between">
+    <a href={castUrl} class="cast-link group inline-flex items-center gap-3 rounded-lg" rel="noopener">
+      <span class="grid size-9 place-items-center rounded-xl border border-line bg-ink-900 text-fg transition-colors group-hover:border-line-strong">
+        <CratisMark class="size-5" />
+      </span>
+      <span class="leading-tight">
+        <span class="block text-[0.9375rem] font-semibold text-fg">Part of the <span class="serif">Cratis Cast</span></span>
+        <span class="block font-mono text-[0.6875rem] text-fg-faint">The people behind the play · {castDirectoryUrl.replace('https://', '')}</span>
+      </span>
+    </a>
+    <p class="font-mono text-xs">
+      © {year} {person.name} · built with <a href="https://github.com/Cratis/Cast" class="underline decoration-line-strong hover:text-fg" rel="noopener">Cast</a>
+      {config.site.source && <> · <a href={config.site.source} class="underline decoration-line-strong hover:text-fg" rel="noopener">source</a></>}
+    </p>
+  </div>
+</footer>
