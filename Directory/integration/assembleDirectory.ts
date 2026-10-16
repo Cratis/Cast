@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import { resolveTier, TierSource, type RegistryMember } from '@cratis/cast/badges';
-import type { CastProfile, DirectoryMember } from './DirectoryMember';
+import type { CastSummary, DirectoryMember } from './DirectoryMember';
 import type { DirectorySnapshot } from './DirectorySnapshot';
 
 /** Everything known about the people, before it is shaped into the directory. */
@@ -11,7 +11,7 @@ export type DirectoryInputs = {
     counts: DirectorySnapshot['counts'];
     profiles: DirectorySnapshot['profiles'];
     activity: DirectorySnapshot['activity'];
-    casts: Record<string, CastProfile>;
+    casts: Record<string, CastSummary>;
     /** Every login discovered as having work in public Cratis repositories. */
     discovered: string[];
 };
@@ -32,7 +32,7 @@ export function assembleDirectory(inputs: DirectoryInputs, builtAt: string, fetc
             handle,
             ...profile,
             ...(inputs.counts[login] ? { mergedPullRequests: inputs.counts[login]!.mergedPullRequests } : {}),
-            ...(activity ? { commits: activity.commits, repositories: activity.repositories } : {}),
+            ...(activity ? { commits: activity.commits, repositories: activity.repositories, ...(activity.standings ? { standings: activity.standings } : {}) } : {}),
         };
     };
 

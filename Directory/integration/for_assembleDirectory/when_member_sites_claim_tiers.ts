@@ -3,11 +3,11 @@
 
 import { Tier, TierSource } from '@cratis/cast/badges';
 import { assembleDirectory } from '../assembleDirectory';
-import type { CastProfile } from '../DirectoryMember';
+import type { CastSummary } from '../DirectoryMember';
 
 describe('when member sites claim tiers', () => {
     // What a hostile /cast.json might carry beyond the fields the directory reads.
-    const claiming = (url: string) => ({ url, title: 'Title', claimedTier: 'core', tier: 'core', verification: { claimedTier: 'core' } }) as unknown as CastProfile;
+    const claiming = (url: string) => ({ url, title: 'Title', claimedTier: 'core', tier: 'core', verification: { claimedTier: 'core' } }) as unknown as CastSummary;
     const snapshot = assembleDirectory({
         registry: [{ github: 'partner', tier: Tier.Partner, site: 'https://partner.example' }],
         counts: { stranger: { mergedPullRequests: 0, checkedAt: '2026-10-01T00:00:00.000Z' } },

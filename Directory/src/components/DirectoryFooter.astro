@@ -1,0 +1,38 @@
+---
+// Copyright (c) Cratis. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+// The directory footer: what the Cast is, how badges are checked, and the directory's own links.
+import CratisMark from '@cratis/cast/site/components/CratisMark.astro';
+
+interface Props {
+  /** Repeat the directory navigation, for pages without the directory header (member profiles). */
+  navigation?: boolean;
+}
+const { navigation = false } = Astro.props;
+const links = [
+  { href: '/#core', label: 'Core' },
+  { href: '/#partners', label: 'Partners' },
+  { href: '/#contributors', label: 'Contributors' },
+  { href: '/join', label: 'Join' },
+];
+---
+
+<footer class="border-t border-line print:hidden">
+  <div class="container-x grid gap-8 py-12 text-sm text-fg-muted md:grid-cols-[1fr_auto] md:items-end">
+    <div>
+      <p class="flex items-center gap-3 text-fg">
+        <CratisMark class="size-5" />
+        <span class="text-[0.9375rem] font-semibold">Software that remembers. <span class="serif">Careers that remember.</span></span>
+      </p>
+      <p class="mt-3 max-w-[60ch]">
+        The Cast is the people who build with <a href="https://cratis.io" class="text-fg underline decoration-line-strong hover:decoration-fg" rel="noopener">Cratis</a>. Every badge here is checked when the directory builds: Core and Partner against the reviewed{' '}
+        <a href="https://github.com/Cratis/Cast/blob/main/Registry/members.yaml" class="text-fg underline decoration-line-strong hover:decoration-fg" rel="noopener">registry</a>, Contributor against merged public pull requests.
+      </p>
+    </div>
+    <p class="font-mono text-xs">
+      {navigation && links.map((link) => <><a href={link.href} class="hover:text-fg">{link.label}</a> · </>)}
+      <a href="/members.json" class="hover:text-fg">members.json</a> · <a href="https://github.com/Cratis/Cast" class="hover:text-fg" rel="noopener">source</a> · <a href="https://cratis.io" class="hover:text-fg" rel="noopener">cratis.io</a>
+    </p>
+  </div>
+</footer>

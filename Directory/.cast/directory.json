@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "builtAt": "2026-10-16T11:16:06.389Z",
-  "fetchedAt": "2026-10-16T10:45:36.360Z",
+  "builtAt": "2026-10-16T14:00:28.153Z",
+  "fetchedAt": "2026-10-16T14:00:03.090Z",
   "members": [
     {
       "handle": "woksin",
@@ -9,8 +9,8 @@
       "avatarUrl": "https://avatars.githubusercontent.com/u/13407188?u=9245447357886096f26f85f957f980016b988116&v=4",
       "bio": "Software Engineer from Norway who loves coding. ",
       "location": "Oslo",
-      "mergedPullRequests": 3132,
-      "commits": 17998,
+      "mergedPullRequests": 3140,
+      "commits": 18046,
       "repositories": [
         "Chronicle",
         "Screenplay",
@@ -19,12 +19,44 @@
         "Stage",
         "Arc.TypeScript"
       ],
+      "standings": {
+        "Chronicle": {
+          "commits": 3815,
+          "rank": 2
+        },
+        "Screenplay": {
+          "commits": 2228,
+          "rank": 1
+        },
+        "Arc": {
+          "commits": 2190,
+          "rank": 2
+        },
+        "AI": {
+          "commits": 1177,
+          "rank": 1
+        },
+        "Stage": {
+          "commits": 1091,
+          "rank": 1
+        },
+        "Arc.TypeScript": {
+          "commits": 1050,
+          "rank": 1
+        }
+      },
       "tier": "core",
       "source": "registry",
       "since": "2024-06",
       "role": "Co-founder & Chief Architect",
       "site": "https://www.woksin.com",
-      "registryLine": 8
+      "registryLine": 8,
+      "cast": {
+        "url": "https://www.woksin.com",
+        "castJsonVersion": 2,
+        "title": "Co-founder & Chief Architect at Cratis · Senior Consultant at Everdeen",
+        "tagline": "I build systems that remember everything."
+      }
     },
     {
       "handle": "einari",
@@ -32,8 +64,8 @@
       "avatarUrl": "https://avatars.githubusercontent.com/u/134365?u=d35b0fe3b69e9735967dd548e5db0f2326eb9190&v=4",
       "bio": "Event sourcerer and passionate software developer. Worked on a bunch of different tech and love working across different platforms. Technology Advisor @ Novanet",
       "location": "Sandefjord, Norway",
-      "mergedPullRequests": 3147,
-      "commits": 26917,
+      "mergedPullRequests": 3160,
+      "commits": 26969,
       "repositories": [
         "Chronicle",
         "Arc",
@@ -42,6 +74,32 @@
         "Samples",
         "Components"
       ],
+      "standings": {
+        "Chronicle": {
+          "commits": 15989,
+          "rank": 1
+        },
+        "Arc": {
+          "commits": 4247,
+          "rank": 1
+        },
+        "Fundamentals": {
+          "commits": 1300,
+          "rank": 1
+        },
+        "AI": {
+          "commits": 595,
+          "rank": 2
+        },
+        "Samples": {
+          "commits": 532,
+          "rank": 1
+        },
+        "Components": {
+          "commits": 408,
+          "rank": 2
+        }
+      },
       "tier": "core",
       "source": "registry",
       "role": "Co-founder & CTO",
@@ -59,6 +117,12 @@
       "repositories": [
         "Chronicle"
       ],
+      "standings": {
+        "Chronicle": {
+          "commits": 41,
+          "rank": 3
+        }
+      },
       "tier": "contributor",
       "source": "contributions"
     },
@@ -72,6 +136,16 @@
         "Chronicle",
         "Arc"
       ],
+      "standings": {
+        "Chronicle": {
+          "commits": 5,
+          "rank": 7
+        },
+        "Arc": {
+          "commits": 4,
+          "rank": 5
+        }
+      },
       "tier": "contributor",
       "source": "contributions"
     },
@@ -86,6 +160,12 @@
       "repositories": [
         "cli"
       ],
+      "standings": {
+        "cli": {
+          "commits": 3,
+          "rank": 3
+        }
+      },
       "tier": "contributor",
       "source": "contributions"
     },
@@ -101,6 +181,20 @@
         "Fundamentals",
         "Arc"
       ],
+      "standings": {
+        "Chronicle": {
+          "commits": 22,
+          "rank": 4
+        },
+        "Fundamentals": {
+          "commits": 4,
+          "rank": 3
+        },
+        "Arc": {
+          "commits": 2,
+          "rank": 7
+        }
+      },
       "tier": "contributor",
       "source": "contributions"
     },
@@ -115,6 +209,12 @@
       "repositories": [
         "Chronicle"
       ],
+      "standings": {
+        "Chronicle": {
+          "commits": 3,
+          "rank": 8
+        }
+      },
       "tier": "contributor",
       "source": "contributions"
     },
@@ -127,6 +227,12 @@
       "repositories": [
         "Arc"
       ],
+      "standings": {
+        "Arc": {
+          "commits": 2,
+          "rank": 6
+        }
+      },
       "tier": "contributor",
       "source": "contributions"
     },
@@ -140,6 +246,12 @@
       "repositories": [
         "Arc"
       ],
+      "standings": {
+        "Arc": {
+          "commits": 1,
+          "rank": 9
+        }
+      },
       "tier": "contributor",
       "source": "contributions"
     },
@@ -154,6 +266,12 @@
       "repositories": [
         "Chronicle"
       ],
+      "standings": {
+        "Chronicle": {
+          "commits": 1,
+          "rank": 9
+        }
+      },
       "tier": "contributor",
       "source": "contributions"
     },
@@ -165,6 +283,12 @@
       "repositories": [
         "Arc"
       ],
+      "standings": {
+        "Arc": {
+          "commits": 2,
+          "rank": 8
+        }
+      },
       "tier": "contributor",
       "source": "contributions"
     }
@@ -172,12 +296,12 @@
   "pending": 0,
   "counts": {
     "woksin": {
-      "mergedPullRequests": 3132,
-      "checkedAt": "2026-10-16T10:45:36.360Z"
+      "mergedPullRequests": 3140,
+      "checkedAt": "2026-10-16T14:00:03.090Z"
     },
     "einari": {
-      "mergedPullRequests": 3147,
-      "checkedAt": "2026-10-16T10:45:36.360Z"
+      "mergedPullRequests": 3160,
+      "checkedAt": "2026-10-16T14:00:03.090Z"
     },
     "claude": {
       "mergedPullRequests": 0,
@@ -288,7 +412,7 @@
   },
   "activity": {
     "woksin": {
-      "commits": 17998,
+      "commits": 18046,
       "repositories": [
         "Chronicle",
         "Screenplay",
@@ -296,10 +420,36 @@
         "AI",
         "Stage",
         "Arc.TypeScript"
-      ]
+      ],
+      "standings": {
+        "Chronicle": {
+          "commits": 3815,
+          "rank": 2
+        },
+        "Screenplay": {
+          "commits": 2228,
+          "rank": 1
+        },
+        "Arc": {
+          "commits": 2190,
+          "rank": 2
+        },
+        "AI": {
+          "commits": 1177,
+          "rank": 1
+        },
+        "Stage": {
+          "commits": 1091,
+          "rank": 1
+        },
+        "Arc.TypeScript": {
+          "commits": 1050,
+          "rank": 1
+        }
+      }
     },
     "einari": {
-      "commits": 26917,
+      "commits": 26969,
       "repositories": [
         "Chronicle",
         "Arc",
@@ -307,7 +457,33 @@
         "AI",
         "Samples",
         "Components"
-      ]
+      ],
+      "standings": {
+        "Chronicle": {
+          "commits": 15989,
+          "rank": 1
+        },
+        "Arc": {
+          "commits": 4247,
+          "rank": 1
+        },
+        "Fundamentals": {
+          "commits": 1300,
+          "rank": 1
+        },
+        "AI": {
+          "commits": 595,
+          "rank": 2
+        },
+        "Samples": {
+          "commits": 532,
+          "rank": 1
+        },
+        "Components": {
+          "commits": 408,
+          "rank": 2
+        }
+      }
     },
     "claude": {
       "commits": 78,
@@ -318,13 +494,45 @@
         "Arc",
         "AI",
         "Automation"
-      ]
+      ],
+      "standings": {
+        "Screenplay": {
+          "commits": 41,
+          "rank": 3
+        },
+        "blog.cratis.io": {
+          "commits": 12,
+          "rank": 3
+        },
+        "Chronicle": {
+          "commits": 8,
+          "rank": 6
+        },
+        "Arc": {
+          "commits": 8,
+          "rank": 3
+        },
+        "AI": {
+          "commits": 4,
+          "rank": 3
+        },
+        "Automation": {
+          "commits": 3,
+          "rank": 3
+        }
+      }
     },
     "tidemann": {
       "commits": 41,
       "repositories": [
         "Chronicle"
-      ]
+      ],
+      "standings": {
+        "Chronicle": {
+          "commits": 41,
+          "rank": 3
+        }
+      }
     },
     "smithmx": {
       "commits": 28,
@@ -332,7 +540,21 @@
         "Chronicle",
         "Fundamentals",
         "Arc"
-      ]
+      ],
+      "standings": {
+        "Chronicle": {
+          "commits": 22,
+          "rank": 4
+        },
+        "Fundamentals": {
+          "commits": 4,
+          "rank": 3
+        },
+        "Arc": {
+          "commits": 2,
+          "rank": 7
+        }
+      }
     },
     "panayot-ivanov-kongsberg": {
       "commits": 18,
@@ -340,56 +562,122 @@
         "Chronicle",
         "Arc",
         "Fundamentals"
-      ]
+      ],
+      "standings": {
+        "Chronicle": {
+          "commits": 11,
+          "rank": 5
+        },
+        "Arc": {
+          "commits": 6,
+          "rank": 4
+        },
+        "Fundamentals": {
+          "commits": 1,
+          "rank": 4
+        }
+      }
     },
     "torgeir-hansen": {
       "commits": 9,
       "repositories": [
         "Chronicle",
         "Arc"
-      ]
+      ],
+      "standings": {
+        "Chronicle": {
+          "commits": 5,
+          "rank": 7
+        },
+        "Arc": {
+          "commits": 4,
+          "rank": 5
+        }
+      }
     },
     "krisbiradar": {
       "commits": 3,
       "repositories": [
         "Chronicle"
-      ]
+      ],
+      "standings": {
+        "Chronicle": {
+          "commits": 3,
+          "rank": 8
+        }
+      }
     },
     "rghvgrv": {
       "commits": 1,
       "repositories": [
         "Chronicle"
-      ]
+      ],
+      "standings": {
+        "Chronicle": {
+          "commits": 1,
+          "rank": 9
+        }
+      }
     },
     "maspasov": {
       "commits": 2,
       "repositories": [
         "Arc"
-      ]
+      ],
+      "standings": {
+        "Arc": {
+          "commits": 2,
+          "rank": 6
+        }
+      }
     },
     "smellilac": {
       "commits": 2,
       "repositories": [
         "Arc"
-      ]
+      ],
+      "standings": {
+        "Arc": {
+          "commits": 2,
+          "rank": 8
+        }
+      }
     },
     "petteroe": {
       "commits": 1,
       "repositories": [
         "Arc"
-      ]
+      ],
+      "standings": {
+        "Arc": {
+          "commits": 1,
+          "rank": 9
+        }
+      }
     },
     "nickprotop": {
       "commits": 3,
       "repositories": [
         "cli"
-      ]
+      ],
+      "standings": {
+        "cli": {
+          "commits": 3,
+          "rank": 3
+        }
+      }
     },
     "dilgerma": {
       "commits": 18,
       "repositories": [
         "Eventmodelers-Build-Kit-CSharp"
-      ]
+      ],
+      "standings": {
+        "Eventmodelers-Build-Kit-CSharp": {
+          "commits": 18,
+          "rank": 3
+        }
+      }
     }
   }
 }
