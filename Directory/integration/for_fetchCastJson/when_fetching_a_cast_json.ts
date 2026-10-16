@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import sinon from 'sinon';
-import { fetchCastJson, maximumCastJsonBytes } from '../fetchDirectory';
+import { castJsonGone, fetchCastJson, maximumCastJsonBytes } from '../fetchDirectory';
 import { profileOverride } from '../profileOverride';
 
 describe('when fetching a cast.json', () => {
@@ -50,6 +50,36 @@ describe('when fetching a cast.json', () => {
     it('should read a local override over plain http', async () => {
         fetchStub.resolves(new Response('{}'));
         ((await fetchCastJson('http://localhost:4321/cast.json', warn, { allowLocal: true })) !== undefined).should.be.true;
+    });
+
+    it('should give up when redirected to plain http', async () => {
+        const response = new Response('{"castJsonVersion":2}');
+        Object.defineProperty(response, 'url', { value: 'http://ada.example/cast.json' });
+        fetchStub.resolves(response);
+        ((await fetchCastJson('https://ada.example/cast.json', warn)) === undefined).should.be.true;
+        warnings[0]!.should.contain('redirected');
+    });
+
+    it('should follow a redirect to https', async () => {
+        const response = new Response('{"castJsonVersion":2}');
+        Object.defineProperty(response, 'url', { value: 'https://www.ada.example/cast.json' });
+        fetchStub.resolves(response);
+        ((await fetchCastJson('https://ada.example/cast.json', warn)) !== undefined).should.be.true;
+    });
+
+    it('should say the file is gone when the site answers 404', async () => {
+        fetchStub.resolves(new Response('', { status: 404 }));
+        ((await fetchCastJson('https://ada.example/cast.json', warn)) === castJsonGone).should.be.true;
+    });
+
+    it('should say the file is gone when the site answers 410', async () => {
+        fetchStub.resolves(new Response('', { status: 410 }));
+        ((await fetchCastJson('https://ada.example/cast.json', warn)) === castJsonGone).should.be.true;
+    });
+
+    it('should give up, without saying it is gone, when the site fails', async () => {
+        fetchStub.resolves(new Response('', { status: 500 }));
+        ((await fetchCastJson('https://ada.example/cast.json', warn)) === undefined).should.be.true;
     });
 
     it('should give up when the request fails', async () => {

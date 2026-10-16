@@ -2,15 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import { z } from 'zod';
+import { isCalendarMonth, isPartialDate } from './calendar';
 import { LiveStat } from './LiveStat';
 import { SectionId } from './SectionId';
 import { ThemeMode } from './ThemeMode';
 
 /** 'YYYY-MM' or 'YYYY'. */
-const month = z.string().regex(/^\d{4}(-\d{2})?$/, 'Use YYYY-MM or YYYY');
+const month = z.string().regex(/^\d{4}(-\d{2})?$/, 'Use YYYY-MM or YYYY').refine(isCalendarMonth, 'Use a real month: YYYY-MM or YYYY');
 
 /** 'YYYY-MM-DD', 'YYYY-MM' or 'YYYY'. */
-const date = z.string().regex(/^\d{4}(-\d{2}(-\d{2})?)?$/, 'Use YYYY-MM-DD, YYYY-MM or YYYY');
+const date = z.string().regex(/^\d{4}(-\d{2}(-\d{2})?)?$/, 'Use YYYY-MM-DD, YYYY-MM or YYYY').refine(isPartialDate, 'Use a real date: YYYY-MM-DD, YYYY-MM or YYYY');
 
 const url = z.url({ protocol: /^https?$/ });
 const hex = z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Use a six-digit hex color such as #8b5cf6');

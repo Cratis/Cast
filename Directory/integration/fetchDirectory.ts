@@ -128,9 +128,13 @@ export const maximumCastJsonBytes = 1_000_000;
 
 const localHost = /^(localhost|127\.0\.0\.1|\[::1\])$/;
 
+/** What {@link fetchCastJson} returns when the site answers that the file is gone (404 or 410). */
+export const castJsonGone = Symbol('cast.json gone');
+
 /**
- * Reads a cast.json: https only (plain http only for a local development override), within 10 seconds and
- * at most {@link maximumCastJsonBytes}. Returns the parsed JSON, or undefined (with a warning) on any problem.
+ * Reads a cast.json: https only (plain http only for a local development override), also after redirects,
+ * within 10 seconds and at most {@link maximumCastJsonBytes}. Returns the parsed JSON, {@link castJsonGone}
+ * when the site answers 404 or 410, or undefined (with a warning) on any other problem.
  */
 export async function fetchCastJson(address: string, warn: Warn, options: { allowLocal?: boolean } = {}): Promise<unknown> {
     let url: URL;
@@ -140,13 +144,18 @@ export async function fetchCastJson(address: string, warn: Warn, options: { allo
         warn(`${address}: not a URL`);
         return undefined;
     }
-    const local = options.allowLocal === true && url.protocol === 'http:' && localHost.test(url.hostname);
-    if (url.protocol !== 'https:' && !local) {
+    const readable = (candidate: URL) => candidate.protocol === 'https:' || (options.allowLocal === true && candidate.protocol === 'http:' && localHost.test(candidate.hostname));
+    if (!readable(url)) {
         warn(`${url}: only https is read`);
         return undefined;
     }
     try {
         const response = await fetch(url, { headers: { 'user-agent': userAgent, accept: 'application/json' }, redirect: 'follow', signal: AbortSignal.timeout(10_000) });
+        if (response.url && !readable(new URL(response.url))) throw new Error(`redirected to ${response.url}; only https is read`);
+        if (response.status === 404 || response.status === 410) {
+            warn(`${url}: answered ${response.status}; the cast.json is gone`);
+            return castJsonGone;
+        }
         if (!response.ok) throw new Error(`answered ${response.status}`);
         if (Number(response.headers.get('content-length') ?? 0) > maximumCastJsonBytes) throw new Error(`larger than ${maximumCastJsonBytes} bytes`);
         const text = await readLimited(response, maximumCastJsonBytes);
@@ -193,5 +202,5 @@ export function castSummary(json: unknown, url: string): CastSummary | undefined
 /** Reads a member's cast.json and keeps only the fields the directory cards show. */
 export async function fetchCastSummary(address: string, warn: Warn): Promise<CastSummary | undefined> {
     const json = await fetchCastJson(address, warn);
-    return json === undefined ? undefined : castSummary(json, address);
+    return json === undefined || json === castJsonGone ? undefined : castSummary(json, address);
 }

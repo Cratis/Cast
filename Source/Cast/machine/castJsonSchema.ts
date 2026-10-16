@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import { z } from 'zod';
+import { isInstant } from '../config/calendar';
 import { castSchema } from '../config/castSchema';
 import { gitHubSnapshotSchema } from '../github/gitHubSnapshotSchema';
 import { writingSnapshotSchema } from '../writing/writingSnapshotSchema';
@@ -22,7 +23,7 @@ export const castJsonSchema = z.object({
     castJsonVersion: z.literal(castJsonVersion),
     handle: login.describe('The GitHub login: the profile identity. Must equal profile.cast.person.handle.'),
     generator: z.string().max(200).optional().describe('What wrote the file, for example "@cratis/cast 1.2.0".'),
-    builtAt: z.string().optional().describe('When the file was written, ISO 8601.'),
+    builtAt: z.string().max(64).refine(isInstant, 'Use an ISO 8601 date and time on a real day').optional().describe('When the file was written, ISO 8601.'),
     profile: z.object({
         cast: castSchema.describe('cast.yaml as JSON. See https://github.com/Cratis/Cast/blob/main/Documentation/cast-yaml.md'),
         github: gitHubSnapshotSchema.optional().describe('Public GitHub data captured at build time. Without it the directory uses its own.'),

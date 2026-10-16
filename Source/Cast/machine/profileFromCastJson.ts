@@ -2,10 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import type { z } from 'zod';
+import { TierSource } from '../badges/TierSource';
 import type { CastConfig } from '../config/CastConfig';
 import { CastConfigError } from '../config/CastConfigError';
 import { parseCastObject } from '../config/parseCast';
-import type { GitHubSnapshot } from '../github/GitHubSnapshot';
+import { resolveSections } from '../config/resolveSections';
+import { emptySnapshot, type GitHubSnapshot } from '../github/GitHubSnapshot';
+import { assertRenderable } from '../site/profile/assertRenderable';
+import { directoryHost } from '../site/profile/CastHost';
+import { castView } from '../site/profile/CastView';
 import type { WritingSnapshot } from '../writing/WritingSnapshot';
 import { castJsonSchema, castJsonVersion } from './castJsonSchema';
 
@@ -52,6 +57,33 @@ function remove(root: unknown, path: Path): void {
 const isBadLink = (issue: z.core.$ZodIssue): boolean =>
     issue.code === 'invalid_format' && (issue.format === 'url' || issue.format === 'email');
 
+/** How large any one part of a cast.json may be. The file itself is at most {@link maximumCastJsonBytes}. */
+const limits = { depth: 24, string: 20_000, items: 2_000 };
+
+/** Where the document exceeds {@link limits}, if anywhere. */
+function oversized(value: unknown, path: Path = []): string | undefined {
+    if (path.length > limits.depth) return `${describe(path)}: nested deeper than ${limits.depth} levels`;
+    if (typeof value === 'string') return value.length > limits.string ? `${describe(path)}: longer than ${limits.string} characters` : undefined;
+    if (!value || typeof value !== 'object') return undefined;
+    const entries = Array.isArray(value) ? value.map((item, index) => [index, item] as const) : Object.entries(value);
+    if (entries.length > limits.items) return `${describe(path) || '(root)'}: more than ${limits.items} entries`;
+    for (const [key, item] of entries) {
+        const problem = (typeof key === 'string' && key.length > limits.string ? `${describe(path)}: a key longer than ${limits.string} characters` : undefined) ?? oversized(item, [...path, key]);
+        if (problem) return problem;
+    }
+    return undefined;
+}
+
+/** A portrait the directory can show: an absolute https URL that parses. */
+function isHttpsUrl(value: unknown): value is string {
+    if (typeof value !== 'string' || value.length > 2_000 || !URL.canParse(value)) return false;
+    return new URL(value).protocol === 'https:';
+}
+
+/** The optional build-time captures: when one does not validate, it is dropped and the directory uses its own data. */
+const captures: Path[] = [['profile', 'github'], ['profile', 'writing']];
+const captureOf = (path: Path): Path | undefined => captures.find(capture => capture.every((key, index) => path[index] === key));
+
 /** The path of the array element closest to `path`, when there is one. */
 function enclosingElement(path: Path): Path | undefined {
     for (let index = path.length - 1; index > 0; index--) {
@@ -64,11 +96,17 @@ function enclosingElement(path: Path): Path | undefined {
  * Validates a cast.json document (format version 2) for rendering by someone other than its owner. Every
  * link must be http(s) and every address an email: other links are dropped, and an array item whose
  * required link was dropped goes with it. The identity must equal `expectedLogin` when given, case-insensitively.
- * A tier anywhere in the file is ignored. Unknown versions and anything else that does not validate are refused.
+ * A tier anywhere in the file is ignored. A GitHub or writing capture that does not validate, or that the profile
+ * pages cannot render, is dropped. The rest is checked the way the profile pages use it (real dates, URLs that
+ * parse, a career that replays); unknown versions, oversized parts and anything else that does not validate or
+ * render are refused, so one member's file can never stop the directory build.
  */
 export function profileFromCastJson(json: unknown, expectedLogin?: string): CastJsonResult {
     if (!isObject(json)) return { problems: ['cast.json is not a JSON object'] };
     if (json['castJsonVersion'] !== castJsonVersion) return { problems: [`castJsonVersion ${JSON.stringify(json['castJsonVersion'])} is not supported; expected ${castJsonVersion}`] };
+
+    const tooLarge = oversized(json);
+    if (tooLarge) return { problems: [tooLarge] };
 
     const document = JSON.parse(JSON.stringify(json)) as Record<string, unknown>;
     const dropped: string[] = [];
@@ -80,7 +118,7 @@ export function profileFromCastJson(json: unknown, expectedLogin?: string): Cast
             dropped.push('profile.cast.tier');
         }
         const person = cast['person'];
-        if (isObject(person) && person['photo'] !== undefined && !(typeof person['photo'] === 'string' && /^https:\/\/[^\s]+$/i.test(person['photo']))) {
+        if (isObject(person) && person['photo'] !== undefined && !isHttpsUrl(person['photo'])) {
             delete person['photo'];
             dropped.push('profile.cast.person.photo');
         }
@@ -92,7 +130,14 @@ export function profileFromCastJson(json: unknown, expectedLogin?: string): Cast
         if (result.success) return finish(result.data, document, expectedLogin, dropped);
 
         const issue = result.error.issues.find(candidate => isBadLink(candidate) || removed.has(describe(candidate.path)));
-        if (!issue) return { problems: result.error.issues.map(problem => `${describe(problem.path) || '(root)'}: ${problem.message}`) };
+        if (!issue) {
+            const capture = result.error.issues.map(candidate => captureOf(candidate.path)).find(Boolean);
+            if (!capture) return { problems: result.error.issues.map(problem => `${describe(problem.path) || '(root)'}: ${problem.message}`) };
+            remove(document, capture);
+            dropped.push(describe(capture));
+            removed.clear();
+            continue;
+        }
         const path = issue.path;
         if (isBadLink(issue) && !removed.has(describe(path))) {
             remove(document, path);
@@ -128,16 +173,42 @@ function finish(data: z.output<typeof castJsonSchema>, document: Record<string, 
         github = undefined;
     }
     const photo = config.person.photo;
-    return {
-        dropped,
-        profile: {
-            handle: data.handle,
-            ...(data.generator ? { generator: data.generator } : {}),
-            ...(data.builtAt ? { builtAt: data.builtAt } : {}),
-            config,
-            ...(github ? { github } : {}),
-            ...(data.profile.writing ? { writing: data.profile.writing as WritingSnapshot } : {}),
-            ...(photo ? { photoUrl: photo } : {}),
-        },
+    const profile: CastJsonProfile = {
+        handle: data.handle,
+        ...(data.generator ? { generator: data.generator } : {}),
+        ...(data.builtAt ? { builtAt: data.builtAt } : {}),
+        config,
+        ...(github ? { github } : {}),
+        ...(data.profile.writing ? { writing: data.profile.writing as WritingSnapshot } : {}),
+        ...(photo ? { photoUrl: photo } : {}),
     };
+
+    // Rendered without the captures when only they cannot be: the directory then uses its own GitHub data.
+    const problem = renderProblem(profile);
+    if (!problem) return { dropped, profile };
+    const { github: _github, writing: _writing, ...withoutCaptures } = profile;
+    if ((profile.github || profile.writing) && !renderProblem(withoutCaptures)) {
+        dropped.push(...(profile.github ? ['profile.github'] : []), ...(profile.writing ? ['profile.writing'] : []));
+        return { dropped, profile: withoutCaptures };
+    }
+    return { problems: [problem] };
+}
+
+/** Why the profile pages could not render this profile, when they could not. */
+function renderProblem(profile: CastJsonProfile): string | undefined {
+    const { config, handle } = profile;
+    try {
+        assertRenderable(castView({
+            config,
+            sections: resolveSections(config),
+            github: profile.github ?? emptySnapshot(handle, config.github.orgs),
+            writing: profile.writing ?? { sources: [], posts: [] },
+            tier: { handle, source: TierSource.None },
+            ...(profile.photoUrl ? { photoUrl: profile.photoUrl } : {}),
+            build: { builtAt: profile.builtAt ?? new Date(0).toISOString(), castVersion: profile.generator ?? 'cast.json', githubSource: 'none', registrySource: 'live' },
+        }, directoryHost(handle, config.site.url)));
+        return undefined;
+    } catch (error) {
+        return `does not render: ${error instanceof Error ? error.message : String(error)}`;
+    }
 }

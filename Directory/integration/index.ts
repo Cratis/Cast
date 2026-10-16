@@ -1,7 +1,7 @@
 // Copyright (c) Cratis. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { AstroIntegration } from 'astro';
@@ -12,8 +12,8 @@ import { profileFromCastJson, type CastJsonProfile } from '@cratis/cast/machine'
 import { assembleDirectory, loginsToVerify } from './assembleDirectory';
 import type { CastSummary } from './DirectoryMember';
 import type { DirectorySnapshot } from './DirectorySnapshot';
-import { castSummary, discoverContributors, fetchCastJson, fetchProfiles, publicRepositories, verifyCounts } from './fetchDirectory';
-import { memberProfile, type MemberProfile } from './memberProfile';
+import { castJsonGone, castSummary, discoverContributors, fetchCastJson, fetchProfiles, publicRepositories, verifyCounts } from './fetchDirectory';
+import { memberProfile, usableGitHub, type MemberProfile } from './memberProfile';
 import { profileOverride } from './profileOverride';
 
 const emptySnapshot = (): DirectorySnapshot => ({ version: 1, builtAt: new Date().toISOString(), members: [], contributors: [], pending: 0, counts: {}, profiles: {}, activity: {} });
@@ -117,7 +117,7 @@ export default function castDirectory(options: { registry?: string; snapshot?: s
                 for (const person of people) {
                     const login = person.handle.toLowerCase();
                     const file = path.join(gitHubFolder, `${login}.json`);
-                    let captured = await readJson<GitHubSnapshot>(file);
+                    let captured: GitHubSnapshot | undefined = usableGitHub(await readJson<unknown>(file), person.handle);
                     const ownSnapshot = castJsons[login]?.profile.github !== undefined;
                     if (command === 'build' && token && !ownSnapshot && fetched < gitHubLimit) {
                         fetched++;
@@ -127,7 +127,7 @@ export default function castDirectory(options: { registry?: string; snapshot?: s
                             await writeJson(file, captured);
                         }
                     }
-                    pages[login] = memberProfile(person, castJsons[login], captured, builtAt);
+                    pages[login] = memberProfile(person, castJsons[login], captured, builtAt, warn);
                 }
                 if (fetched) logger.info(`captured GitHub data for ${fetched} people`);
 
@@ -148,6 +148,7 @@ export default function castDirectory(options: { registry?: string; snapshot?: s
 /**
  * A registry member's cast.json: the development override, else their `profile` URL or `<site>/cast.json`.
  * A fresh copy replaces the last good one in the build cache; when the fetch fails the cached copy is used.
+ * When the site answers that the file is gone (404 or 410), the owner removed it: the cached copy goes too.
  */
 async function readMemberCastJson(member: RegistryMember, fetchLive: boolean, cacheFolder: string, warn: (message: string) => void): Promise<{ json: unknown; url: string; cached: boolean } | undefined> {
     const override = profileOverride(member.github, process.env);
@@ -158,6 +159,10 @@ async function readMemberCastJson(member: RegistryMember, fetchLive: boolean, ca
     let fresh: unknown;
     if (fetchLive || override) {
         fresh = await fetchCastJson(url, warn, { allowLocal: override !== undefined });
+        if (fresh === castJsonGone) {
+            if (!override) await rm(file, { force: true });
+            return undefined;
+        }
         if (fresh !== undefined && usable(fresh)) {
             if (!override) await writeJson(file, { url, json: fresh });
             return { json: fresh, url, cached: false };
