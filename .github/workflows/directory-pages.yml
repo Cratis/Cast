@@ -40,6 +40,13 @@ jobs:
         run: yarn install --immutable
       - name: Build the engine (schema and bundled registry)
         run: yarn workspace @cratis/cast build
+      - name: Restore the last good member profiles and GitHub data
+        uses: actions/cache@v4
+        with:
+          path: Directory/.cast/cache
+          key: directory-cache-${{ github.run_id }}
+          restore-keys: |
+            directory-cache-
       - name: Build the directory
         run: yarn workspace @cratis/cast-directory build
         env:
