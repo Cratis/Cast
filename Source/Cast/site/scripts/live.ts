@@ -5,23 +5,28 @@
 import { onPageLoad } from '../lib/lifecycle';
 import { relativeTime } from '../lib/reltime';
 import type { PullRequest } from '../lib/github';
-import { config } from '../data';
+import { readClientCast } from '../profile/clientCast';
 
 type SearchItem = { repository_url?: string; pull_request?: { merged_at?: string }; title?: unknown; number?: unknown; html_url?: string };
 type SearchResponse = { total_count?: unknown; incomplete_results?: boolean; items?: unknown };
 type PublicEvent = { type?: string; repo?: { name?: string }; created_at?: string; payload?: { action?: string; ref_type?: string; pull_request?: { merged?: boolean } } };
 
-const login = encodeURIComponent(config.github.login);
-const orgs = config.github.orgs;
-const orgPattern = new RegExp(`^https://api\\.github\\.com/repos/(${orgs.map(org => org.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})/([^/]+)$`, 'i');
+const orgPatternFor = (orgs: string[]) =>
+    new RegExp(`^https://api\\.github\\.com/repos/(${orgs.map(org => org.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})/([^/]+)$`, 'i');
 
 const TTL = 5 * 60_000;
 type Merged = { total: number; latest: PullRequest[] };
 type Activity = { type: string; repo: string; at: string };
-let merged: { at: number; data: Merged } | undefined;
+// Per login: the directory renders many profiles on one origin.
+const merged = new Map<string, { at: number; data: Merged }>();
 const pending = new Map<string, Promise<unknown>>();
 
-export const getLiveMerged = (): Merged | undefined => merged && Date.now() - merged.at < TTL ? merged.data : undefined;
+/** The live merged pull requests of the profile on the page, while fresh. */
+export const getLiveMerged = (): Merged | undefined => {
+    const login = readClientCast()?.login.toLowerCase();
+    const entry = login ? merged.get(login) : undefined;
+    return entry && Date.now() - entry.at < TTL ? entry.data : undefined;
+};
 
 async function cached<T>(key: string, path: string, parse: (data: unknown) => T): Promise<T> {
     try {
@@ -42,7 +47,7 @@ async function cached<T>(key: string, path: string, parse: (data: unknown) => T)
     try { return await request; } finally { pending.delete(key); }
 }
 
-function parseMerged(raw: unknown): Merged {
+function parseMerged(raw: unknown, orgPattern: RegExp): Merged {
     const data = raw as SearchResponse | null;
     const total = data?.total_count;
     if (typeof total !== 'number' || !Number.isSafeInteger(total) || total < 0 || data?.incomplete_results || !Array.isArray(data?.items)) throw new Error('Invalid search');
@@ -105,18 +110,23 @@ function renderMerged(data: Merged): void {
 }
 
 onPageLoad(() => {
-    if (!document.querySelector('[data-hero]')) return;
+    const cast = readClientCast();
+    if (!document.querySelector('[data-hero]') || !cast) return;
+    const login = encodeURIComponent(cast.login);
+    const key = cast.login.toLowerCase();
+    const orgs = cast.orgs;
+    const orgPattern = orgPatternFor(orgs);
     let active = true;
     let idle: number | undefined;
     let timer: ReturnType<typeof setTimeout> | undefined;
     const refresh = () => {
         if (!active || document.visibilityState !== 'visible') return;
-        void cached('merged', `/search/issues?q=author:${login}+${orgs.map(org => `org:${encodeURIComponent(org)}`).join('+')}+is:public+is:pr+is:merged&sort=updated&order=desc&per_page=12`, parseMerged)
+        void cached(`${key}:merged`, `/search/issues?q=author:${login}+${orgs.map(org => `org:${encodeURIComponent(org)}`).join('+')}+is:public+is:pr+is:merged&sort=updated&order=desc&per_page=12`, (raw) => parseMerged(raw, orgPattern))
             .then((data) => {
-                merged = { at: Date.now(), data };
+                merged.set(key, { at: Date.now(), data });
                 if (active && document.visibilityState === 'visible') renderMerged(data);
             }).catch(() => { /* Quietly keep the build-time snapshot. */ });
-        void cached('events', `/users/${login}/events/public?per_page=30`, parseEvents)
+        void cached(`${key}:events`, `/users/${login}/events/public?per_page=30`, parseEvents)
             .then((events) => {
                 if (!active || document.visibilityState !== 'visible' || !events.length) return;
                 const event = events[0]!;

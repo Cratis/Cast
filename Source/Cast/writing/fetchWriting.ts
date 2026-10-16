@@ -5,6 +5,7 @@ import type { z } from 'zod';
 import type { writingSourceSchema } from '../config/castSchema';
 import { mergePosts, parseFeed, parseStarlightAuthorPage } from './parse';
 import type { Post, WritingSnapshot } from './WritingSnapshot';
+import { postSchema, writingLimits } from './writingSnapshotSchema';
 
 type WritingSource = z.output<typeof writingSourceSchema>;
 const maximumPages = 10;
@@ -49,6 +50,20 @@ export async function fetchWriting(sources: readonly WritingSource[], warn: (mes
             warn(`writing source ${'rss' in source ? source.rss : source.starlightBlogAuthor}: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
-    if (posts.length === 0) return undefined;
-    return { fetchedAt: new Date().toISOString(), sources: origins, posts: mergePosts(posts) };
+    const kept = withinLimits(posts);
+    if (kept.length === 0) return undefined;
+    return { fetchedAt: new Date().toISOString(), sources: origins.slice(0, writingLimits.sources), posts: kept };
+}
+
+/** Newest posts first, trimmed to the limits a reader of cast.json enforces; posts that would still fail them are left out. */
+export function withinLimits(posts: readonly Post[]): Post[] {
+    return mergePosts(posts)
+        .map(post => ({
+            ...post,
+            title: post.title.slice(0, writingLimits.title),
+            description: post.description.slice(0, writingLimits.description),
+            tags: post.tags.map(tag => tag.slice(0, writingLimits.tag)).slice(0, writingLimits.tags),
+        }))
+        .filter(post => postSchema.safeParse(post).success)
+        .slice(0, writingLimits.posts);
 }

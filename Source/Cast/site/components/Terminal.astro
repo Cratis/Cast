@@ -4,12 +4,17 @@
 
 // Shell for the interactive terminal. The behavior lives in scripts/terminal.ts and is
 // only downloaded the first time the terminal opens.
-import { person, projects } from '../data';
+import type { CastView } from '../profile/CastView';
+
+interface Props {
+  cast: CastView;
+}
+const { person, projects } = Astro.props.cast;
 const firstProject = projects[0]?.name;
 const chips = ['help', 'whoami', 'now', 'git log --oneline', 'stream tail', 'ls projects', ...(firstProject ? [`cat ${firstProject}`] : []), 'contact', 'replay'];
 ---
 
-<dialog class="term" data-terminal aria-label="Terminal" aria-describedby="term-hint" transition:persist="terminal">
+<dialog class="term" data-terminal aria-label="Terminal" aria-describedby="term-hint" transition:persist={`terminal-${person.handle.toLowerCase()}`}>
   <div class="shell panel flex flex-col overflow-hidden">
     <div class="flex items-center gap-3 border-b border-line px-4 py-2.5">
       <span class="flex gap-1.5" aria-hidden="true">

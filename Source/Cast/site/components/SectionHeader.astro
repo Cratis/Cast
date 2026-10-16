@@ -2,7 +2,8 @@
 // Copyright (c) Cratis. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import { renderInline } from '../lib/inline';
+import type { CastHost } from '../profile/CastHost';
+import Inline from './Inline.astro';
 
 interface Props {
   index: string;
@@ -11,8 +12,10 @@ interface Props {
   /** May use *emphasis* for the italic serif accent. */
   title: string;
   id?: string;
+  /** Where the profile is rendered, for links in the title. */
+  host?: CastHost;
 }
-const { index, kind = 'event', label, title, id } = Astro.props;
+const { index, kind = 'event', label, title, id, host } = Astro.props;
 const noteClass = kind === 'command' ? 'note note-command' : kind === 'view' ? 'note note-view' : 'note';
 ---
 
@@ -22,6 +25,6 @@ const noteClass = kind === 'command' ? 'note note-command' : kind === 'view' ? '
     {index && <span class="h-px w-8 bg-line-strong" aria-hidden="true"></span>}
     <span class={noteClass}>{label}</span>
   </p>
-  <h2 id={id} class="section-title max-w-[22ch]" set:html={renderInline(title)} />
+  <h2 id={id} class="section-title max-w-[22ch]"><Inline text={title} host={host} /></h2>
   <slot />
 </header>

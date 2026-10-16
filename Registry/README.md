@@ -23,15 +23,18 @@ A tier says what someone's relationship to Cratis is. It is not a certification,
     since: 2026-10          # when the partnership started, YYYY-MM
     role: Independent consultant
     company: Your Company   # optional
-    site: https://you.dev   # optional: your Cast site; the directory reads its /cast.json
+    site: https://you.dev   # optional: your site; the directory reads its /cast.json
+    profile: https://you.dev/profile/cast.json   # optional: where your cast.json is, when not at <site>/cast.json
   ```
+
+  With a `cast.json` (from a Cast site, or written by any site in the [cast.json format](../Documentation/cast-json.md)), the directory renders your full profile at `https://cast.cratis.io/<login>/`. Without one it shows a profile built from public GitHub data.
 
   Say in the pull request how you work with Cratis. Cratis reviews it, may ask to talk first, and merges it only when we can vouch for the work.
 - **Core.** Added by Cratis.
 
 ## Changes and removal
 
-Anyone listed can change their own `role`, `company` or `site` in a pull request, or remove themselves at any time. Cratis removes a Partner entry when the partnership ends or when we can no longer vouch for the work, and says so in the pull request that removes it. Removal takes effect on the next build of each site; the badge then falls back to Contributor if the person has merged Cratis pull requests, or disappears.
+Anyone listed can change their own `role`, `company`, `site` or `profile` in a pull request, or remove themselves at any time. Cratis removes a Partner entry when the partnership ends or when we can no longer vouch for the work, and says so in the pull request that removes it. Removal takes effect on the next build of each site; the badge then falls back to Contributor if the person has merged Cratis pull requests, or disappears.
 
 ## Validation
 

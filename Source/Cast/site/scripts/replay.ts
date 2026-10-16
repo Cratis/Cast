@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 // Career replay: renders the projection produced by folding career events up to a position.
-import { careerEvents } from '../data';
+import { readClientCast } from '../profile/clientCast';
 import { project, formatMonth, yearsBetween, alsoText, type CareerProjection } from '../lib/career';
 import { motionReduced } from '../lib/motion';
 
@@ -11,6 +11,7 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
 export function mountReplay(root: HTMLElement): () => void {
     const cleanups: (() => void)[] = [];
+    const careerEvents = readClientCast()?.careerEvents ?? [];
     const total = careerEvents.length;
     const q = <T extends Element = HTMLElement>(sel: string) => root.querySelector<T>(sel);
     const qa = <T extends Element = HTMLElement>(sel: string) => [...root.querySelectorAll<T>(sel)];

@@ -2,16 +2,21 @@
 // Copyright (c) Cratis. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import { config, person, tier } from '../data';
+import type { CastView } from '../profile/CastView';
 import { castDirectoryUrl, verificationUrl } from '../../badges/constants';
 import CratisMark from './CratisMark.astro';
+interface Props {
+  cast: CastView;
+}
+const { cast } = Astro.props;
+const { config, person, tier } = cast;
 const year = new Date().getFullYear();
 const castUrl = tier.tier ? verificationUrl(person.handle) : castDirectoryUrl;
 ---
 
 <footer class="border-t border-line print:hidden">
   <div class="container-x flex flex-col gap-6 py-10 text-sm text-fg-muted md:flex-row md:items-center md:justify-between">
-    <a href={castUrl} class="cast-link group inline-flex items-center gap-3 rounded-lg" rel="noopener">
+    <a href={castUrl} class="cast-link group inline-flex items-center gap-3 rounded-lg" rel={cast.host.rel}>
       <span class="grid size-9 place-items-center rounded-xl border border-line bg-ink-900 text-fg transition-colors group-hover:border-line-strong">
         <CratisMark class="size-5" />
       </span>
@@ -21,8 +26,8 @@ const castUrl = tier.tier ? verificationUrl(person.handle) : castDirectoryUrl;
       </span>
     </a>
     <p class="font-mono text-xs">
-      © {year} {person.name} · built with <a href="https://github.com/Cratis/Cast" class="underline decoration-line-strong hover:text-fg" rel="noopener">Cast</a>
-      {config.site.source && <> · <a href={config.site.source} class="underline decoration-line-strong hover:text-fg" rel="noopener">source</a></>}
+      © {year} {person.name} · built with <a href="https://github.com/Cratis/Cast" class="underline decoration-line-strong hover:text-fg" rel={cast.host.rel}>Cast</a>
+      {config.site.source && <> · <a href={config.site.source} class="underline decoration-line-strong hover:text-fg" rel={cast.host.rel}>source</a></>}
     </p>
   </div>
 </footer>

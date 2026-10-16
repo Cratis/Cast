@@ -2,17 +2,18 @@
 // Copyright (c) Cratis. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+import type { CastView } from '../profile/CastView';
+import Inline from './Inline.astro';
 import SectionHeader from './SectionHeader.astro';
-import { agentic as agenticData, config } from '../data';
-import { github } from '../lib/github';
-import { postsFor, themes } from '../lib/blog';
-import { renderInline } from '../lib/inline';
 
 interface Props {
+  cast: CastView;
   index: string;
   title?: string;
   label?: string;
 }
+const { cast } = Astro.props;
+const { agentic: agenticData, config, github, postsFor, themes } = cast;
 const agentic = agenticData!;
 const { index, title = agentic.title, label = agentic.label } = Astro.props;
 const fmt = new Intl.NumberFormat('en-US');
@@ -25,8 +26,8 @@ const kinds = ['command', 'event', 'view', 'event', 'command'] as const;
 <section id="agentic" class="relative overflow-hidden py-24 md:py-36" aria-labelledby="agentic-title">
   <div class="pointer-events-none absolute top-1/4 -left-40 size-[36rem] rounded-full bg-view/8 blur-[120px]" aria-hidden="true"></div>
   <div class="container-x relative">
-    <SectionHeader index={index} kind="view" label={label} title={title} id="agentic-title">
-      <p class="mt-6 max-w-[62ch] text-lg leading-relaxed text-fg-muted" set:html={renderInline(agentic.pitch)} />
+    <SectionHeader host={cast.host} index={index} kind="view" label={label} title={title} id="agentic-title">
+      <p class="mt-6 max-w-[62ch] text-lg leading-relaxed text-fg-muted"><Inline text={agentic.pitch} host={cast.host} /></p>
     </SectionHeader>
 
     <div class="panel overflow-hidden" data-reveal data-harness>
@@ -46,7 +47,7 @@ const kinds = ['command', 'event', 'view', 'event', 'command'] as const;
               </span>
               <span class="mt-4 block font-display text-2xl font-[650] tracking-[-0.02em]">{w.step}</span>
               <span class={`note mt-1 ${kinds[i] === 'command' ? 'note-command' : kinds[i] === 'view' ? 'note-view' : ''}`}>{w.event}</span>
-              <span class="mt-3 block text-sm leading-relaxed text-fg-muted" set:html={renderInline(w.text)} />
+              <span class="mt-3 block text-sm leading-relaxed text-fg-muted"><Inline text={w.text} host={cast.host} /></span>
               {w.loop && (
                 <span class="loop mt-4 inline-flex whitespace-nowrap items-center gap-1.5 rounded-full border border-event/30 bg-event/8 px-2.5 py-0.5 font-mono text-[0.6875rem] text-event-soft">
                   ↺ {w.loop}
@@ -65,10 +66,10 @@ const kinds = ['command', 'event', 'view', 'event', 'command'] as const;
           const Tag = item.url ? 'a' : 'div';
           return (
             <li class:list={[item.list && 'md:col-span-2']} data-reveal style={`--reveal-delay:${(i % 3) * 60}ms`}>
-              <Tag href={item.url} rel={item.url ? 'noopener' : undefined} class:list={['panel flex h-full flex-col p-5 md:p-6', item.url && 'glow group']} style="--glow: var(--color-view)">
+              <Tag href={item.url} rel={item.url ? cast.host.rel : undefined} class:list={['panel flex h-full flex-col p-5 md:p-6', item.url && 'glow group']} style="--glow: var(--color-view)">
                 <span class="note note-view">{item.kind}</span>
                 <span class="mt-4 font-display text-2xl font-[650] tracking-[-0.02em] transition-colors group-hover:text-view-soft">{item.name}</span>
-                <span class="mt-2 text-sm leading-relaxed text-fg-muted" set:html={renderInline(item.text)} />
+                <span class="mt-2 text-sm leading-relaxed text-fg-muted"><Inline text={item.text} host={cast.host} /></span>
                 {item.list && (
                   <span class="mt-5 block">
                     <span class="block font-mono text-[0.6875rem] tracking-[0.08em] text-fg-faint uppercase">{item.listLabel}</span>
@@ -89,7 +90,7 @@ const kinds = ['command', 'event', 'view', 'event', 'command'] as const;
           <ul class="mt-3 grid gap-x-8 gap-y-2 md:grid-cols-2">
             {aiPosts.map((p) => (
               <li>
-                <a href={p.url} rel="noopener" class="group flex items-baseline gap-3 text-[0.9375rem]">
+                <a href={p.url} rel={cast.host.rel} class="group flex items-baseline gap-3 text-[0.9375rem]">
                   <span class="text-view" aria-hidden="true">→</span>
                   <span class="text-fg group-hover:underline">{p.headline}</span>
                 </a>

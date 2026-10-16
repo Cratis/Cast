@@ -4,20 +4,28 @@
 import { verificationUrl } from '../badges/constants';
 import type { CastData } from '../integration/CastData';
 import { plainText } from '../site/lib/inline';
+import { castJsonVersion } from './castJsonSchema';
 
-/** Version of the /cast.json document. Bumped on breaking changes; additions keep the version. */
-export const castJsonVersion = 1;
+export { castJsonVersion };
+
+/** Where the published JSON Schema of cast.json lives. */
+export const castJsonSchemaUrl = 'https://unpkg.com/@cratis/cast/cast-json.schema.json';
 
 /**
- * The machine-readable profile at /cast.json. Agents can read it; the directory shows its title and tagline.
+ * The machine-readable profile at /cast.json, format version 2. `profile` is the complete, render-ready
+ * profile: cast.yaml as JSON plus the build-time GitHub and writing captures. The directory renders a member's
+ * full profile from it; agents can read it. The fields before `profile` are the version 1 summary, kept.
  * `verification.claimedTier` is what this site's build resolved. A site is static and controlled by its owner,
  * so it is a claim: the directory page at `verification.url` is the source of truth, and the directory never
  * reads tiers from here.
  */
-export function castJson(data: CastData) {
+export function castJson(data: CastData, photoUrl?: string) {
     const { config, tier, github, build } = data;
     const person = config.person;
+    const { $schema: _schema, ...cast } = config;
+    const { photo: _photo, ...personWithoutPhoto } = person;
     return {
+        $schema: castJsonSchemaUrl,
         castJsonVersion,
         generator: `@cratis/cast ${build.castVersion}`,
         builtAt: build.builtAt,
@@ -59,6 +67,11 @@ export function castJson(data: CastData) {
             contributionsLastYear: github.contributions.total,
             mergedPullRequests: github.mergedPullRequests.total,
             mergedPullRequestsByOrg: github.mergedPullRequests.byOrg,
+        },
+        profile: {
+            cast: { ...cast, person: { ...personWithoutPhoto, ...(photoUrl ? { photo: photoUrl } : {}) } },
+            github,
+            writing: data.writing,
         },
     };
 }

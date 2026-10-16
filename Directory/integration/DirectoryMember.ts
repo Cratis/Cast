@@ -3,8 +3,9 @@
 
 import type { Tier, TierSource } from '@cratis/cast/badges';
 
-/** What a member's own Cast site says about them, read from its /cast.json. */
-export type CastProfile = {
+/** What a member's cast.json says about them, shown on directory cards. Never a tier. */
+export type CastSummary = {
+    /** The member's site, or the cast.json URL when there is no site. */
     url: string;
     title?: string;
     tagline?: string;
@@ -32,5 +33,7 @@ export type DirectoryMember = {
     commits?: number;
     /** Public Cratis repositories they have commits in, most commits first. */
     repositories?: string[];
-    cast?: CastProfile;
+    /** Commits and rank among human committers in each of those repositories. */
+    standings?: Record<string, { commits: number; rank: number }>;
+    cast?: CastSummary;
 };

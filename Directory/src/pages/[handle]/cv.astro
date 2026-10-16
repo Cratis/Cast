@@ -1,0 +1,24 @@
+---
+// Copyright (c) Cratis. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+// A member's printable CV, from the same data as their directory profile.
+import CvPage from '@cratis/cast/site/pages/CvPage.astro';
+import DirectoryFooter from '../../components/DirectoryFooter.astro';
+import DirectoryLead from '../../components/DirectoryLead.astro';
+import { everyone, memberPage, type DirectoryMember } from '../../lib/directory';
+
+export function getStaticPaths() {
+  return everyone.map((member) => ({ params: { handle: member.handle.toLowerCase() }, props: { member } }));
+}
+
+interface Props {
+  member: DirectoryMember;
+}
+const { cast } = memberPage(Astro.props.member);
+---
+
+<CvPage cast={cast}>
+  <DirectoryLead slot="lead" />
+  <DirectoryFooter slot="footer" navigation />
+</CvPage>

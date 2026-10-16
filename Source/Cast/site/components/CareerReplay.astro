@@ -2,18 +2,21 @@
 // Copyright (c) Cratis. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import { careerEvents, firstName } from '../data';
-import { renderInline } from '../lib/inline';
+import type { CastView } from '../profile/CastView';
+import Inline from './Inline.astro';
+import { project, formatMonth, yearsBetween, alsoText } from '../lib/career';
+import SectionHeader from './SectionHeader.astro';
 
 interface Props {
+  cast: CastView;
   index: string;
   title?: string;
   label?: string;
   intro?: string;
 }
 const { index, title = 'Career, replayed from the *event log.*', label = 'Event stream', intro } = Astro.props;
-import { project, formatMonth, yearsBetween, alsoText } from '../lib/career';
-import SectionHeader from './SectionHeader.astro';
+const { cast } = Astro.props;
+const { careerEvents, firstName } = cast;
 
 const total = careerEvents.length;
 const final = project(careerEvents);
@@ -27,9 +30,9 @@ const icon = {
 
 <section id="career" class="relative py-24 md:py-36" aria-labelledby="career-title" data-replay data-total={total}>
   <div class="container-x">
-    <SectionHeader index={index} label={label} title={title} id="career-title">
+    <SectionHeader host={cast.host} index={index} label={label} title={title} id="career-title">
       <p class="mt-6 max-w-[60ch] text-lg text-fg-muted" data-reveal>
-        {intro ? <Fragment set:html={renderInline(intro)} /> : <>Every role, skill and organization below is a projection, computed by folding these {total} events in order.
+        {intro ? <Fragment><Inline text={intro} host={cast.host} /></Fragment> : <>Every role, skill and organization below is a projection, computed by folding these {total} events in order.
         Scroll, scrub or press play to watch the state rebuild itself.</>}
       </p>
     </SectionHeader>
@@ -176,7 +179,7 @@ const icon = {
                   {e.org && (
                     <p class="mt-1 text-sm text-fg-muted">
                       {e.orgUrl ? (
-                        <a href={e.orgUrl} class="underline decoration-line-strong hover:text-fg hover:decoration-event" rel="noopener">
+                        <a href={e.orgUrl} class="underline decoration-line-strong hover:text-fg hover:decoration-event" rel={cast.host.rel}>
                           {e.org}
                         </a>
                       ) : (
@@ -185,7 +188,7 @@ const icon = {
                       {e.location && <span class="text-fg-faint"> · {e.location}</span>}
                     </p>
                   )}
-                  <p class="mt-3 text-[0.95rem] leading-relaxed text-fg-muted" set:html={renderInline(e.summary)} />
+                  <p class="mt-3 text-[0.95rem] leading-relaxed text-fg-muted"><Inline text={e.summary} host={cast.host} /></p>
                   {e.skills && (
                     <ul class="mt-4 flex flex-wrap gap-1.5" aria-label="Skills">
                       {e.skills.map((s) => (

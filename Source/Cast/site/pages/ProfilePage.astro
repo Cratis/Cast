@@ -1,0 +1,78 @@
+---
+// Copyright (c) Cratis. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+// The home page of one profile. A Cast site serves it at /; the directory at /<login>/.
+import Base from '../layouts/Base.astro';
+import Nav from '../components/Nav.astro';
+import Hero from '../components/Hero.astro';
+import Now from '../components/Now.astro';
+import Stats from '../components/Stats.astro';
+import CareerReplay from '../components/CareerReplay.astro';
+import EventModel from '../components/EventModel.astro';
+import Cratis from '../components/Cratis.astro';
+import Activity from '../components/Activity.astro';
+import Projects from '../components/Projects.astro';
+import Agentic from '../components/Agentic.astro';
+import Writing from '../components/Writing.astro';
+import Talks from '../components/Talks.astro';
+import Skills from '../components/Skills.astro';
+import Contact from '../components/Contact.astro';
+import Footer from '../components/Footer.astro';
+import type { CastView } from '../profile/CastView';
+import { plainText } from '../lib/inline';
+
+interface Props {
+  cast: CastView;
+  /** Page title; defaults to "<name> · <title>". */
+  title?: string;
+  /** Meta description; defaults to the site description, else the tagline and intro. */
+  description?: string;
+}
+const { cast } = Astro.props;
+const { config, person, sections } = cast;
+
+const components = {
+  hero: Hero,
+  now: Now,
+  stats: Stats,
+  career: CareerReplay,
+  model: EventModel,
+  cratis: Cratis,
+  activity: Activity,
+  agentic: Agentic,
+  projects: Projects,
+  writing: Writing,
+  talks: Talks,
+  skills: Skills,
+  contact: Contact,
+} as const;
+
+const title = Astro.props.title ?? `${person.name} · ${person.title}`;
+const description = Astro.props.description ?? config.site.description ?? `${plainText(person.tagline)} ${plainText(person.intro)}`;
+---
+
+<Base cast={cast} title={title} description={description}>
+  <Nav slot="nav" cast={cast}><slot name="lead" slot="lead" /></Nav>
+  {!sections.some((section) => section.id === 'hero') && <slot name="after-hero" />}
+  {
+    sections.map((section, position) => {
+      const Section = components[section.id];
+      const previous = sections[position - 1];
+      return (
+        <>
+          <Section
+            cast={cast}
+            index={section.index}
+            {...(section.title ? { title: section.title } : {})}
+            {...(section.label ? { label: section.label } : {})}
+            {...(section.intro ? { intro: section.intro } : {})}
+            compact={section.id === 'skills' && previous?.id === 'talks'}
+          />
+          {section.id === 'hero' && <slot name="after-hero" />}
+        </>
+      );
+    })
+  }
+  <slot name="footer" slot="footer"><Footer cast={cast} /></slot>
+</Base>

@@ -3,6 +3,15 @@
 
 import type { DirectoryMember } from './DirectoryMember';
 
+/** A person's commits in public Cratis repositories, from the contributors API. */
+export type DiscoveredActivity = {
+    commits: number;
+    /** Their top repositories, most commits first. */
+    repositories: string[];
+    /** Commits and rank among human committers in each of those repositories (first 100 committers per repository). */
+    standings?: Record<string, { commits: number; rank: number }>;
+};
+
 /** Merged pull request count for one login and when it was checked. */
 export type VerifiedCount = { mergedPullRequests: number; checkedAt: string };
 
@@ -19,5 +28,5 @@ export type DirectorySnapshot = {
     pending: number;
     counts: Record<string, VerifiedCount>;
     profiles: Record<string, Pick<DirectoryMember, 'name' | 'avatarUrl' | 'bio' | 'location'>>;
-    activity: Record<string, { commits: number; repositories: string[] }>;
+    activity: Record<string, DiscoveredActivity>;
 };

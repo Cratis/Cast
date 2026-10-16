@@ -2,16 +2,19 @@
 // Copyright (c) Cratis. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import { person, profileLinks } from '../data';
-import { renderInline } from '../lib/inline';
+import type { CastView } from '../profile/CastView';
+import Inline from './Inline.astro';
 
 interface Props {
+  cast: CastView;
   index: string;
   title?: string;
   label?: string;
   intro?: string;
 }
 const { index, title = 'Append an event to *my stream.*', label = 'Command', intro = 'Questions about event sourcing, Cratis, a project or a role? Issue the command and it lands in my inbox.' } = Astro.props;
+const { cast } = Astro.props;
+const { person, profileLinks } = cast;
 const mailto = person.email ? `mailto:${person.email}` : undefined;
 const channels = [person.email ? 'email' : undefined, ...profileLinks.slice(0, 3).map((link) => link.label)].filter(Boolean).join(' · ');
 ---
@@ -24,8 +27,8 @@ const channels = [person.email ? 'email' : undefined, ...profileLinks.slice(0, 3
     <p class="mb-5 flex items-center gap-3 font-mono text-xs text-fg-faint" data-reveal>
       {index && <span class="text-fg-muted">{index}</span>}{index && <span class="h-px w-8 bg-line-strong" aria-hidden="true"></span>}<span class="note note-command">{label}</span>
     </p>
-    <h2 id="contact-title" class="max-w-[14ch] text-[clamp(2.75rem,7.5vw,6.5rem)] leading-[0.92] font-[800] tracking-[-0.045em]" data-reveal set:html={renderInline(title)} />
-    <p class="mt-6 max-w-[52ch] text-lg text-fg-muted" data-reveal set:html={renderInline(intro)} />
+    <h2 id="contact-title" class="max-w-[14ch] text-[clamp(2.75rem,7.5vw,6.5rem)] leading-[0.92] font-[800] tracking-[-0.045em]" data-reveal><Inline text={title} host={cast.host} /></h2>
+    <p class="mt-6 max-w-[52ch] text-lg text-fg-muted" data-reveal><Inline text={intro} host={cast.host} /></p>
 
     <div class="mt-14 grid grid-cols-1 items-center gap-6 lg:grid-cols-[1fr_auto_1fr]" data-reveal data-contact>
       <!-- Command sticky note -->
@@ -71,7 +74,7 @@ const channels = [person.email ? 'email' : undefined, ...profileLinks.slice(0, 3
           </span>
         </div>}
         <div class="mt-3 flex flex-wrap gap-2.5">
-          {profileLinks.map((link) => <a href={link.url} class="btn btn-sm" rel="me noopener">{link.label}</a>)}
+          {profileLinks.map((link) => <a href={link.url} class="btn btn-sm" rel={cast.host.verified ? cast.host.rel : 'me noopener'}>{link.label}</a>)}
         </div>
       </div>
     </div>

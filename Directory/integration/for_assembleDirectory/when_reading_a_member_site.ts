@@ -2,19 +2,19 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import sinon from 'sinon';
-import { addProfiles, fetchCastProfile, type ProfileNode } from '../fetchDirectory';
-import type { CastProfile } from '../DirectoryMember';
+import { addProfiles, fetchCastSummary, type ProfileNode } from '../fetchDirectory';
+import type { CastSummary } from '../DirectoryMember';
 import type { DirectorySnapshot } from '../DirectorySnapshot';
 
 describe('when reading a member site', () => {
-    let profile: CastProfile | undefined;
+    let profile: CastSummary | undefined;
     let fetchStub: sinon.SinonStub;
 
     beforeEach(async () => {
         fetchStub = sinon.stub(globalThis, 'fetch').resolves(new Response(JSON.stringify({
             castJsonVersion: 1, title: 'Chief Architect', tagline: 'Hi', verification: { claimedTier: 'core' }, tier: 'core',
         })));
-        profile = await fetchCastProfile('https://member.example', () => undefined);
+        profile = await fetchCastSummary('https://member.example', () => undefined);
     });
 
     afterEach(() => fetchStub.restore());

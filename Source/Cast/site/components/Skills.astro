@@ -2,10 +2,11 @@
 // Copyright (c) Cratis. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import { skills } from '../data';
+import type { CastView } from '../profile/CastView';
 import SectionHeader from './SectionHeader.astro';
 
 interface Props {
+  cast: CastView;
   index: string;
   title?: string;
   label?: string;
@@ -13,13 +14,15 @@ interface Props {
   compact?: boolean;
 }
 const { index, title = 'The *toolbox.*', label = 'Read model', compact = false } = Astro.props;
+const { cast } = Astro.props;
+const { skills } = cast;
 const groups = Object.entries(skills);
 const accents = ['bg-event', 'bg-command', 'bg-view', 'bg-accent'];
 ---
 
 <section id="skills" class:list={['relative pb-24 md:pb-36', compact ? '' : 'pt-24 md:pt-32']} aria-labelledby="skills-title">
   <div class="container-x">
-    <SectionHeader index={index} kind="view" label={label} title={title} id="skills-title" />
+    <SectionHeader host={cast.host} index={index} kind="view" label={label} title={title} id="skills-title" />
     <div class="grid grid-cols-1 gap-px overflow-hidden rounded-[1.25rem] border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
       {
         groups.map(([group, list], i) => (

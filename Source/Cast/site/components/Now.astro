@@ -2,18 +2,21 @@
 // Copyright (c) Cratis. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+import type { CastView } from '../profile/CastView';
+import Inline from './Inline.astro';
 import { Picture } from 'astro:assets';
-import { person, now, careerEvents, firstName, photo, photoUrl } from '../data';
 import { formatMonth } from '../lib/career';
-import { renderInline } from '../lib/inline';
 import SectionHeader from './SectionHeader.astro';
 
 interface Props {
+  cast: CastView;
   index: string;
   title?: string;
   label?: string;
 }
 const { index, title = 'Where the stream is *now.*', label = 'Read model' } = Astro.props;
+const { cast } = Astro.props;
+const { person, now, careerEvents, firstName, photo, photoUrl } = cast;
 const rows: { key: string; value: string | string[] }[] = Object.entries(now).map(([key, value]) => ({
   key,
   value: typeof value === 'string' && /^\d{4}-\d{2}$/.test(value) ? formatMonth(value) : value,
@@ -23,7 +26,7 @@ const hasPortrait = photo !== undefined || photoUrl !== undefined;
 
 <section id="about" class="relative py-24 md:py-36" aria-labelledby="about-title">
   <div class="container-x">
-    <SectionHeader index={index} kind="view" label={label} title={title} id="about-title" />
+    <SectionHeader host={cast.host} index={index} kind="view" label={label} title={title} id="about-title" />
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
       {hasPortrait && <figure class="avatar group panel overflow-hidden p-2 lg:col-span-4" data-reveal>
@@ -69,7 +72,7 @@ const hasPortrait = photo !== undefined || photoUrl !== undefined;
                       ))}
                     </ul>
                   ) : (
-                    <Fragment set:html={renderInline(r.value)} />
+                    <Fragment><Inline text={r.value} host={cast.host} /></Fragment>
                   )}
                 </dd>
               </div>
@@ -79,16 +82,16 @@ const hasPortrait = photo !== undefined || photoUrl !== undefined;
       </div>}
     </div>
 
-    <div class="mt-16 grid grid-cols-1 gap-10 md:mt-24 md:grid-cols-12">
-      <h3 class="eyebrow md:col-span-3" data-reveal>About</h3>
-      <div class="text-lg leading-relaxed text-fg-muted md:col-span-9 md:columns-2 md:gap-10 [&>p]:mb-6 [&>p]:break-inside-avoid" data-reveal>
-        {person.about.map((p, i) => <p class:list={[i === 0 && 'text-fg']} set:html={renderInline(p)} />)}
-      </div>
+    {(person.about.length > 0 || person.interests.length > 0) && <div class="mt-16 grid grid-cols-1 gap-10 md:mt-24 md:grid-cols-12">
+      {person.about.length > 0 && <h3 class="eyebrow md:col-span-3" data-reveal>About</h3>}
+      {person.about.length > 0 && <div class="text-lg leading-relaxed text-fg-muted md:col-span-9 md:columns-2 md:gap-10 [&>p]:mb-6 [&>p]:break-inside-avoid" data-reveal>
+        {person.about.map((p, i) => <p class:list={[i === 0 && 'text-fg']}><Inline text={p} host={cast.host} /></p>)}
+      </div>}
       {person.interests.length > 0 && <h3 class="eyebrow md:col-span-3" data-reveal>Interests</h3>}
       {person.interests.length > 0 && <ul class="flex flex-wrap gap-2 md:col-span-9" data-reveal>
         {person.interests.map((i) => <li class="tag">{i}</li>)}
       </ul>}
-    </div>
+    </div>}
   </div>
 </section>
 

@@ -13,6 +13,8 @@
   items:
     - name: cast.yaml
       href: cast-yaml.md
+    - name: cast.json
+      href: cast-json.md
     - name: Badges and the registry
       href: badges-and-registry.md
     - name: The directory
