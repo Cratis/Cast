@@ -25,6 +25,6 @@ describe('when rendering badges', () => {
 
         it('should link to the lowercased verification address', () => svg.should.contain('cast.cratis.io/woksin'));
         it('should escape text', () => svg.should.contain('Sindre &lt;Wilting&gt;'));
-        it('should show since', () => svg.should.contain('since 2024-06'));
+        it('should show since', () => svg.should.contain('since Jun 2024'));
     });
 });

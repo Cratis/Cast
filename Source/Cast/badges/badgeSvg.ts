@@ -94,6 +94,15 @@ export type BadgeCardOptions = {
     since?: string;
 };
 
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/** `2024-06` as `Jun 2024`, matching the directory's cards; anything else is shown as given. */
+const monthYear = (since: string): string => {
+    const match = /^(\d{4})-(\d{2})$/.exec(since);
+    const month = match ? months[Number(match[2]) - 1] : undefined;
+    return match && month ? `${month} ${match[1]}` : since;
+};
+
 /**
  * The large badge card (480 × 168): a dark card with a tier-colored edge, the Cratis mark, the tier in
  * the italic serif and the verification address. Meant for READMEs, slides and profile pages.
@@ -106,7 +115,7 @@ export function badgeCardSvg(tier: Tier | undefined, options: BadgeCardOptions):
     const handle = options.handle.toLowerCase();
     const address = `${castDirectoryUrl.replace(/^https:\/\//, '')}/${handle}`;
     const who = options.name ? `${options.name} · @${options.handle}` : `@${options.handle}`;
-    const sinceText = options.since ? ` · since ${options.since}` : '';
+    const sinceText = options.since ? ` · since ${monthYear(options.since)}` : '';
     const title = tier ? `${who}: Cratis Cast ${style.label}` : `${who}: not verified in the Cratis Cast`;
 
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="${escapeXml(title)}">
