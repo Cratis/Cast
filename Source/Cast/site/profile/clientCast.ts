@@ -34,6 +34,8 @@ export type ClientCast = {
     projects: { name: string; url: string; pitch: string; version?: string; category: string; features: string[]; stack: string[]; install?: string }[];
     pullRequests: PullRequest[];
     mergedPrTotal: number;
+    /** The total is the cast.yaml fallback, not a capture. */
+    mergedPrSelfReported: boolean;
     snapshotDate: string;
     posts: { headline: string; url: string; part?: number; minutes?: number; themes: string[] }[];
     themes: WritingTheme[];
@@ -85,6 +87,7 @@ export function clientCast(cast: CastView): ClientCast {
         })),
         pullRequests: cast.github.mergedPullRequests.latest,
         mergedPrTotal: cast.mergedPrTotal,
+        mergedPrSelfReported: cast.mergedPrSelfReported,
         snapshotDate: cast.snapshotDate(),
         posts: cast.posts.map(post => ({
             headline: post.headline,

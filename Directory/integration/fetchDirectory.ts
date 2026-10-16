@@ -190,7 +190,9 @@ export function castSummary(json: unknown, url: string): CastSummary | undefined
     if (!body || typeof body !== 'object' || typeof body.castJsonVersion !== 'number') return undefined;
     const person = body.profile?.cast?.person;
     const title = typeof body.title === 'string' ? body.title : typeof person?.title === 'string' ? person.title : undefined;
-    const tagline = typeof body.tagline === 'string' ? body.tagline : typeof person?.tagline === 'string' ? plainText(person.tagline) : undefined;
+    // Taglines carry inline markup (`*accent*`, links, code); cards show them as plain text, whoever wrote the file.
+    const rawTagline = typeof body.tagline === 'string' ? body.tagline : typeof person?.tagline === 'string' ? person.tagline : undefined;
+    const tagline = rawTagline === undefined ? undefined : plainText(rawTagline);
     return {
         url,
         castJsonVersion: body.castJsonVersion,

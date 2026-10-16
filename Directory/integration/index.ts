@@ -89,8 +89,10 @@ export default function castDirectory(options: { registry?: string; snapshot?: s
                 const castJsons: Record<string, { profile: CastJsonProfile; url: string }> = {};
                 for (const member of registry) {
                     const read = await readMemberCastJson(member, command === 'build', path.join(cacheFolder, 'profiles'), warn);
-                    if (!read) continue;
                     const login = member.github.toLowerCase();
+                    // Removed by its owner: the card falls back to GitHub data rather than the last title and tagline.
+                    if (read === castJsonGone) delete casts[login];
+                    if (!read || read === castJsonGone) continue;
                     const summary = castSummary(read.json, member.site ?? read.url);
                     if (summary) casts[login] = summary;
                     const parsed = profileFromCastJson(read.json, member.github);
@@ -148,9 +150,10 @@ export default function castDirectory(options: { registry?: string; snapshot?: s
 /**
  * A registry member's cast.json: the development override, else their `profile` URL or `<site>/cast.json`.
  * A fresh copy replaces the last good one in the build cache; when the fetch fails the cached copy is used.
- * When the site answers that the file is gone (404 or 410), the owner removed it: the cached copy goes too.
+ * When the site answers that the file is gone (404 or 410), the owner removed it: the cached copy goes too,
+ * and the result is {@link castJsonGone}.
  */
-async function readMemberCastJson(member: RegistryMember, fetchLive: boolean, cacheFolder: string, warn: (message: string) => void): Promise<{ json: unknown; url: string; cached: boolean } | undefined> {
+async function readMemberCastJson(member: RegistryMember, fetchLive: boolean, cacheFolder: string, warn: (message: string) => void): Promise<{ json: unknown; url: string; cached: boolean } | typeof castJsonGone | undefined> {
     const override = profileOverride(member.github, process.env);
     const url = override ?? profileUrlOf(member);
     if (!url) return undefined;
@@ -161,7 +164,7 @@ async function readMemberCastJson(member: RegistryMember, fetchLive: boolean, ca
         fresh = await fetchCastJson(url, warn, { allowLocal: override !== undefined });
         if (fresh === castJsonGone) {
             if (!override) await rm(file, { force: true });
-            return undefined;
+            return castJsonGone;
         }
         if (fresh !== undefined && usable(fresh)) {
             if (!override) await writeJson(file, { url, json: fresh });

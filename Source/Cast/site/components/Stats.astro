@@ -8,7 +8,7 @@ interface Props {
   cast: CastView;
 }
 const { cast } = Astro.props;
-const { stats: siteStats, cratis, github, cratisRepos, mergedPrFloor, snapshotDate } = cast;
+const { stats: siteStats, cratis, github, cratisRepos, mergedPrFloor, mergedPrStatus } = cast;
 
 type Stat = (typeof siteStats)[number];
 const rankOne = cratisRepos.filter((r) => r.rank === 1).length;
@@ -37,9 +37,9 @@ const accents = ['text-event', 'text-command', 'text-view', 'text-fg'];
               style={`--reveal-delay:${i * 80}ms`}
             >
               <dt class="order-2 max-w-[18ch] text-sm leading-snug text-fg-muted">{s.label}
-                {s.live === 'mergedPullRequests' && <span data-pr-status class="mt-1 block font-mono text-[0.6875rem] text-fg-faint">as of {snapshotDate()}</span>}
+                {s.live === 'mergedPullRequests' && <span data-pr-status class="mt-1 block font-mono text-[0.6875rem] text-fg-faint">{mergedPrStatus}</span>}
               </dt>
-              <dd class={`order-1 font-display text-[clamp(2.5rem,5vw,4rem)] leading-none font-[650] tracking-[-0.04em] tabular-nums ${accents[i % accents.length]}`}>
+              <dd class={`order-1 font-display whitespace-nowrap text-[clamp(2.5rem,5vw,4rem)] leading-none font-[650] tracking-[-0.04em] tabular-nums ${accents[i % accents.length]}`}>
                 {s.prefix}<span data-merged-prs={s.live === 'mergedPullRequests' ? 'number' : undefined} data-count={plain ? undefined : s.value}>{plain ? s.value : fmt.format(s.value)}</span>
                 {s.suffix && <span class="text-fg-faint">{s.suffix}</span>}
               </dd>

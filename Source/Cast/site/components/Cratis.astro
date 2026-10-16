@@ -14,7 +14,7 @@ interface Props {
   label?: string;
 }
 const { cast } = Astro.props;
-const { cratis: cratisData, cratisRepos, mergedPrFloor, mergedPrTotal, snapshotDate, starsFor } = cast;
+const { cratis: cratisData, cratisRepos, mergedPrFloor, mergedPrTotal, mergedPrStatus, snapshotDate, starsFor } = cast;
 const cratis = cratisData!;
 const { index, title = cratis.title, label = cratis.label } = Astro.props;
 
@@ -56,7 +56,7 @@ const badge = (r: CratisRepo) => (r.founded ? 'b-founded' : r.rank === 1 ? 'b-le
           <div class="flex flex-col bg-ink-900 p-5 md:p-6">
             <dt class="order-2 mt-2 text-sm leading-snug text-fg-muted">
               {h.label}
-              {h.live && <> (<span data-merged-prs="exact">{fmt.format(mergedPrTotal)}</span>, <span data-pr-status>as of {asOf}</span>)</>}
+              {h.live && <> (<span data-merged-prs="exact">{fmt.format(mergedPrTotal)}</span>, <span data-pr-status>{mergedPrStatus}</span>)</>}
             </dt>
             <dd data-merged-prs={h.live ? 'floor' : undefined} class={`order-1 font-display text-[clamp(2.25rem,4.4vw,3.5rem)] leading-none font-[750] tracking-[-0.045em] tabular-nums ${h.accent}`}>{h.value}</dd>
           </div>

@@ -40,6 +40,8 @@ export function usableGitHub(json: unknown, login: string): GitHubSnapshot | und
     return result.success && sameLogin(result.data.login, login) ? result.data as GitHubSnapshot : undefined;
 }
 const formatNumber = (value: number) => new Intl.NumberFormat('en-US').format(value);
+/** Ends a bio as a sentence, so the facts that follow it do not read as part of it. */
+const sentence = (text: string) => (/[.!?…)"'\u201d]$/.test(text) ? text : `${text}.`);
 
 /** The GitHub data a page shows: the captured snapshot with the directory's own counts and standings filled in. */
 export function memberGitHub(member: DirectoryMember, captured: GitHubSnapshot | undefined): GitHubSnapshot {
@@ -95,7 +97,7 @@ export function gitHubOnlyCast(member: DirectoryMember): CastConfig {
             ...(member.location ? { location: member.location } : {}),
             links,
             tagline: shortBio ?? 'Building with *Cratis.*',
-            intro: bio && !shortBio ? `${bio} ${factLine}` : factLine,
+            intro: bio && !shortBio ? `${sentence(bio)} ${factLine}` : factLine,
         },
         now,
         ...(repositories.length ? {
