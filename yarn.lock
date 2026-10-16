@@ -341,6 +341,14 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cratis/cast-registry@workspace:Registry":
+  version: 0.0.0-use.local
+  resolution: "@cratis/cast-registry@workspace:Registry"
+  dependencies:
+    "@cratis/cast": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
 "@cratis/cast-sample-woksin@workspace:Samples/woksin":
   version: 0.0.0-use.local
   resolution: "@cratis/cast-sample-woksin@workspace:Samples/woksin"
