@@ -60,7 +60,7 @@ const asOf = directory.fetchedAt ? new Date(directory.fetchedAt).toLocaleDateStr
   </section>
 
   <div class="container-x sticky top-[calc(var(--nav-h)+0.75rem)] z-30">
-    <label class="panel flex items-center gap-3 px-4 py-1 shadow-2xl shadow-black/40">
+    <label class="panel flex items-center gap-3 px-4 py-1 shadow-2xl shadow-black/40 focus-within:outline-2 focus-within:outline-offset-3 focus-within:outline-command">
       <svg viewBox="0 0 20 20" class="size-4 shrink-0 text-fg-faint" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="9" cy="9" r="5.5"></circle><path d="m13.2 13.2 3.3 3.3" stroke-linecap="round"></path></svg>
       <span class="sr-only">Find someone in the Cast</span>
       <input type="search" data-filter-input placeholder="Find someone by name, handle, role or place" class="h-11 min-w-0 flex-1 bg-transparent text-base text-fg placeholder:text-fg-faint focus:outline-none" />
@@ -98,7 +98,7 @@ const asOf = directory.fetchedAt ? new Date(directory.fetchedAt).toLocaleDateStr
       <ul class="wall grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
         {contributors.map((member) => (
           <li data-member data-search={`${member.handle} ${member.name ?? ''} ${member.location ?? ''}`.toLowerCase()}>
-            <a href={`/${member.handle.toLowerCase()}`} class="tile group flex items-center gap-3 rounded-xl border border-line bg-ink-900/60 p-2.5 pr-3 transition-colors hover:border-event/40 hover:bg-event/5">
+            <a href={`/${member.handle.toLowerCase()}/`} class="tile group flex items-center gap-3 rounded-xl border border-line bg-ink-900/60 p-2.5 pr-3 transition-colors hover:border-event/40 hover:bg-event/5">
               <img src={avatar(member, 80)} alt="" width="36" height="36" loading="lazy" class="size-9 shrink-0 rounded-lg border border-line object-cover" />
               <span class="min-w-0">
                 <span class="block truncate text-sm font-medium text-fg">{displayName(member)}</span>

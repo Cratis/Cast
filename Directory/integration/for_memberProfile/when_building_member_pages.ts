@@ -49,4 +49,18 @@ describe('when building member pages', () => {
         it('should link their site', () => page.data.config.person.links['website']!.should.equal('https://ada.example'));
         it('should show the verified merged pull requests', () => page.data.github.mergedPullRequests.total.should.equal(3));
     });
+
+    describe('for a member whose long bio does not end a sentence', () => {
+        const bio = 'Event sourcerer and passionate software developer, working across many platforms. Technology Advisor @ Novanet';
+        const page = memberProfile({ ...core, bio }, undefined, undefined, builtAt);
+
+        it('should end the bio before the facts', () => page.data.config.person.intro.should.equal(`${bio}. 3 merged public pull requests in the Cratis organization, counted when the directory was built.`));
+    });
+
+    describe('for a member whose long bio ends a sentence', () => {
+        const bio = 'Event sourcerer and passionate software developer, working across many platforms and stacks at once!';
+        const page = memberProfile({ ...core, bio }, undefined, undefined, builtAt);
+
+        it('should keep the bio as written', () => page.data.config.person.intro.should.contain(`${bio} 3 merged`));
+    });
 });

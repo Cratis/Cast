@@ -55,8 +55,7 @@ const summary = `Contribution heatmap: ${fmt.format(total)} contributions betwee
     ) : <div class="panel overflow-hidden" data-reveal data-heatmap>
       <div class="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-3.5 md:px-7">
         <p class="font-mono text-sm">
-          <span class="text-fg-faint">EventStore:</span> <span class="text-event">github.com/{github.login}</span>
-          <span class="text-fg-faint">· partitioned by day</span>
+          <span class="text-fg-faint">EventStore:</span> <span class="text-event">github.com/{github.login}</span> <span class="text-fg-faint">· partitioned by day</span>
         </p>
         <p class="font-mono text-xs text-fg-faint">snapshot taken <time datetime={github.fetchedAt}>{snapshotDate()}</time></p>
       </div>
