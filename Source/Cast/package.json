@@ -33,6 +33,7 @@
         "**/*.css",
         "**/*.svg",
         "cast.schema.json",
+        "cast-json.schema.json",
         "registry/members.yaml",
         "!**/for_*/**",
         "!vitest.config.ts",
@@ -46,6 +47,9 @@
         "./badges": "./badges/index.ts",
         "./github/*": "./github/*.ts",
         "./cast.schema.json": "./cast.schema.json",
+        "./cast-json.schema.json": "./cast-json.schema.json",
+        "./machine": "./machine/index.ts",
+        "./profile": "./site/profile/index.ts",
         "./package.json": "./package.json",
         "./*": "./*"
     },
