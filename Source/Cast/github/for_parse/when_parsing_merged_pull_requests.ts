@@ -6,7 +6,7 @@ import { mergedPullRequestQuery, parseMergedPullRequests, type PullRequestNode }
 describe('when parsing merged pull requests', () => {
     const nodes: PullRequestNode[] = [
         { title: 'Older', number: 1, url: 'https://github.com/Cratis/Arc/pull/1', mergedAt: '2026-01-01T00:00:00Z', repository: { nameWithOwner: 'Cratis/Arc', isPrivate: false } },
-        { title: 'Secret', number: 2, url: 'https://github.com/Cratis/Studio/pull/2', mergedAt: '2026-03-01T00:00:00Z', repository: { nameWithOwner: 'Cratis/Studio', isPrivate: true } },
+        { title: 'Secret', number: 2, url: 'https://github.com/Cratis/Hidden/pull/2', mergedAt: '2026-03-01T00:00:00Z', repository: { nameWithOwner: 'Cratis/Hidden', isPrivate: true } },
         { title: 'Newer', number: 3, url: 'https://github.com/Cratis/Chronicle/pull/3', mergedAt: '2026-02-01T00:00:00Z', repository: { nameWithOwner: 'Cratis/Chronicle', isPrivate: false } },
         { title: 'Open', number: 4, url: 'https://github.com/Cratis/Arc/pull/4', mergedAt: null, repository: { nameWithOwner: 'Cratis/Arc', isPrivate: false } },
         { title: 'Unknown visibility', number: 5, url: 'https://github.com/Cratis/Arc/pull/5', mergedAt: '2026-04-01T00:00:00Z', repository: { nameWithOwner: 'Cratis/Arc' } },
