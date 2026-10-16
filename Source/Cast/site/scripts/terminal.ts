@@ -8,6 +8,7 @@ import { getLiveMerged } from './live';
 import { relativeTime } from '../lib/reltime';
 import { copyText } from '../lib/clipboard';
 import { formatMonth } from '../lib/career';
+import { plainText } from '../lib/inline';
 import { go, goSection, openExternal, profilePath, startReplay } from '../lib/nav';
 import { currentTheme, setTheme } from '../lib/theme';
 
@@ -318,7 +319,7 @@ class Terminal {
                 run: () => {
                     this.print(c.fg(person.name), c.faint(` (${person.handle})`));
                     this.print(person.title, ...(person.location ? [c.faint(' · '), person.location] : []));
-                    this.print(c.ev(person.tagline.replace(/\*/g, '')));
+                    this.print(c.ev(plainText(person.tagline)));
                 },
             },
             now: {
@@ -327,7 +328,7 @@ class Terminal {
                     this.print(c.faint('Projection: '), c.view(`${firstName}.Now`), c.faint(` · projected from ${careerEvents.length} events`));
                     const rows: [string, string][] = Object.entries(now).map(([key, value]) => [
                         key,
-                        Array.isArray(value) ? value.join(', ') : /^\d{4}-\d{2}$/.test(value) ? formatMonth(value) : value.replace(/\*/g, ''),
+                        Array.isArray(value) ? value.join(', ') : /^\d{4}-\d{2}$/.test(value) ? formatMonth(value) : plainText(value),
                     ]);
                     for (const [k, v] of rows) this.print(c.faint(pad(k, 12)), c.fg(v));
                 },
@@ -516,7 +517,7 @@ class Terminal {
                 desc: 'what Cratis is',
                 run: () => {
                     if (!cratis) return this.print(c.faint('Cratis makes event sourcing practical. '), link('https://cratis.io'));
-                    if (cratis.pitch) this.print(c.fg(cratis.pitch.replace(/\*/g, '')));
+                    if (cratis.pitch) this.print(c.fg(plainText(cratis.pitch)));
                     this.print(c.faint(`${this.mergedTotal()} merged PRs · `), link(LINKS['cratis'] ?? 'https://cratis.io'));
                     for (const r of cratis.repos) this.print(c.cmd(pad(r.name, 21)), c.faint(pad(r.role, 16)), r.url ? link(r.url, r.desc) : r.desc);
                 },

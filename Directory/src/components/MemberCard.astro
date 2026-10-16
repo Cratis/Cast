@@ -3,6 +3,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import CastBadge from '@cratis/cast/site/components/CastBadge.astro';
+import { cardLine } from '../../integration/cardLine';
 import { avatar, displayName, formatMonth, formatNumber, type DirectoryMember } from '../lib/directory';
 
 interface Props {
@@ -10,7 +11,7 @@ interface Props {
 }
 const { member } = Astro.props;
 const name = displayName(member);
-const line = member.cast?.tagline ?? member.cast?.title ?? member.bio;
+const line = cardLine(member);
 const search = `${member.handle} ${name} ${member.role ?? ''} ${member.company ?? ''} ${member.location ?? ''}`.toLowerCase();
 ---
 
@@ -21,7 +22,7 @@ const search = `${member.handle} ${name} ${member.role ?? ''} ${member.company ?
       <CastBadge tier={member.tier} handle={member.handle} claim={false} size="compact" />
     </div>
     <h3 class="mt-5 text-2xl leading-tight font-[750] tracking-[-0.03em]">
-      <a href={`/${member.handle.toLowerCase()}`} class="after:absolute after:inset-0 after:rounded-[1.25rem]">{name}</a>
+      <a href={`/${member.handle.toLowerCase()}/`} class="after:absolute after:inset-0 after:rounded-[1.25rem]">{name}</a>
     </h3>
     <p class="mt-1 font-mono text-xs text-fg-faint">@{member.handle}{member.location && ` · ${member.location}`}</p>
     {member.role && <p class="mt-3 text-[0.975rem] text-fg">{member.role}{member.company && <span class="text-fg-muted"> · {member.company}</span>}</p>}
