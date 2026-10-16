@@ -18,7 +18,7 @@ const search = `${member.handle} ${name} ${member.role ?? ''} ${member.company ?
   <article class="panel glow group relative flex h-full flex-col p-6" style={`--glow: ${member.tier === 'core' ? 'var(--color-violet)' : 'var(--color-teal)'}`}>
     <div class="flex items-start justify-between gap-4">
       <img src={avatar(member, 160)} alt="" width="64" height="64" loading="lazy" class="size-16 rounded-2xl border border-line-strong object-cover" />
-      <CastBadge tier={member.tier} handle={member.handle} size="compact" />
+      <CastBadge tier={member.tier} handle={member.handle} claim={false} size="compact" />
     </div>
     <h3 class="mt-5 text-2xl leading-tight font-[750] tracking-[-0.03em]">
       <a href={`/${member.handle.toLowerCase()}`} class="after:absolute after:inset-0 after:rounded-[1.25rem]">{name}</a>

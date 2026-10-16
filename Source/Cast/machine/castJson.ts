@@ -9,8 +9,10 @@ import { plainText } from '../site/lib/inline';
 export const castJsonVersion = 1;
 
 /**
- * The machine-readable profile at /cast.json. The directory aggregates these, and agents can read them.
- * `tier` is the claim as verified when the site was built, never something the site asserted.
+ * The machine-readable profile at /cast.json. Agents can read it; the directory shows its title and tagline.
+ * `verification.claimedTier` is what this site's build resolved. A site is static and controlled by its owner,
+ * so it is a claim: the directory page at `verification.url` is the source of truth, and the directory never
+ * reads tiers from here.
  */
 export function castJson(data: CastData) {
     const { config, tier, github, build } = data;
@@ -19,7 +21,7 @@ export function castJson(data: CastData) {
         castJsonVersion,
         generator: `@cratis/cast ${build.castVersion}`,
         builtAt: build.builtAt,
-        handle: person.handle,
+        handle: config.github.login,
         name: person.name,
         ...(person.fullName ? { fullName: person.fullName } : {}),
         title: person.title,
@@ -28,13 +30,14 @@ export function castJson(data: CastData) {
         intro: plainText(person.intro),
         site: config.site.url,
         verification: {
-            url: verificationUrl(person.handle),
-            tier: tier.tier ?? null,
+            url: verificationUrl(config.github.login),
+            claimedTier: tier.tier ?? null,
             source: tier.source,
             ...(tier.member?.since ? { since: tier.member.since } : {}),
             ...(tier.member?.role ? { role: tier.member.role } : {}),
-            verifiedAt: build.builtAt,
+            claimedAt: build.builtAt,
             registry: build.registrySource,
+            note: 'Claimed by this site when it was built. The directory page at url is the source of truth.',
         },
         links: { github: `https://github.com/${config.github.login}`, ...person.links },
         career: config.career.events.map(event => ({

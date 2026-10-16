@@ -5,6 +5,7 @@
 import SectionHeader from './SectionHeader.astro';
 import { eventModel } from '../data';
 import { renderInline } from '../lib/inline';
+import { safeJson } from '../lib/safeJson';
 
 interface Props {
   index: string;
@@ -149,7 +150,7 @@ const stepsFor = (id: string) => m.steps.flatMap((s, i) => (s.cards.includes(id)
         </ol>
       </div>
     </div>
-    <script type="application/json" data-model-json set:html={JSON.stringify({ cards: m.cards.map(({ id, kind, name, source, note }) => ({ id, kind, name, source, note })), steps: m.steps, root: `${m.repo}/blob/${m.branch}/${m.sourceRoot}` })} />
+    <script type="application/json" data-model-json set:html={safeJson({ cards: m.cards.map(({ id, kind, name, source, note }) => ({ id, kind, name, source, note })), steps: m.steps, root: `${m.repo}/blob/${m.branch}/${m.sourceRoot}` })} />
   </div>
 </section>
 

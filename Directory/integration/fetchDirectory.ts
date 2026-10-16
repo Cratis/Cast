@@ -37,7 +37,8 @@ export async function publicRepositories(token: string, warn: Warn): Promise<str
  * Commit authors with GitHub accounts across public Cratis repositories (first page of 100 per repository),
  * bots excluded. This is discovery only: a contributor is confirmed by a merged pull request search.
  */
-export async function discoverContributors(repositories: readonly string[], token: string, warn: Warn): Promise<DirectorySnapshot['activity']> {
+export async function discoverContributors(repositories: readonly string[], token: string, warn: Warn): Promise<{ activity: DirectorySnapshot['activity']; complete: boolean }> {
+    let complete = true;
     const activity: Record<string, { commits: number; repositories: Map<string, number> }> = {};
     for (const repository of repositories) {
         try {
@@ -50,39 +51,57 @@ export async function discoverContributors(repositories: readonly string[], toke
                 activity[login]!.repositories.set(repository, contributor.contributions);
             }
         } catch (error) {
+            complete = false;
             warn(`${repository}: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
-    return Object.fromEntries(Object.entries(activity).map(([login, entry]) => [login, {
+    return { complete, activity: Object.fromEntries(Object.entries(activity).map(([login, entry]) => [login, {
         commits: entry.commits,
         repositories: [...entry.repositories.entries()].sort((left, right) => right[1] - left[1]).slice(0, 6).map(([name]) => name),
-    }]));
+    }])) };
 }
 
-/** Public profile fields for many logins, 40 per GraphQL request. Unknown logins are skipped. */
+/**
+ * Public profile fields for many logins, 40 per GraphQL request. An unknown or renamed login resolves to null
+ * with a GraphQL error; the rest of its batch is kept. A batch that fails outright is retried one login at a
+ * time, so one bad login never drops the others.
+ */
 export async function fetchProfiles(logins: readonly string[], token: string, warn: Warn): Promise<DirectorySnapshot['profiles']> {
     const profiles: DirectorySnapshot['profiles'] = {};
     for (let start = 0; start < logins.length; start += 40) {
         const batch = logins.slice(start, start + 40);
         const query = `query { ${batch.map((login, index) => `u${index}: user(login: ${JSON.stringify(login)}) { login name avatarUrl bio location }`).join('\n')} }`;
+        const partial = { allowPartial: true as const, onErrors: (messages: string[]) => warn(`profiles: ${messages.join('; ')}`) };
         try {
-            type Profile = { login: string; name: string | null; avatarUrl: string | null; bio: string | null; location: string | null } | null;
-            const data = await graphql<Record<string, Profile>>(query, {}, token);
-            for (const profile of Object.values(data)) {
-                if (!profile) continue;
-                profiles[profile.login.toLowerCase()] = {
-                    ...(profile.name ? { name: profile.name } : {}),
-                    ...(profile.avatarUrl ? { avatarUrl: profile.avatarUrl } : {}),
-                    ...(profile.bio ? { bio: profile.bio } : {}),
-                    ...(profile.location ? { location: profile.location } : {}),
-                };
-            }
+            addProfiles(profiles, await graphql<Record<string, ProfileNode>>(query, {}, token, partial));
         } catch (error) {
-            // GraphQL returns errors for logins that are organizations or gone; keep what resolved.
-            warn(`profiles ${start}-${start + batch.length}: ${error instanceof Error ? error.message : String(error)}`);
+            warn(`profiles ${start}-${start + batch.length}: ${error instanceof Error ? error.message : String(error)}; retrying one by one`);
+            for (const login of batch) {
+                try {
+                    addProfiles(profiles, await graphql<Record<string, ProfileNode>>(`query { u0: user(login: ${JSON.stringify(login)}) { login name avatarUrl bio location } }`, {}, token, partial));
+                } catch (single) {
+                    warn(`profile ${login}: ${single instanceof Error ? single.message : String(single)}`);
+                }
+            }
         }
     }
     return profiles;
+}
+
+/** A user node; null for logins that do not resolve to a user. */
+export type ProfileNode = { login: string; name: string | null; avatarUrl: string | null; bio: string | null; location: string | null } | null;
+
+/** Adds the resolved users of one GraphQL response, skipping nulls. */
+export function addProfiles(profiles: DirectorySnapshot['profiles'], data: Record<string, ProfileNode>): void {
+    for (const profile of Object.values(data)) {
+        if (!profile?.login) continue;
+        profiles[profile.login.toLowerCase()] = {
+            ...(profile.name ? { name: profile.name } : {}),
+            ...(profile.avatarUrl ? { avatarUrl: profile.avatarUrl } : {}),
+            ...(profile.bio ? { bio: profile.bio } : {}),
+            ...(profile.location ? { location: profile.location } : {}),
+        };
+    }
 }
 
 /** Verifies merged public pull requests in the Cratis organization for each login. */

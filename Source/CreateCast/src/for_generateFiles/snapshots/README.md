@@ -25,4 +25,4 @@ The site will be at https://www.ada.example.
 
 ## Your badge
 
-Your Cast badge is checked on every build: Core and Partner come from the [Cast registry](https://github.com/Cratis/Cast/blob/main/Registry/README.md), Contributor from merged public pull requests in the Cratis organization. Verification page: https://cast.cratis.io/ada
+Your site shows the Cast tier its build resolved, as a claim: Core and Partner from the [Cast registry](https://github.com/Cratis/Cast/blob/main/Registry/README.md), Contributor from merged public pull requests in the Cratis organization. The directory, built by Cratis, is the source of truth; link to your verification page: https://cast.cratis.io/ada

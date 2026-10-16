@@ -25,7 +25,9 @@ async function readSnapshot(file: string): Promise<DirectorySnapshot> {
 /**
  * Builds the directory data before Astro renders: the registry in this repository is the source of truth
  * for Core and Partner; GitHub supplies public profiles, discovery and verified merged pull request counts.
- * Never fails the build on network problems: the committed snapshot is used instead.
+ * Never fails the build on network problems or rate limits: every GitHub step is caught, failed steps keep the
+ * snapshot's values, and the committed snapshot is used when nothing can be fetched. Only an invalid registry
+ * stops the build.
  */
 export default function castDirectory(options: { registry?: string; snapshot?: string; verifyLimit?: number } = {}): AstroIntegration {
     return {
@@ -50,8 +52,10 @@ export default function castDirectory(options: { registry?: string; snapshot?: s
                     const now = new Date();
                     try {
                         const repositories = await publicRepositories(token, warn);
-                        activity = await discoverContributors(repositories, token, warn);
-                        logger.info(`discovered ${Object.keys(activity).length} people across ${repositories.length} public repositories`);
+                        const discovery = await discoverContributors(repositories, token, warn);
+                        // A partial discovery (rate limits, outages) adds to what is known; only a complete one replaces it.
+                        activity = discovery.complete ? discovery.activity : { ...activity, ...discovery.activity };
+                        logger.info(`discovered ${Object.keys(discovery.activity).length} people across ${repositories.length} public repositories${discovery.complete ? '' : ' (partial; kept earlier discoveries)'}`);
                         const memberLogins = registry.map(member => member.github.toLowerCase());
                         const everyone = [...new Set([...memberLogins, ...Object.keys(activity)])];
                         const limit = options.verifyLimit ?? Number(process.env.CAST_DIRECTORY_VERIFY_LIMIT ?? 40);
@@ -63,6 +67,7 @@ export default function castDirectory(options: { registry?: string; snapshot?: s
                     } catch (error) {
                         warn(`GitHub: ${error instanceof Error ? error.message : String(error)}; keeping the snapshot`);
                     }
+                    // Member sites only contribute display text (title, tagline). Tiers never come from them.
                     for (const member of registry.filter(entry => entry.site)) {
                         const cast = await fetchCastProfile(member.site!, warn);
                         if (cast) casts[member.github.toLowerCase()] = cast;

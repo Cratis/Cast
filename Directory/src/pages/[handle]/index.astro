@@ -48,7 +48,7 @@ const facts = [
       <div class="mt-8 grid gap-8 md:grid-cols-[auto_1fr] md:items-center">
         <img src={avatar(member, 240)} alt={`${name}`} width="120" height="120" class="size-28 rounded-[1.75rem] border border-line-strong object-cover md:size-32" />
         <div>
-          <CastBadge tier={member.tier} handle={member.handle} />
+          <CastBadge tier={member.tier} handle={member.handle} claim={false} />
           <h1 class="mt-4 text-[clamp(2.5rem,6vw,4.5rem)] leading-[0.95] font-[800] tracking-[-0.045em]">{name}</h1>
           <p class="mt-3 font-mono text-sm text-fg-muted">@{member.handle}{member.cast?.title && <span class="text-fg-faint"> · {member.cast.title}</span>}</p>
           {(member.cast?.tagline ?? member.bio) && <p class="mt-4 max-w-[60ch] text-lg text-fg-muted">{member.cast?.tagline ?? member.bio}</p>}

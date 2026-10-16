@@ -22,6 +22,11 @@ export function parseCastObject(document: unknown, source = 'cast.yaml'): CastCo
     }
 
     const config = result.data;
+
+    // One identity: the GitHub login. person.handle is that login; github.login may repeat it, never differ.
+    if (config.github.login !== undefined && config.github.login.toLowerCase() !== config.person.handle.toLowerCase()) {
+        throw new CastConfigError([`github.login: '${config.github.login}' differs from person.handle '${config.person.handle}'. Both are your GitHub login, which is your Cast identity; use the same value or leave github.login out.`], source);
+    }
     const events = config.career.events
         .map((event, index) => ({ ...event, seq: event.seq ?? index + 1 }))
         .sort((left, right) => left.seq - right.seq);

@@ -2,7 +2,7 @@
 // Copyright (c) Cratis. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-// The verified Cast badge. Renders only when the build verified a tier; links to the verification page.
+// The Cast badge. On a member's site it is a claim that links to the directory, which is the authority.
 import type { Tier } from '../../badges/Tier';
 import { tierStyles } from '../../badges/badgeSvg';
 import { verificationUrl } from '../../badges/constants';
@@ -13,8 +13,13 @@ interface Props {
   handle: string;
   size?: 'compact' | 'full';
   class?: string;
+  /**
+   * True on a member's own site: the tier is what that site's build resolved, a claim. The directory, which
+   * Cratis builds from the registry and live GitHub data, passes false.
+   */
+  claim?: boolean;
 }
-const { tier, handle, size = 'full', class: className = '' } = Astro.props;
+const { tier, handle, size = 'full', class: className = '', claim = true } = Astro.props;
 const style = tier ? tierStyles[tier] : undefined;
 const href = verificationUrl(handle);
 ---
@@ -26,8 +31,8 @@ const href = verificationUrl(handle);
       rel="noopener"
       class:list={['cast-badge group', `cast-${tier}`, size === 'compact' ? 'is-compact' : 'is-full', className]}
       style={`--tier-from:${style.from};--tier-to:${style.to};--tier-ink:${style.ink}`}
-      aria-label={`Cratis Cast ${style.label}: ${style.description}. Verify on cast.cratis.io`}
-      title={`Cratis Cast ${style.label} · verified`}
+      aria-label={claim ? `Cratis Cast ${style.label}, as claimed by this site. Verify at cast.cratis.io` : `Cratis Cast ${style.label}: ${style.description}. Verified by the Cast directory`}
+      title={claim ? `Cratis Cast ${style.label} · verify at cast.cratis.io` : `Cratis Cast ${style.label} · verified by the directory`}
     >
       <span class="cast-badge-left">
         <CratisMark class="cast-badge-mark" />
@@ -35,7 +40,12 @@ const href = verificationUrl(handle);
       </span>
       <span class="cast-badge-tier">
         {style.label}
-        {size === 'full' && (
+        {size === 'full' && claim && (
+          <svg viewBox="0 0 16 16" class="cast-badge-check" aria-hidden="true">
+            <path d="M5.5 10.5 10.5 5.5M6.5 5.5h4v4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        )}
+        {size === 'full' && !claim && (
           <svg viewBox="0 0 16 16" class="cast-badge-check" aria-hidden="true">
             <path d="M8 1.2 9.6 2.6l2.1-.2.6 2 1.8 1.1-.7 2 .7 2-1.8 1.1-.6 2-2.1-.2L8 14.8l-1.6-1.4-2.1.2-.6-2-1.8-1.1.7-2-.7-2 1.8-1.1.6-2 2.1.2Z" fill="currentColor" opacity=".9" />
             <path d="m5.4 8.2 1.8 1.8 3.5-3.6" fill="none" stroke="var(--tier-from)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />

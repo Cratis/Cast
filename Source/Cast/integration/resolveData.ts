@@ -6,6 +6,9 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { cratisOrganization } from '../badges/constants';
 import { resolveTier } from '../badges/resolveTier';
+import type { RegistryMember } from '../badges/RegistryMember';
+import type { ResolvedTier } from '../badges/ResolvedTier';
+import type { GitHubSnapshot } from '../github/GitHubSnapshot';
 import type { CastConfig } from '../config/CastConfig';
 import { parseCast } from '../config/parseCast';
 import { resolveSections } from '../config/resolveSections';
@@ -34,6 +37,22 @@ export const trackedCratisRepositories = (config: CastConfig): string[] =>
         .filter(repository => repository.url?.toLowerCase().startsWith(`https://github.com/${cratisOrganization.toLowerCase()}/`))
         .map(repository => `${cratisOrganization}/${repository.name}`);
 
+const sameLogin = (left: string, right: string): boolean => left.toLowerCase() === right.toLowerCase();
+
+/** The snapshot's GitHub data, only when it was captured for this identity. */
+export const usableSnapshot = (github: GitHubSnapshot | undefined, identity: string): GitHubSnapshot | undefined =>
+    github && typeof github.login === 'string' && sameLogin(github.login, identity) ? github : undefined;
+
+/**
+ * The tier a site shows: a claim, linked to the directory, which is the authority. Core and Partner come from
+ * the registry by the GitHub login. Contributor comes only from merged pull requests fetched live in this build
+ * for that login: never from `.cast/snapshot.json`, which the site owner controls.
+ */
+export function siteTier(identity: string, registry: readonly RegistryMember[], githubSource: CastData['build']['githubSource'], github: GitHubSnapshot): ResolvedTier {
+    const liveCount = githubSource === 'live' && sameLogin(github.login, identity) ? github.mergedPullRequests.byOrg[cratisOrganization] : undefined;
+    return resolveTier(identity, registry, liveCount);
+}
+
 /**
  * Reads cast.yaml, captures build-time data (never failing the build on network problems) and resolves the
  * verified tier. Order of truth for live data: a fresh fetch, then `.cast/snapshot.json`, then cast.yaml.
@@ -43,8 +62,13 @@ export async function resolveData(options: ResolveDataOptions): Promise<Resolved
     const config = parseCast(configText, path.basename(options.configFile));
     const warn = (message: string) => options.log.warn(`${message}`);
 
+    const identity = config.github.login;
     const snapshot = await readSnapshot(options.snapshotFile);
-    let github = snapshot.github;
+    const snapshotGitHub = usableSnapshot(snapshot.github, identity);
+    if (snapshot.github && !snapshotGitHub) {
+        warn(`.cast/snapshot.json holds GitHub data for '${snapshot.github.login}', not '${identity}'; ignoring it`);
+    }
+    let github = snapshotGitHub;
     let githubSource: CastData['build']['githubSource'] = github ? 'snapshot' : 'none';
     let writing = snapshot.writing;
     let changed = false;
@@ -61,7 +85,9 @@ export async function resolveData(options: ResolveDataOptions): Promise<Resolved
                 releases: config.github.releases,
                 stars: config.github.stars,
             }, token, github, warn);
-            if (fresh) {
+            if (fresh && !sameLogin(fresh.login, identity)) {
+                warn(`GitHub answered for '${fresh.login}', not '${identity}'; ignoring it`);
+            } else if (fresh) {
                 github = fresh;
                 githubSource = 'live';
                 changed = true;
@@ -85,8 +111,8 @@ export async function resolveData(options: ResolveDataOptions): Promise<Resolved
     }
 
     const registry = await loadRegistry(options.fetch, warn);
-    const githubData = github ?? emptySnapshot(config.github.login, config.github.orgs);
-    const tier = resolveTier(config.person.handle, registry.members, githubData.mergedPullRequests.byOrg[cratisOrganization]);
+    const githubData = github ?? emptySnapshot(identity, config.github.orgs);
+    const tier = siteTier(identity, registry.members, githubSource, githubData);
 
     const photo = config.person.photo;
     const photoUrl = photo && /^https:\/\//.test(photo) ? photo : undefined;

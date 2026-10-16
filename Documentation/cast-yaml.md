@@ -39,7 +39,7 @@ Dates are `YYYY-MM` or `YYYY`; talks and community entries may also use `YYYY-MM
 | --- | --- | --- |
 | `name` | yes | Display name. Its first word names the projections, such as `Ada.Now`. |
 | `fullName` | | Full name, when it differs. Used on the CV. |
-| `handle` | yes | Your GitHub login. It is also your Cast handle: your verification page is `https://cast.cratis.io/<handle>`. |
+| `handle` | yes | Your GitHub login: your one Cast identity. Tier, badge, `/cast.json` and your verification page (`https://cast.cratis.io/<handle>`) all use it. |
 | `title` | yes | The role line under your name. |
 | `titleShort` | | A shorter role line for small screens. |
 | `location` | | For example `Oslo, Norway`. |
@@ -169,7 +169,7 @@ One real slice of an event model, drawn as a board you can play. `name`, `repo`,
 
 | Field | Default | Meaning |
 | --- | --- | --- |
-| `login` | `person.handle` | The GitHub account to read. |
+| `login` | `person.handle` | Optional. If given, it must equal `person.handle` (case-insensitive); a different login stops the build, because the GitHub login is your one identity. |
 | `orgs` | `[Cratis]` | Organizations whose merged public pull requests are counted. The live feed shows the newest across them. |
 | `releases` | `[]` | `owner/name` repositories whose latest release tag versions your projects. |
 | `stars` | `[]` | `owner/name` repositories whose star count is shown on pipeline cards. |

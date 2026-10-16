@@ -57,7 +57,7 @@ Edit `cast.yaml` and the page follows. Editors that understand the `yaml-languag
 GITHUB_TOKEN=$(gh auth token) npm run build
 ```
 
-What was captured is saved to `.cast/snapshot.json`. Commit it: builds without a token, or with GitHub unreachable, use it instead. Network problems never fail a build. Only public data is used; private repositories are filtered out even when the token can see them.
+What was captured is saved to `.cast/snapshot.json`, with the login it was captured for. Commit it: builds without a token, or with GitHub unreachable, use it for the numbers on the page. It never sets your badge, and a snapshot for another login is ignored (see [Badges and the registry](badges-and-registry.md)). Network problems never fail a build. Only public data is used; private repositories are filtered out even when the token can see them.
 
 ## Publish
 

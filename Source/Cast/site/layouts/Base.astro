@@ -12,6 +12,7 @@ import { ClientRouter } from 'astro:transitions';
 import { config, person, githubUrl, profileLinks } from '../data';
 import { plainText } from '../lib/inline';
 import { accentTokens } from '../lib/accent';
+import { safeJson } from '../lib/safeJson';
 import CommandPalette from '../components/CommandPalette.astro';
 import Terminal from '../components/Terminal.astro';
 
@@ -87,7 +88,7 @@ const jsonLd = {
     <meta name="twitter:description" content={plainText(description)} />
     <meta name="twitter:image" content={ogImage} />
 
-    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <script type="application/ld+json" set:html={safeJson(jsonLd)} />
     <style set:html={`:root{--color-accent:${accent.dark};--color-accent-soft:${accent.darkSoft};--color-accent-ink:${accent.ink}}html[data-theme='light']{--color-accent:${accent.light};--color-accent-soft:${accent.lightSoft}}`}></style>
 
     <script is:inline>

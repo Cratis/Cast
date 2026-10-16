@@ -21,7 +21,7 @@ const text = z.string().min(1);
 export const personSchema = z.object({
     name: z.string().min(1).describe('Display name, for example "Ada Lovelace".'),
     fullName: z.string().optional().describe('Full legal name when it differs from the display name.'),
-    handle: z.string().regex(/^[A-Za-z0-9-]+$/).describe('Your GitHub login. It is also your Cast handle and verification page.'),
+    handle: z.string().regex(/^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$/, 'Must be your GitHub login').describe('Your GitHub login: your one Cast identity. Tier, badge, /cast.json and the verification page all use it.'),
     title: z.string().min(1).describe('Role line under your name.'),
     titleShort: z.string().optional().describe('Shorter role line for small screens.'),
     location: z.string().optional(),
@@ -210,7 +210,7 @@ export const certificationSchema = z.object({
 });
 
 export const githubSchema = z.object({
-    login: z.string().optional().describe('GitHub login; defaults to person.handle.'),
+    login: z.string().optional().describe('Must equal person.handle (case-insensitive) when given; your GitHub login is your one identity.'),
     orgs: z.array(z.string()).default(['Cratis']).describe('Organizations whose merged public pull requests are counted. The first one feeds the live pull request feed.'),
     releases: z.array(z.string().regex(/^[\w.-]+\/[\w.-]+$/)).default([]).describe('owner/name repositories whose latest release versions your projects.'),
     stars: z.array(z.string().regex(/^[\w.-]+\/[\w.-]+$/)).default([]).describe('owner/name repositories whose star count is shown.'),

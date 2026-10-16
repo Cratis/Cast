@@ -20,7 +20,7 @@ export function llmsText(data: CastData): string {
 
     if (tier.tier) {
         const style = tierStyles[tier.tier];
-        lines.push(`Cratis Cast: ${style.label} (${style.description.toLowerCase()}), verified at build time from ${tier.source === 'registry' ? 'the Cast registry' : 'merged public pull requests in the Cratis organization'}. Verification: ${verificationUrl(person.handle)}`, '');
+        lines.push(`Cratis Cast: ${style.label} (${style.description.toLowerCase()}), as claimed by this site's build from ${tier.source === 'registry' ? 'the Cast registry' : 'merged public pull requests in the Cratis organization'}. The authoritative check is ${verificationUrl(config.github.login)}`, '');
     }
 
     if (projection.currentRoles.length > 0) {

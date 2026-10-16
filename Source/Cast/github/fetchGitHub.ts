@@ -34,8 +34,11 @@ async function rest(path: string, token: string): Promise<Response> {
     return response;
 }
 
-/** Runs a GraphQL query; throws on transport or GraphQL errors. */
-export async function graphql<T>(query: string, variables: Record<string, unknown>, token: string): Promise<T> {
+/**
+ * Runs a GraphQL query; throws on transport errors and on GraphQL errors. With `allowPartial`, GraphQL errors
+ * (such as one unknown login in a batch) are reported through `onErrors` and whatever data came back is returned.
+ */
+export async function graphql<T>(query: string, variables: Record<string, unknown>, token: string, partial?: { allowPartial: true; onErrors: (messages: string[]) => void }): Promise<T> {
     const response = await fetch('https://api.github.com/graphql', {
         method: 'POST',
         headers: { authorization: `bearer ${token}`, 'content-type': 'application/json', 'user-agent': userAgent },
@@ -44,7 +47,11 @@ export async function graphql<T>(query: string, variables: Record<string, unknow
     });
     if (!response.ok) throw new Error(`GitHub GraphQL answered ${response.status} ${response.statusText}`);
     const body = await response.json() as { data?: T; errors?: { message: string }[] };
-    if (body.errors?.length) throw new Error(`GraphQL errors: ${body.errors.map(error => error.message).join('; ')}`);
+    if (body.errors?.length) {
+        const messages = body.errors.map(error => error.message);
+        if (!partial || !body.data) throw new Error(`GraphQL errors: ${messages.join('; ')}`);
+        partial.onErrors(messages);
+    }
     if (!body.data) throw new Error('GraphQL returned no data');
     return body.data;
 }
