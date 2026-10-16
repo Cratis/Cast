@@ -66,6 +66,7 @@ export default tseslint.config(
             '**/node_modules/**',
             '**/.astro/**',
             '**/.yarn/**',
+            '**/snapshots/**',
         ],
     },
     eslint.configs.recommended,

@@ -1,0 +1,19 @@
+{
+  "name": "ada-cast",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Ada Lovelace's Cast site.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "engines": {
+    "node": ">=23.0.0"
+  },
+  "dependencies": {
+    "@cratis/cast": "^1.2.3",
+    "astro": "^7.2.0"
+  }
+}

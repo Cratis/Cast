@@ -392,6 +392,16 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@cratis/create-cast@workspace:Source/CreateCast":
+  version: 0.0.0-use.local
+  resolution: "@cratis/create-cast@workspace:Source/CreateCast"
+  dependencies:
+    "@cratis/cast": "workspace:*"
+  bin:
+    create-cast: dist/index.js
+  languageName: unknown
+  linkType: soft
+
 "@emnapi/core@npm:1.11.1":
   version: 1.11.1
   resolution: "@emnapi/core@npm:1.11.1"

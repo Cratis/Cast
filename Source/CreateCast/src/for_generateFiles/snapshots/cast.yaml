@@ -1,0 +1,114 @@
+# yaml-language-server: $schema=https://unpkg.com/@cratis/cast/cast.schema.json
+#
+# Your Cast site. Every page is built from this file; edit it and the site follows.
+# Text fields can use *emphasis* (the italic serif accent), **strong**, `code` and [links](https://example.com).
+# Reference: https://github.com/Cratis/Cast/blob/main/Documentation/cast-yaml.md
+
+site:
+  url: "https://www.ada.example"
+  # description: One sentence for search engines; defaults to your tagline and intro.
+  # source: https://github.com/you/your-site
+
+person:
+  name: "Ada Lovelace"
+  handle: "ada"
+  title: "Analyst of engines."   # the role line under your name
+  location: "London"
+  # email: you@example.com
+  photo: "https://avatars.githubusercontent.com/u/1?v=4"   # or a local file such as ./avatar.jpeg
+  links:
+    github: "https://github.com/ada"
+    website: "https://ada.example"
+    # linkedin: https://www.linkedin.com/in/you/
+  tagline: "I build software that *remembers.*"   # the hero headline; *asterisks* mark the accent
+  intro: "Analyst of engines. Writes \"programs\"."
+  # about:
+  #   - A paragraph for the "about" column and the CV summary.
+  # interests: [Event Modeling, Event Sourcing, Developer experience]
+  # languages: [English (fluent)]
+
+# The "now" read model: ordered rows. YYYY-MM values show as months.
+# now:
+#   role: Senior Engineer
+#   company: Example Co
+#   since: 2025-06
+#   building: [Something with Cratis]
+
+# Big numbers. `live` replaces the value with a build-time figure from GitHub.
+# stats:
+#   - { value: 1000, suffix: "+", label: contributions on GitHub in the last year, live: contributionsLastYear }
+#   - { value: 10, suffix: "+", label: merged PRs in the Cratis org, live: mergedPullRequests }
+
+# Your career as an event stream. Types are past-tense PascalCase. `role` sets the current role;
+# `endsRole` closes the open role at that organization. The page replays these in order.
+# career:
+#   events:
+#     - date: 2018-07
+#       type: EmploymentStarted
+#       title: Software Engineer
+#       org: Example Co
+#       orgUrl: https://example.com
+#       role: Software Engineer
+#       summary: What you built and what changed because of it.
+#       skills: [C#, Event Sourcing]
+#     - date: 2024-06
+#       type: TalkGiven
+#       title: "Talk: Event Modeling in practice"
+#       summary: Where and what about.
+
+# What you do at Cratis. The section only renders when this key is present.
+# cratis:
+#   role: I maintain the Chronicle Go client and help teams adopt event modeling.
+#   repos:
+#     - { name: Chronicle.Go, url: https://github.com/Cratis/Chronicle.Go, kind: Client · Go, group: client, desc: Idiomatic Go client for Chronicle. }
+#   highlights: [A change you landed that you are proud of]
+
+# projects:
+#   - name: my-tool
+#     url: https://github.com/you/my-tool
+#     category: cli
+#     pitch: What it does, in one sentence.
+#     features: [One, Two, Three]
+#     stack: [Rust]
+#     install: brew install you/tap/my-tool
+# projectCategories:
+#   - { id: cli, label: CLI }
+
+# talks:
+#   - { title: Event sourcing in practice, host: Example Meetup, date: 2025-11-12, url: https://example.com/talk, summary: What it covered. }
+# community:
+#   - { title: Event Modeling Conference, detail: Attended, date: 2025-10 }
+
+# Posts from RSS/Atom feeds or a Starlight Blog author page (such as blog.cratis.io).
+# writing:
+#   sources:
+#     - rss: https://example.com/rss.xml
+#     - starlightBlogAuthor: https://blog.cratis.io/authors/your-name/
+#   themes:
+#     - { id: event-sourcing, label: Event sourcing, tags: [event-sourcing, cqrs] }
+
+# agentic:
+#   pitch: How you work with AI coding agents.
+#   items:
+#     - { name: my-setup, url: https://github.com/you/my-setup, kind: Agent configuration, text: What it is. }
+
+# skills:
+#   Languages: [C#, TypeScript]
+#   Architecture: [Event Modeling, Event Sourcing, CQRS]
+# education:
+#   - { degree: Bachelor of Computer Science, school: Example University, from: "2015", to: "2018" }
+# certifications:
+#   - { title: Example certificate, issuer: Example, year: "2023" }
+
+# Public GitHub data captured at build time (a token is read from GITHUB_TOKEN or GH_TOKEN).
+github:
+  orgs: [Cratis]   # organizations whose merged public pull requests you want counted
+  # releases: [you/my-tool]   # latest release versions your projects
+  # stars: [Cratis/Chronicle]
+
+theme:
+  accent: "#8b5cf6"   # your accent; Cratis violet by default
+  mode: dark          # dark, light or system for first-time visitors
+
+# Section order. Leave it out to show every section that has data.
+# sections: [hero, now, stats, career, cratis, activity, projects, writing, talks, skills, contact]
