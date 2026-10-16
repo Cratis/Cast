@@ -17,10 +17,10 @@ export type PullRequestNode = {
 
 const botLogins = new Set(['cratis-bot', 'dependabot', 'github-actions', 'renovate', 'copilot', 'copilot-swe-agent']);
 
-/** True for bots: GitHub's Bot type, `[bot]` logins and well-known automation accounts. */
+/** True for bots: GitHub's Bot type, `[bot]` and `-bot` logins, and well-known automation accounts. */
 export function isBot(entry: { login: string; type?: string }): boolean {
     const login = entry.login.toLowerCase();
-    return entry.type === 'Bot' || login.endsWith('[bot]') || botLogins.has(login);
+    return entry.type === 'Bot' || login.endsWith('[bot]') || login.endsWith('-bot') || botLogins.has(login);
 }
 
 /** Commits and 1-based rank of `login` among human contributors; rank 0 when absent. */

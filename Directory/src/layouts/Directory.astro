@@ -1,0 +1,122 @@
+---
+// Copyright (c) Cratis. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+import '@fontsource-variable/inter/wght.css';
+import '@fontsource-variable/jetbrains-mono/wght.css';
+import '@fontsource-variable/fraunces/opsz-italic.css';
+import '@cratis/cast/site/styles/global.css';
+import CratisMark from '@cratis/cast/site/components/CratisMark.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  noindex?: boolean;
+}
+const { title, description, noindex = false } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const links = [
+  { href: '/#core', label: 'Core' },
+  { href: '/#partners', label: 'Partners' },
+  { href: '/#contributors', label: 'Contributors' },
+  { href: '/join', label: 'Join' },
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="theme-color" content="#08080e" />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/json" href="/members.json" title="Cast members" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Cratis Cast" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <script is:inline>
+      /* eslint-disable no-var, no-empty, @typescript-eslint/no-unused-vars -- runs before anything else loads, so it stays ES5 */
+      (function () {
+        var d = document.documentElement;
+        var t = 'dark';
+        try {
+          if (localStorage.getItem('cast:theme') === 'light') t = 'light';
+        } catch (e) {}
+        d.dataset.theme = t;
+        d.style.colorScheme = t;
+        if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) d.classList.add('js-motion');
+        d.classList.add('js');
+      })();
+    </script>
+  </head>
+  <body class="grain">
+    <a href="#main" class="sr-only-focusable fixed top-3 left-3 z-[100] rounded-lg bg-accent px-4 py-2 font-medium text-accent-ink">Skip to content</a>
+    <header data-nav class="fixed inset-x-0 top-0 z-50 h-[var(--nav-h)] border-b border-transparent transition-[background-color,border-color] duration-300 data-[scrolled]:border-line data-[scrolled]:bg-ink-950/75 data-[scrolled]:backdrop-blur-xl">
+      <nav class="container-x flex h-full items-center justify-between gap-4" aria-label="Primary">
+        <a href="/" class="group flex items-center gap-2.5 rounded-md" aria-label="Cratis Cast, home">
+          <span class="grid size-8 place-items-center rounded-[0.6rem] border border-line-strong bg-ink-900 text-fg transition-transform duration-500 ease-[var(--ease-spring)] group-hover:-rotate-6">
+            <CratisMark class="size-[1.15rem]" />
+          </span>
+          <span class="text-[0.9375rem] font-semibold tracking-tight">Cratis <span class="serif">Cast</span></span>
+        </a>
+        <ul class="hidden items-center gap-1 md:flex">
+          {links.map((link) => <li><a href={link.href} class="rounded-lg px-3 py-2 text-sm text-fg-muted transition-colors hover:text-fg">{link.label}</a></li>)}
+        </ul>
+        <div class="flex items-center gap-2">
+          <a href="/join" class="btn btn-sm btn-primary md:hidden">Join</a>
+          <button type="button" data-theme-toggle class="btn btn-sm w-9 px-0 text-fg-muted hover:text-fg" aria-label="Light theme" aria-pressed="false" title="Toggle light theme">
+            <svg viewBox="0 0 20 20" class="theme-sun size-4" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="10" cy="10" r="3.5"></circle><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M4.3 15.7l1.4-1.4M14.3 5.7l1.4-1.4" stroke-linecap="round"></path></svg>
+            <svg viewBox="0 0 20 20" class="theme-moon size-4" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M16 12.5A6.5 6.5 0 0 1 7.5 4a6.5 6.5 0 1 0 8.5 8.5Z" stroke-linejoin="round"></path></svg>
+          </button>
+          <a href="https://github.com/Cratis/Cast" class="btn btn-sm hidden sm:inline-flex" rel="noopener">GitHub</a>
+        </div>
+      </nav>
+    </header>
+    <main id="main" tabindex="-1" class="outline-none">
+      <slot />
+    </main>
+    <footer class="border-t border-line">
+      <div class="container-x grid gap-8 py-12 text-sm text-fg-muted md:grid-cols-[1fr_auto] md:items-end">
+        <div>
+          <p class="flex items-center gap-3 text-fg">
+            <CratisMark class="size-5" />
+            <span class="text-[0.9375rem] font-semibold">Software that remembers. <span class="serif">Careers that remember.</span></span>
+          </p>
+          <p class="mt-3 max-w-[60ch]">
+            The Cast is the people who build with <a href="https://cratis.io" class="text-fg underline decoration-line-strong hover:decoration-fg" rel="noopener">Cratis</a>. Every badge here is checked when the directory builds: Core and Partner against the reviewed{' '}
+            <a href="https://github.com/Cratis/Cast/blob/main/Registry/members.yaml" class="text-fg underline decoration-line-strong hover:decoration-fg" rel="noopener">registry</a>, Contributor against merged public pull requests.
+          </p>
+        </div>
+        <p class="font-mono text-xs">
+          <a href="/members.json" class="hover:text-fg">members.json</a> · <a href="https://github.com/Cratis/Cast" class="hover:text-fg" rel="noopener">source</a> · <a href="https://cratis.io" class="hover:text-fg" rel="noopener">cratis.io</a>
+        </p>
+      </div>
+    </footer>
+    <script>
+      import '@cratis/cast/site/scripts/ambient';
+      import { currentTheme, toggleTheme } from '@cratis/cast/site/lib/theme';
+      document.addEventListener('click', (event) => {
+        if ((event.target as Element | null)?.closest('[data-theme-toggle]')) toggleTheme();
+      });
+      document.querySelectorAll('[data-theme-toggle]').forEach((button) => button.setAttribute('aria-pressed', String(currentTheme() === 'light')));
+    </script>
+    <style>
+      .theme-moon {
+        display: none;
+      }
+      :global(html[data-theme='light']) .theme-sun {
+        display: none;
+      }
+      :global(html[data-theme='light']) .theme-moon {
+        display: block;
+      }
+    </style>
+  </body>
+</html>

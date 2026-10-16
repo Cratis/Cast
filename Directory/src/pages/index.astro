@@ -1,0 +1,191 @@
+---
+// Copyright (c) Cratis. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+import Directory from '../layouts/Directory.astro';
+import MemberCard from '../components/MemberCard.astro';
+import Section from '../components/Section.astro';
+import { badgeSvg, Tier } from '@cratis/cast/badges';
+import { avatar, contributors, core, directory, displayName, formatNumber, partners } from '../lib/directory';
+
+const totals = [
+  { value: core.length, label: 'Core', note: 'founders and maintainers', accent: 'text-violet' },
+  { value: partners.length, label: 'Partners', note: 'vouched for by Cratis', accent: 'text-teal' },
+  { value: contributors.length, label: 'Contributors', note: 'merged public work', accent: 'text-event' },
+];
+const badges = [Tier.Core, Tier.Partner, Tier.Contributor].map((tier) => `data:image/svg+xml;utf8,${encodeURIComponent(badgeSvg(tier))}`);
+const asOf = directory.fetchedAt ? new Date(directory.fetchedAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : undefined;
+---
+
+<Directory title="Cratis Cast · The people behind the play" description="The verified directory of people who build with Cratis: Core, Partners and Contributors. Every badge is checked when the directory builds.">
+  <section class="relative isolate overflow-hidden pt-[calc(var(--nav-h)+4rem)] pb-16 md:pt-[calc(var(--nav-h)+7rem)] md:pb-24">
+    <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+      <div class="stage-grid absolute inset-0"></div>
+      <div class="absolute -top-32 right-[-10rem] size-[42rem] rounded-full bg-violet/20 blur-[140px]"></div>
+      <div class="absolute bottom-[-14rem] left-[-12rem] size-[36rem] rounded-full bg-teal/12 blur-[140px]"></div>
+      <div class="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-ink-950"></div>
+    </div>
+    <div class="container-x">
+      <p class="hero-in mb-8 inline-flex items-center gap-3 rounded-full border border-line bg-ink-900/70 py-1.5 pr-4 pl-2 font-mono text-xs text-fg-muted backdrop-blur" style="--d:0ms">
+        <span class="rounded-full bg-violet/15 px-2 py-0.5 text-violet">Cratis Cast</span>
+        verified at build{asOf && <> · <span class="text-fg">{asOf}</span></>}
+      </p>
+      <h1 class="hero-in max-w-[12ch] text-[clamp(3rem,8vw,7rem)] leading-[0.93] font-[800] tracking-[-0.045em]" style="--d:80ms">
+        The people behind <em class="serif shine">the play.</em>
+      </h1>
+      <p class="hero-in mt-8 max-w-[56ch] text-lg leading-relaxed text-fg-muted md:text-xl" style="--d:160ms">
+        Everyone who builds with Cratis: the people who maintain it, the partners Cratis vouches for, and everyone whose work has been merged.
+        Each one has a Cast site that remembers their career, and a badge anyone can check.
+      </p>
+      <div class="hero-in mt-10 flex flex-wrap items-center gap-3" style="--d:240ms">
+        <a href="/join" class="btn btn-primary">
+          Get your Cast site
+          <svg viewBox="0 0 16 16" class="size-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </a>
+        <code class="rounded-xl border border-line bg-ink-900/80 px-4 py-2.5 font-mono text-sm text-fg-muted"><span class="text-view">$</span> npm create @cratis/cast</code>
+      </div>
+
+      <dl class="hero-in mt-16 grid max-w-3xl grid-cols-3 gap-px overflow-hidden rounded-2xl border border-line bg-line" style="--d:320ms">
+        {totals.map((total) => (
+          <div class="flex flex-col gap-3 bg-ink-900/90 p-5 backdrop-blur md:p-6">
+            <dt class="order-2 text-sm text-fg-muted"><span class="text-fg">{total.label}</span><span class="hidden sm:inline"> · {total.note}</span></dt>
+            <dd class={`font-display text-[clamp(2rem,4.5vw,3.25rem)] leading-none font-[800] tracking-[-0.045em] tabular-nums ${total.accent}`}>{formatNumber(total.value)}</dd>
+          </div>
+        ))}
+      </dl>
+      <div class="hero-in mt-8 flex flex-wrap items-center gap-3" style="--d:400ms" aria-label="The three badges">
+        {badges.map((src, index) => <img src={src} alt={['Core badge', 'Partner badge', 'Contributor badge'][index]} height="20" class="h-5 w-auto" />)}
+      </div>
+    </div>
+  </section>
+
+  <div class="container-x sticky top-[calc(var(--nav-h)+0.75rem)] z-30">
+    <label class="panel flex items-center gap-3 px-4 py-1 shadow-2xl shadow-black/40">
+      <svg viewBox="0 0 20 20" class="size-4 shrink-0 text-fg-faint" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="9" cy="9" r="5.5"></circle><path d="m13.2 13.2 3.3 3.3" stroke-linecap="round"></path></svg>
+      <span class="sr-only">Find someone in the Cast</span>
+      <input type="search" data-filter-input placeholder="Find someone by name, handle, role or place" class="h-11 min-w-0 flex-1 bg-transparent text-base text-fg placeholder:text-fg-faint focus:outline-none" />
+      <span class="font-mono text-xs text-fg-faint" data-filter-count aria-live="polite"></span>
+    </label>
+  </div>
+
+  <Section id="core" index="01" kind="command" label="Tier · Core" title="The *Core.*">
+    <p slot="intro" class="mt-6 max-w-[60ch] text-lg text-fg-muted">The founders and maintainers of Cratis. Listed in the reviewed registry.</p>
+    <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {core.map((member) => <MemberCard member={member} />)}
+    </ul>
+  </Section>
+
+  <Section id="partners" index="02" kind="view" label="Tier · Partner" title="The *Partners.*">
+    <p slot="intro" class="mt-6 max-w-[60ch] text-lg text-fg-muted">Consultants and companies Cratis vouches for, added through a reviewed pull request.</p>
+    {partners.length > 0 ? (
+      <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {partners.map((member) => <MemberCard member={member} />)}
+      </ul>
+    ) : (
+      <div class="panel flex flex-col items-start gap-4 p-8 md:flex-row md:items-center md:justify-between" data-reveal>
+        <p class="max-w-[56ch] text-fg-muted"><span class="font-mono text-sm text-fg-faint">EventNotFound:</span> no partners are listed yet. Cratis adds partners it can vouch for, one reviewed pull request at a time.</p>
+        <a href="/join#partner" class="btn btn-sm">How partners join</a>
+      </div>
+    )}
+  </Section>
+
+  <Section id="contributors" index="03" kind="event" label="Tier · Contributor" title="Everyone with *merged work.*">
+    <p slot="intro" class="mt-6 max-w-[62ch] text-lg text-fg-muted">
+      People with merged pull requests in public Cratis repositories, found and checked against GitHub when the directory builds. Nobody applies; the work is the application.
+      {directory.pending > 0 && <span class="text-fg-faint"> {formatNumber(directory.pending)} more are waiting to be checked.</span>}
+    </p>
+    {contributors.length > 0 ? (
+      <ul class="wall grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+        {contributors.map((member) => (
+          <li data-member data-search={`${member.handle} ${member.name ?? ''} ${member.location ?? ''}`.toLowerCase()}>
+            <a href={`/${member.handle.toLowerCase()}`} class="tile group flex items-center gap-3 rounded-xl border border-line bg-ink-900/60 p-2.5 pr-3 transition-colors hover:border-event/40 hover:bg-event/5">
+              <img src={avatar(member, 80)} alt="" width="36" height="36" loading="lazy" class="size-9 shrink-0 rounded-lg border border-line object-cover" />
+              <span class="min-w-0">
+                <span class="block truncate text-sm font-medium text-fg">{displayName(member)}</span>
+                <span class="block truncate font-mono text-[0.6875rem] text-fg-faint">{formatNumber(member.mergedPullRequests ?? 0)} merged {member.mergedPullRequests === 1 ? 'PR' : 'PRs'}</span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <div class="panel p-8 font-mono text-sm text-fg-faint" data-reveal>EventNotFound: no contributors have been checked yet. They appear after the first build with a GitHub token.</div>
+    )}
+  </Section>
+
+  <section class="relative overflow-hidden py-24 md:py-32">
+    <div class="pointer-events-none absolute bottom-0 left-1/2 h-[26rem] w-[64rem] -translate-x-1/2 translate-y-1/2 rounded-full bg-violet/15 blur-[120px]" aria-hidden="true"></div>
+    <div class="container-x relative grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-end">
+      <div>
+        <h2 class="max-w-[14ch] text-[clamp(2.5rem,6vw,5rem)] leading-[0.95] font-[800] tracking-[-0.045em]">Your career, <em class="serif">as an event stream.</em></h2>
+        <p class="mt-6 max-w-[54ch] text-lg text-fg-muted">One <code class="inline-code">cast.yaml</code> becomes a site that replays your career, shows your public work as it happens, prints as a CV and carries a badge anyone can verify.</p>
+      </div>
+      <div class="flex flex-wrap gap-3 lg:justify-end">
+        <a href="/join" class="btn btn-primary">Join the Cast</a>
+        <a href="https://www.woksin.com" class="btn" rel="noopener">See a Cast site</a>
+      </div>
+    </div>
+  </section>
+</Directory>
+
+<style>
+  .stage-grid {
+    background-image:
+      linear-gradient(to right, color-mix(in srgb, var(--color-fg) 4%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in srgb, var(--color-fg) 4%, transparent) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(70rem 40rem at 60% 20%, #000, transparent 75%);
+  }
+  .shine {
+    background: linear-gradient(100deg, #c9baff 0%, #8b5cf6 40%, #2dd4bf 80%, #c9baff 100%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: none;
+    padding-right: 0.08em;
+  }
+  :global(html[data-theme='light']) .shine {
+    background-image: linear-gradient(100deg, #6d28d9 0%, #5b21b6 45%, #0f766e 85%, #6d28d9 100%);
+  }
+  :global(.js-motion) .shine {
+    animation: shine 9s ease-in-out infinite alternate;
+  }
+  @keyframes shine {
+    to {
+      background-position: 100% 0;
+    }
+  }
+  :global(.js-motion) .hero-in {
+    animation: hero-in 1.1s var(--ease-out-expo) both;
+    animation-delay: var(--d, 0ms);
+  }
+  @keyframes hero-in {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+      filter: blur(6px);
+    }
+  }
+  [data-member][hidden] {
+    display: none;
+  }
+</style>
+
+<script>
+  const input = document.querySelector<HTMLInputElement>('[data-filter-input]');
+  const count = document.querySelector<HTMLElement>('[data-filter-count]');
+  const members = [...document.querySelectorAll<HTMLElement>('[data-member]')];
+  const apply = () => {
+    const query = (input?.value ?? '').trim().toLowerCase();
+    let shown = 0;
+    for (const member of members) {
+      const match = !query || (member.dataset['search'] ?? '').includes(query);
+      member.hidden = !match;
+      if (match) shown++;
+    }
+    if (count) count.textContent = query ? `${shown} of ${members.length}` : `${members.length} people`;
+  };
+  input?.addEventListener('input', apply);
+  apply();
+</script>

@@ -1,0 +1,127 @@
+---
+// Copyright (c) Cratis. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+import Directory from '../../layouts/Directory.astro';
+import CastBadge from '@cratis/cast/site/components/CastBadge.astro';
+import { castDirectoryUrl, cratisOrganization, registryBlobUrl, tierStyles, TierSource } from '@cratis/cast/badges';
+import { avatar, displayName, everyone, formatMonth, formatNumber, type DirectoryMember } from '../../lib/directory';
+
+export function getStaticPaths() {
+  return everyone.map((member) => ({ params: { handle: member.handle.toLowerCase() }, props: { member } }));
+}
+
+interface Props {
+  member: DirectoryMember;
+}
+const { member } = Astro.props;
+const name = displayName(member);
+const style = member.tier ? tierStyles[member.tier] : undefined;
+const page = `${castDirectoryUrl}/${member.handle.toLowerCase()}`;
+const badgeUrl = `${page}/badge.svg`;
+const cardUrl = `${page}/badge-card.svg`;
+const searchUrl = `https://github.com/search?q=${encodeURIComponent(`author:${member.handle} org:${cratisOrganization} is:public is:pr is:merged`)}&type=pullrequests`;
+const snippets = [
+  { label: 'Markdown', value: `[![Cratis Cast ${style?.label ?? ''}](${badgeUrl})](${page})` },
+  { label: 'HTML', value: `<a href="${page}"><img src="${badgeUrl}" alt="Cratis Cast ${style?.label ?? ''}" height="20"></a>` },
+  { label: 'Image URL', value: badgeUrl },
+  { label: 'Card (Markdown)', value: `[![Cratis Cast](${cardUrl})](${page})` },
+];
+const facts = [
+  member.since ? { key: 'since', value: formatMonth(member.since) } : undefined,
+  member.role ? { key: 'role', value: member.role } : undefined,
+  member.company ? { key: 'company', value: member.company } : undefined,
+  member.mergedPullRequests !== undefined ? { key: 'merged PRs in Cratis', value: formatNumber(member.mergedPullRequests) } : undefined,
+  member.commits !== undefined ? { key: 'commits in public repos', value: formatNumber(member.commits) } : undefined,
+  member.location ? { key: 'location', value: member.location } : undefined,
+].filter((fact): fact is { key: string; value: string } => fact !== undefined);
+---
+
+<Directory title={`${name} · Cratis Cast ${style?.label ?? ''}`} description={`${name} (@${member.handle}) is ${style ? `Cratis Cast ${style.label}: ${style.description.toLowerCase()}` : 'in the Cratis Cast'}. Verified when the directory was built.`}>
+  <section class="relative isolate overflow-hidden pt-[calc(var(--nav-h)+3.5rem)] pb-20">
+    <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+      <div class="absolute -top-40 right-[-8rem] size-[38rem] rounded-full blur-[140px]" style={`background:${style?.from ?? '#8b5cf6'};opacity:.16`}></div>
+    </div>
+    <div class="container-x max-w-5xl">
+      <a href="/" class="link-quiet font-mono text-xs">← The Cast</a>
+
+      <div class="mt-8 grid gap-8 md:grid-cols-[auto_1fr] md:items-center">
+        <img src={avatar(member, 240)} alt={`${name}`} width="120" height="120" class="size-28 rounded-[1.75rem] border border-line-strong object-cover md:size-32" />
+        <div>
+          <CastBadge tier={member.tier} handle={member.handle} />
+          <h1 class="mt-4 text-[clamp(2.5rem,6vw,4.5rem)] leading-[0.95] font-[800] tracking-[-0.045em]">{name}</h1>
+          <p class="mt-3 font-mono text-sm text-fg-muted">@{member.handle}{member.cast?.title && <span class="text-fg-faint"> · {member.cast.title}</span>}</p>
+          {(member.cast?.tagline ?? member.bio) && <p class="mt-4 max-w-[60ch] text-lg text-fg-muted">{member.cast?.tagline ?? member.bio}</p>}
+        </div>
+      </div>
+
+      <div class="mt-12 grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+        <div class="panel overflow-hidden" data-reveal>
+          <div class="flex items-center justify-between gap-3 border-b border-line px-6 py-3.5 font-mono text-xs">
+            <span class="note note-view">Verification</span>
+            <span class="text-fg-faint">checked at build</span>
+          </div>
+          <div class="p-6">
+            <p class="text-[clamp(1.75rem,3.5vw,2.5rem)] leading-tight font-[800] tracking-[-0.035em]">
+              {style ? <>Cratis Cast <em class="serif">{style.label}</em></> : 'Not verified'}
+            </p>
+            <p class="mt-2 text-fg-muted">{style?.description}</p>
+            <p class="mt-5 rounded-xl border border-line bg-ink-950/60 p-4 text-sm leading-relaxed text-fg-muted">
+              {member.source === TierSource.Registry && (
+                <>Verified from the reviewed Cast registry: <a href={`${registryBlobUrl}${member.registryLine ? `#L${member.registryLine}` : ''}`} class="text-fg underline decoration-line-strong hover:decoration-fg" rel="noopener">Registry/members.yaml{member.registryLine ? `, line ${member.registryLine}` : ''}</a>. Only Cratis can add or change that line.</>
+              )}
+              {member.source === TierSource.Contributions && (
+                <>Verified from <a href={searchUrl} class="text-fg underline decoration-line-strong hover:decoration-fg" rel="noopener">{formatNumber(member.mergedPullRequests ?? 0)} merged public pull requests</a> in the Cratis organization, counted when the directory was built.</>
+              )}
+              {member.source === TierSource.None && <>No registry entry and no merged public pull requests in the Cratis organization were found.</>}
+            </p>
+            {facts.length > 0 && (
+              <dl class="mt-6 divide-y divide-line border-t border-line">
+                {facts.map((fact) => (
+                  <div class="grid grid-cols-[11rem_1fr] gap-4 py-3">
+                    <dt class="font-mono text-xs leading-6 text-fg-faint">{fact.key}</dt>
+                    <dd class="text-[0.975rem] text-fg">{fact.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+            {member.repositories && member.repositories.length > 0 && (
+              <ul class="mt-4 flex flex-wrap gap-1.5" aria-label="Public Cratis repositories with their commits">
+                {member.repositories.map((repository) => <li><a href={`https://github.com/${cratisOrganization}/${repository}`} rel="noopener" class="tag hover:text-fg">{repository}</a></li>)}
+              </ul>
+            )}
+            <div class="mt-6 flex flex-wrap gap-2.5">
+              {member.site && <a href={member.site} class="btn btn-primary btn-sm" rel="noopener">Visit {new URL(member.site).host.replace(/^www\./, '')}</a>}
+              <a href={`https://github.com/${member.handle}`} class="btn btn-sm" rel="noopener">GitHub profile</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid min-w-0 grid-cols-1 content-start gap-6" data-reveal style="--reveal-delay:120ms">
+          <img src={`/${member.handle.toLowerCase()}/badge-card.svg`} alt={`Cratis Cast ${style?.label ?? ''} badge card for ${name}`} width="480" height="168" class="w-full rounded-[1.1rem]" />
+          <div class="panel p-6">
+            <p class="note">Embed the badge</p>
+            <p class="mt-2 text-sm text-fg-muted">The badge is served from this page, so it always shows the tier as the directory last verified it.</p>
+            <div class="mt-4 flex items-center gap-3 rounded-xl border border-line bg-ink-950/60 p-4">
+              <img src={`/${member.handle.toLowerCase()}/badge.svg`} alt={`Cratis Cast ${style?.label ?? ''}`} height="20" class="h-5 w-auto" />
+            </div>
+            <ul class="mt-4 grid grid-cols-1 gap-3">
+              {snippets.map((snippet) => (
+                <li>
+                  <p class="mb-1.5 font-mono text-[0.6875rem] tracking-wider text-fg-faint uppercase">{snippet.label}</p>
+                  <div class="flex items-stretch gap-2">
+                    <code class="min-w-0 flex-1 overflow-x-auto rounded-lg border border-line bg-ink-950/70 px-3 py-2 font-mono text-[0.75rem] whitespace-nowrap text-fg-muted">{snippet.value}</code>
+                    <span class="relative inline-flex">
+                      <button type="button" class="btn btn-sm h-full" data-copy={snippet.value} aria-label={`Copy ${snippet.label}`}><span data-copy-label>Copy</span></button>
+                      <span class="sr-only" aria-live="polite" data-copy-status></span>
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</Directory>

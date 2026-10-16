@@ -16,5 +16,6 @@ describe('when ranking contributors', () => {
     it('should report the commits', () => standingAmongHumans(contributors, 'woksin').commits.should.equal(3800));
     it('should rank zero when absent', () => standingAmongHumans(contributors, 'grace').rank.should.equal(0));
     it('should treat bracket logins as bots', () => isBot({ login: 'renovate[bot]' }).should.be.true);
+    it('should treat -bot logins as bots', () => isBot({ login: 'snyk-bot', type: 'User' }).should.be.true);
     it('should treat people as people', () => isBot({ login: 'einari', type: 'User' }).should.be.false);
 });

@@ -41,6 +41,9 @@
     "exports": {
         ".": "./index.ts",
         "./schema": "./config/index.ts",
+        "./config": "./config/index.ts",
+        "./badges": "./badges/index.ts",
+        "./github/*": "./github/*.ts",
         "./cast.schema.json": "./cast.schema.json",
         "./package.json": "./package.json",
         "./*": "./*"

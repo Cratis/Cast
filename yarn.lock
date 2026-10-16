@@ -341,6 +341,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@cratis/cast-directory@workspace:Directory":
+  version: 0.0.0-use.local
+  resolution: "@cratis/cast-directory@workspace:Directory"
+  dependencies:
+    "@cratis/cast": "workspace:*"
+    "@fontsource-variable/fraunces": "npm:^5.3.0"
+    "@fontsource-variable/inter": "npm:^5.3.0"
+    "@fontsource-variable/jetbrains-mono": "npm:^5.3.0"
+    "@tailwindcss/vite": "npm:^4.3.3"
+    astro: "npm:^7.2.0"
+    tailwindcss: "npm:^4.3.3"
+    yaml: "npm:^2.9.1"
+  languageName: unknown
+  linkType: soft
+
 "@cratis/cast-registry@workspace:Registry":
   version: 0.0.0-use.local
   resolution: "@cratis/cast-registry@workspace:Registry"

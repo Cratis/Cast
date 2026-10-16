@@ -1,0 +1,35 @@
+---
+// Copyright (c) Cratis. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+import CastBadge from '@cratis/cast/site/components/CastBadge.astro';
+import { avatar, displayName, formatMonth, formatNumber, type DirectoryMember } from '../lib/directory';
+
+interface Props {
+  member: DirectoryMember;
+}
+const { member } = Astro.props;
+const name = displayName(member);
+const line = member.cast?.tagline ?? member.cast?.title ?? member.bio;
+const search = `${member.handle} ${name} ${member.role ?? ''} ${member.company ?? ''} ${member.location ?? ''}`.toLowerCase();
+---
+
+<li data-member data-search={search}>
+  <article class="panel glow group relative flex h-full flex-col p-6" style={`--glow: ${member.tier === 'core' ? 'var(--color-violet)' : 'var(--color-teal)'}`}>
+    <div class="flex items-start justify-between gap-4">
+      <img src={avatar(member, 160)} alt="" width="64" height="64" loading="lazy" class="size-16 rounded-2xl border border-line-strong object-cover" />
+      <CastBadge tier={member.tier} handle={member.handle} size="compact" />
+    </div>
+    <h3 class="mt-5 text-2xl leading-tight font-[750] tracking-[-0.03em]">
+      <a href={`/${member.handle.toLowerCase()}`} class="after:absolute after:inset-0 after:rounded-[1.25rem]">{name}</a>
+    </h3>
+    <p class="mt-1 font-mono text-xs text-fg-faint">@{member.handle}{member.location && ` · ${member.location}`}</p>
+    {member.role && <p class="mt-3 text-[0.975rem] text-fg">{member.role}{member.company && <span class="text-fg-muted"> · {member.company}</span>}</p>}
+    {line && <p class="mt-2 text-sm leading-relaxed text-fg-muted">{line}</p>}
+    <dl class="mt-auto flex flex-wrap gap-x-5 gap-y-1 pt-5 font-mono text-xs text-fg-faint">
+      {member.since && <div><dt class="inline">since </dt><dd class="inline text-fg">{formatMonth(member.since)}</dd></div>}
+      {member.mergedPullRequests !== undefined && member.mergedPullRequests > 0 && <div><dd class="inline text-fg">{formatNumber(member.mergedPullRequests)}</dd><dt class="inline"> merged PRs</dt></div>}
+      {member.site && <div><dt class="sr-only">Site</dt><dd class="inline"><a href={member.site} rel="noopener" class="relative z-10 text-fg-muted underline decoration-line-strong hover:text-fg">{new URL(member.site).host.replace(/^www\./, '')}</a></dd></div>}
+    </dl>
+  </article>
+</li>

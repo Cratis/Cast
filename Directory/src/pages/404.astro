@@ -1,0 +1,24 @@
+---
+// Copyright (c) Cratis. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+import Directory from '../layouts/Directory.astro';
+---
+
+<Directory title="Not in the Cast · Cratis Cast" description="Nobody with this handle is in the Cratis Cast yet." noindex>
+  <section class="flex min-h-[80svh] items-center pt-[var(--nav-h)]">
+    <div class="container-x py-24">
+      <div class="panel max-w-2xl p-6 md:p-10">
+        <p class="font-mono text-sm text-fg-faint">HTTP 404</p>
+        <h1 class="mt-3 text-[clamp(2.5rem,7vw,4.5rem)] leading-[0.95] font-[800] tracking-[-0.045em] text-event-soft">MemberNotFound</h1>
+        <p class="mt-5 max-w-[46ch] text-lg text-fg-muted">
+          Nobody with this handle is in the Cast yet. Contributors appear after their first merged pull request in a public Cratis repository, once the directory has checked it.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="/" class="btn btn-primary">See the Cast</a>
+          <a href="/join" class="btn">How to join</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Directory>
