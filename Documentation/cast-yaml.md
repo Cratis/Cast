@@ -22,6 +22,8 @@ Text fields (taglines, intros, summaries, paragraphs) can use a little inline ma
 | `` `code` `` | Inline code. |
 | `[label](https://…)` | A link. Only `https://`, `http://`, `/`, `#` and `mailto:` targets become links. |
 
+The same rules apply when your profile is read from [cast.json](cast-json.md) by the directory: markup is turned into elements, never HTML, and other link targets stay plain text.
+
 Dates are `YYYY-MM` or `YYYY`; talks and community entries may also use `YYYY-MM-DD`.
 
 ## site

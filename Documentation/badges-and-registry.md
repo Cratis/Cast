@@ -23,7 +23,7 @@ Your Cast identity is your GitHub login: `person.handle` in `cast.yaml`. If you 
 
 **A Cast site is static and controlled by its owner. The directory is the source of truth.**
 
-Anyone can edit their own site's files, including `.cast/snapshot.json`, so what a site shows is a *claim*. Every badge on a site links to `https://cast.cratis.io/<login>`, which Cratis builds from the registry in this repository and live GitHub data, every hour. That page, and the badge images it serves, are what to trust and what to link to. The directory never reads tiers from member sites: from a member's `/cast.json` it takes only the title and tagline it displays.
+Anyone can edit their own site's files, including `.cast/snapshot.json`, so what a site shows is a *claim*. Every badge on a site links to `https://cast.cratis.io/<login>`, which Cratis builds from the registry in this repository and live GitHub data, every hour. That page, and the badge images it serves, are what to trust and what to link to. The directory never reads tiers from member sites: it renders a registry member's profile from their [cast.json](cast-json.md), and ignores any tier or claim in it.
 
 ## How a site resolves its claim
 
@@ -43,7 +43,7 @@ The directory resolves tiers the same way for everyone it lists, with its own Gi
 | Where | What |
 | --- | --- |
 | Navigation, hero and `/cv` header of a Cast site | The inline badge: the site's claim, labeled "verify at cast.cratis.io" and linking to the verification page. |
-| `https://cast.cratis.io/<handle>` | The verification page: tier, where it was verified from (with a link to the registry line or the pull request search), role, since, site and embed snippets. |
+| `https://cast.cratis.io/<handle>/` | The person's profile in the directory, with the verification right after the hero: tier, where it was verified from (with a link to the registry line or the pull request search), role, since, site and embed snippets. The badge there reads as verified. |
 | `https://cast.cratis.io/<handle>/badge.svg` | The 20 px badge, for READMEs and profiles. |
 | `https://cast.cratis.io/<handle>/badge-card.svg` | The large card. |
 | `/badge.svg`, `/badge-card.svg` on a Cast site | The same images for the site's own claim. Link to the directory's instead. |
@@ -58,7 +58,7 @@ The three badges are drawn to read on light and dark pages: Core in the Cratis v
 
 ## Machine-readable claims
 
-`/cast.json` on every Cast site includes a `verification` object with the site's claim and where to check it:
+`/cast.json` (see the [cast.json reference](cast-json.md)) on every Cast site includes a `verification` object with the site's claim and where to check it:
 
 ```json
 {
