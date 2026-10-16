@@ -27,8 +27,8 @@ const asOf = directory.fetchedAt ? new Date(directory.fetchedAt).toLocaleDateStr
     </div>
     <div class="container-x">
       <p class="hero-in mb-8 inline-flex items-center gap-3 rounded-full border border-line bg-ink-900/70 py-1.5 pr-4 pl-2 font-mono text-xs text-fg-muted backdrop-blur" style="--d:0ms">
-        <span class="rounded-full bg-violet/15 px-2 py-0.5 text-violet">Cratis Cast</span>
-        verified at build{asOf && <> · <span class="text-fg">{asOf}</span></>}
+        <span class="rounded-full bg-violet/15 px-2 py-0.5 whitespace-nowrap text-violet">Cratis Cast</span>
+        <span class="whitespace-nowrap">verified at build</span>{asOf && <> · <span class="text-fg">{asOf}</span></>}
       </p>
       <h1 class="hero-in max-w-[12ch] text-[clamp(3rem,8vw,7rem)] leading-[0.93] font-[800] tracking-[-0.045em]" style="--d:80ms">
         The people behind <em class="serif shine">the play.</em>

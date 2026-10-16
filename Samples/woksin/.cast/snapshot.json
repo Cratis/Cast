@@ -1,7 +1,7 @@
 {
   "version": 1,
   "github": {
-    "fetchedAt": "2026-10-16T09:43:57.918Z",
+    "fetchedAt": "2026-10-16T10:38:24.446Z",
     "login": "woksin",
     "orgs": [
       "Cratis"
@@ -17,8 +17,8 @@
       "publicRepositories": 83
     },
     "contributions": {
-      "total": 32123,
-      "commits": 17722,
+      "total": 32160,
+      "commits": 17749,
       "weeks": [
         {
           "start": "2025-10-12",
@@ -230,16 +230,37 @@
         },
         {
           "start": "2026-10-11",
-          "counts": [849, 673, 900, 1043, 717, 264]
+          "counts": [849, 673, 900, 1043, 717, 301]
         }
       ]
     },
     "mergedPullRequests": {
-      "total": 3128,
+      "total": 3131,
       "byOrg": {
-        "Cratis": 3128
+        "Cratis": 3131
       },
       "latest": [
+        {
+          "title": "Consolidate the Dynamic Consistency Boundary documentation",
+          "repository": "Cratis/Chronicle",
+          "number": 4971,
+          "url": "https://github.com/Cratis/Chronicle/pull/4971",
+          "mergedAt": "2026-10-16T10:03:55Z"
+        },
+        {
+          "title": "Named, typed diagnostic arguments",
+          "repository": "Cratis/Screenplay",
+          "number": 823,
+          "url": "https://github.com/Cratis/Screenplay/pull/823",
+          "mergedAt": "2026-10-16T09:59:10Z"
+        },
+        {
+          "title": "Accept ESM v24 models and text validation rules",
+          "repository": "Cratis/Stage",
+          "number": 465,
+          "url": "https://github.com/Cratis/Stage/pull/465",
+          "mergedAt": "2026-10-16T09:44:39Z"
+        },
         {
           "title": "Show reducers as self-reducing read models in the samples",
           "repository": "Cratis/Samples",
@@ -302,27 +323,6 @@
           "number": 459,
           "url": "https://github.com/Cratis/Stage/pull/459",
           "mergedAt": "2026-10-16T06:29:28Z"
-        },
-        {
-          "title": "Allow rules and requirements on commands with generated properties",
-          "repository": "Cratis/Stage",
-          "number": 458,
-          "url": "https://github.com/Cratis/Stage/pull/458",
-          "mergedAt": "2026-10-16T05:38:40Z"
-        },
-        {
-          "title": "Resolve grouped proxy imports by full type name",
-          "repository": "Cratis/Arc",
-          "number": 3326,
-          "url": "https://github.com/Cratis/Arc/pull/3326",
-          "mergedAt": "2026-10-16T04:40:10Z"
-        },
-        {
-          "title": "Run composite command inputs in the specification executor",
-          "repository": "Cratis/Stage",
-          "number": 453,
-          "url": "https://github.com/Cratis/Stage/pull/453",
-          "mergedAt": "2026-10-16T03:26:07Z"
         }
       ]
     },
@@ -330,12 +330,12 @@
       "Cratis/Screenplay": {
         "commits": 2206,
         "rank": 1,
-        "prs": 311
+        "prs": 312
       },
       "Cratis/Stage": {
         "commits": 1069,
         "rank": 1,
-        "prs": 202
+        "prs": 203
       },
       "Cratis/Arc": {
         "commits": 2190,
@@ -345,7 +345,7 @@
       "Cratis/Chronicle": {
         "commits": 3805,
         "rank": 2,
-        "prs": 467
+        "prs": 468
       },
       "Cratis/AI": {
         "commits": 1177,
@@ -416,7 +416,7 @@
     }
   },
   "writing": {
-    "fetchedAt": "2026-10-16T09:43:57.967Z",
+    "fetchedAt": "2026-10-16T10:38:24.644Z",
     "sources": [
       "https://blog.cratis.io/authors/sindre-alstad-wilting/"
     ],

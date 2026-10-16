@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "builtAt": "2026-10-16T09:55:41.139Z",
-  "fetchedAt": "2026-10-16T09:52:29.178Z",
+  "builtAt": "2026-10-16T10:47:59.601Z",
+  "fetchedAt": "2026-10-16T10:45:36.360Z",
   "members": [
     {
       "handle": "woksin",
@@ -9,8 +9,8 @@
       "avatarUrl": "https://avatars.githubusercontent.com/u/13407188?u=9245447357886096f26f85f957f980016b988116&v=4",
       "bio": "Software Engineer from Norway who loves coding. ",
       "location": "Oslo",
-      "mergedPullRequests": 3129,
-      "commits": 17977,
+      "mergedPullRequests": 3132,
+      "commits": 17998,
       "repositories": [
         "Chronicle",
         "Screenplay",
@@ -32,8 +32,8 @@
       "avatarUrl": "https://avatars.githubusercontent.com/u/134365?u=d35b0fe3b69e9735967dd548e5db0f2326eb9190&v=4",
       "bio": "Event sourcerer and passionate software developer. Worked on a bunch of different tech and love working across different platforms. Technology Advisor @ Novanet",
       "location": "Sandefjord, Norway",
-      "mergedPullRequests": 3142,
-      "commits": 26913,
+      "mergedPullRequests": 3147,
+      "commits": 26917,
       "repositories": [
         "Chronicle",
         "Arc",
@@ -172,12 +172,12 @@
   "pending": 0,
   "counts": {
     "woksin": {
-      "mergedPullRequests": 3129,
-      "checkedAt": "2026-10-16T09:52:29.178Z"
+      "mergedPullRequests": 3132,
+      "checkedAt": "2026-10-16T10:45:36.360Z"
     },
     "einari": {
-      "mergedPullRequests": 3142,
-      "checkedAt": "2026-10-16T09:52:29.178Z"
+      "mergedPullRequests": 3147,
+      "checkedAt": "2026-10-16T10:45:36.360Z"
     },
     "claude": {
       "mergedPullRequests": 0,
@@ -288,7 +288,7 @@
   },
   "activity": {
     "woksin": {
-      "commits": 17977,
+      "commits": 17998,
       "repositories": [
         "Chronicle",
         "Screenplay",
@@ -299,7 +299,7 @@
       ]
     },
     "einari": {
-      "commits": 26913,
+      "commits": 26917,
       "repositories": [
         "Chronicle",
         "Arc",
