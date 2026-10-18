@@ -3,7 +3,7 @@ name: Publish
 # Never cancel a release in flight: one push to main is one run.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false
+  queue: max
 
 on:
   workflow_dispatch:
