@@ -28,8 +28,10 @@ interface Props {
   title?: string;
   /** Meta description; defaults to the site description, else the tagline and intro. */
   description?: string;
+  /** Ask search engines not to index the page; a member's own site leaves this off. */
+  noindex?: boolean;
 }
-const { cast } = Astro.props;
+const { cast, noindex = false } = Astro.props;
 const { config, person, sections } = cast;
 
 const components = {
@@ -52,7 +54,7 @@ const title = Astro.props.title ?? `${person.name} · ${person.title}`;
 const description = Astro.props.description ?? config.site.description ?? `${plainText(person.tagline)} ${plainText(person.intro)}`;
 ---
 
-<Base cast={cast} title={title} description={description}>
+<Base cast={cast} title={title} description={description} noindex={noindex}>
   <Nav slot="nav" cast={cast}><slot name="lead" slot="lead" /></Nav>
   {!sections.some((section) => section.id === 'hero') && <slot name="after-hero" />}
   {

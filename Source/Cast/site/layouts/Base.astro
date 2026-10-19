@@ -60,7 +60,7 @@ const jsonLd = {
     <title>{title}</title>
     <meta name="description" content={plainText(description)} />
     <link rel="canonical" href={canonical} />
-    {noindex && <meta name="robots" content="noindex" />}
+    {noindex && <meta name="robots" content="noindex, follow" />}
     <meta name="theme-color" content="#08080e" />
     <meta name="color-scheme" content="dark light" />
     <meta name="author" content={person.name} />
