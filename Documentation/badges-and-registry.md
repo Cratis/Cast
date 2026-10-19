@@ -23,7 +23,7 @@ Your Cast identity is your GitHub login: `person.handle` in `cast.yaml`. If you 
 
 **A Cast site is static and controlled by its owner. The directory is the source of truth.**
 
-Anyone can edit their own site's files, including `.cast/snapshot.json`, so what a site shows is a *claim*. Every badge on a site links to `https://cast.cratis.io/<login>`, which Cratis builds from the registry in this repository and live GitHub data, every six hours. That page, and the badge images it serves, are what to trust and what to link to. The directory never reads tiers from member sites: it renders a registry member's profile from their [cast.json](cast-json.md), and ignores any tier or claim in it.
+Anyone can edit their own site's files, including `.cast/snapshot.json`, so what a site shows is a *claim*. Every badge on a site links to `https://cast.cratis.io/<login>`, which Cratis builds from the registry in this repository and live GitHub data, on every registry change and every six hours. That page, and the badge images it serves, are what to trust and what to link to. The directory never reads tiers from member sites: it renders a registry member's profile from their [cast.json](cast-json.md), and ignores any tier or claim in it.
 
 ## How a site resolves its claim
 
