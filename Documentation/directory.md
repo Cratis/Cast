@@ -79,4 +79,4 @@ yarn workspace @cratis/cast build                                       # schema
 GITHUB_TOKEN=$(gh auth token) yarn workspace @cratis/cast-directory build
 ```
 
-The [Directory Pages](https://github.com/Cratis/Cast/blob/main/.github/workflows/directory-pages.yml) workflow builds and deploys it to GitHub Pages on pushes to `main` that touch `Directory/`, `Registry/` or `Source/Cast/`, every hour, and on demand. `Directory/public/CNAME` names `cast.cratis.io`.
+The [Directory Pages](https://github.com/Cratis/Cast/blob/main/.github/workflows/directory-pages.yml) workflow builds and deploys it to GitHub Pages on pushes to `main` that touch `Directory/`, `Registry/` or `Source/Cast/`, every six hours, and on demand. `Directory/public/CNAME` names `cast.cratis.io`.

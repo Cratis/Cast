@@ -43,7 +43,7 @@ Cast changes that:
 
 **A member** runs `npm create @cratis/cast`, edits one YAML file with completion in the editor, and pushes. Engine updates arrive as a version bump; a custom domain is one line. The badge goes in their GitHub README, email signature and profiles.
 
-**Cratis** merges a pull request to add a Partner. The directory and the person's site pick it up on the next hourly build.
+**Cratis** merges a pull request to add a Partner. The directory picks it up on its next build: right away for a registry change, otherwise within six hours; the person's site on its next hourly build.
 
 ## Trust
 
