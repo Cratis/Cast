@@ -9,7 +9,11 @@ import castDirectory from './integration/index.ts';
 export default defineConfig({
     site: 'https://cast.cratis.io',
     trailingSlash: 'ignore',
-    integrations: [castDirectory(), sitemap({ filter: (page) => !/\/404\/?$/.test(page) })],
+    integrations: [castDirectory(), sitemap({
+            // Only the directory's own pages. Member profiles stay crawlable through links but are not
+            // promoted in the sitemap until profile indexing is decided (Cratis/SEO#6).
+            filter: (page) => ['https://cast.cratis.io/', 'https://cast.cratis.io/join/'].includes(page),
+        })],
     vite: {
         plugins: [tailwindcss()],
     },

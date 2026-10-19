@@ -16,7 +16,7 @@ export const GET: APIRoute = () => {
         '> Cratis Cast is a profile-site engine and directory for the people who build with Cratis, with verified, event-sourced profile pages.',
         '',
         `- [Directory](${site}/): the verified directory of Core, Partners and Contributors; every badge is checked when the directory builds.`,
-        `- [Join the Cast](${site}/join): get a Cast site with one command and learn how the badges are verified.`,
+        `- [Join the Cast](${site}/join/): get a Cast site with one command and learn how the badges are verified.`,
         `- [members.json](${site}/members.json): the directory as machine-readable data.`,
         '- [Source code](https://github.com/Cratis/Cast): the engine and the registry.',
         '',
