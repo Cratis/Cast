@@ -15,9 +15,35 @@ const totals = [
 ];
 const badges = [Tier.Core, Tier.Partner, Tier.Contributor].map((tier) => `data:image/svg+xml;utf8,${encodeURIComponent(badgeSvg(tier))}`);
 const asOf = directory.fetchedAt ? new Date(directory.fetchedAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : undefined;
+const siteUrl = 'https://cast.cratis.io/';
+const description = 'The verified directory of people who build with Cratis: Core, Partners and Contributors. Every badge is checked when the directory builds.';
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': `${siteUrl}#website`,
+      url: siteUrl,
+      name: 'Cratis Cast',
+      description,
+      inLanguage: 'en',
+      publisher: { '@id': 'https://cratis.no/#organization' },
+    },
+    {
+      '@type': 'CollectionPage',
+      '@id': `${siteUrl}#collection`,
+      url: siteUrl,
+      name: 'Cratis Cast: the people behind the play',
+      description,
+      inLanguage: 'en',
+      isPartOf: { '@id': `${siteUrl}#website` },
+      publisher: { '@id': 'https://cratis.no/#organization' },
+    },
+  ],
+};
 ---
 
-<Directory title="Cratis Cast · The people behind the play" description="The verified directory of people who build with Cratis: Core, Partners and Contributors. Every badge is checked when the directory builds.">
+<Directory title="Cratis Cast · The people behind the play" description={description} jsonLd={jsonLd}>
   <section class="relative isolate overflow-hidden pt-[calc(var(--nav-h)+4rem)] pb-16 md:pt-[calc(var(--nav-h)+7rem)] md:pb-24">
     <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
       <div class="stage-grid absolute inset-0"></div>
