@@ -18,7 +18,7 @@ interface Props {
 const { cast } = memberPage(Astro.props.member);
 ---
 
-<CvPage cast={cast}>
+<CvPage cast={cast} noindex>
   <DirectoryLead slot="lead" />
   <DirectoryFooter slot="footer" navigation />
 </CvPage>

@@ -26,7 +26,7 @@ const title = `${cast.person.name} · Cratis Cast ${style?.label ?? ''}`.trim();
 const description = `${name} (@${member.handle}) is ${style ? `Cratis Cast ${style.label}: ${style.description.toLowerCase()}` : 'in the Cratis Cast'}. Verified when the directory was built.`;
 ---
 
-<ProfilePage cast={cast} title={title} description={description}>
+<ProfilePage cast={cast} title={title} description={description} noindex>
   <DirectoryLead slot="lead" />
   <VerificationPanel slot="after-hero" member={member} page={page} />
   <DirectoryFooter slot="footer" navigation />

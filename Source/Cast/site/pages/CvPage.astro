@@ -14,8 +14,10 @@ import { plainText } from '../lib/inline';
 
 interface Props {
   cast: CastView;
+  /** Ask search engines not to index the page; a member's own site leaves this off. */
+  noindex?: boolean;
 }
-const { cast } = Astro.props;
+const { cast, noindex = false } = Astro.props;
 const { config, person, careerEvents, cratis, skills, education, certifications, talks, firstName, githubUrl, profileLinks, tier, liveProjects: projects, mergedPrFloor, mergedPrTotal, cratisRepos } = cast;
 
 const projection = project(careerEvents);
@@ -61,6 +63,7 @@ const talkYear = (date: string) => date.slice(0, 4);
   title={`CV · ${person.name}`}
   description={`Curriculum vitae of ${person.fullName ?? person.name}, ${person.title}${person.location ? `, ${person.location}` : ''}.`}
   bodyClass="cv-page"
+  noindex={noindex}
 >
   <Nav slot="nav" cast={cast} home={false}><slot name="lead" slot="lead" /></Nav>
 
