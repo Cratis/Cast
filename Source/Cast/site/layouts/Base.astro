@@ -42,12 +42,13 @@ const jsonLd = {
   '@type': 'Person',
   name: person.name,
   alternateName: [person.fullName, person.handle].filter(Boolean),
-  jobTitle: person.title,
-  ...(person.email ? { email: `mailto:${person.email}` } : {}),
+  // Directory copies (noindex) carry only the name, links and photo; personal details stay on the member's own site.
+  ...(!noindex && person.title ? { jobTitle: person.title } : {}),
+  ...(!noindex && person.email ? { email: `mailto:${person.email}` } : {}),
   url: host.siteFiles ? Astro.site?.toString() : config.site.url,
   ...(host.siteFiles ? { image: new URL(cast.href('apple-touch-icon.png'), Astro.site).toString() } : cast.photoUrl ? { image: cast.photoUrl } : {}),
-  ...(person.location ? { address: { '@type': 'PostalAddress', addressLocality: person.location.split(',')[0]?.trim(), ...(person.country ? { addressCountry: person.country } : {}) } } : {}),
-  knowsAbout: person.interests,
+  ...(!noindex && person.location ? { address: { '@type': 'PostalAddress', addressLocality: person.location.split(',')[0]?.trim(), ...(person.country ? { addressCountry: person.country } : {}) } } : {}),
+  ...(!noindex && person.interests?.length ? { knowsAbout: person.interests } : {}),
   sameAs: [githubUrl, ...profileLinks.filter((link) => link.key !== 'github').map((link) => link.url)],
 };
 ---
