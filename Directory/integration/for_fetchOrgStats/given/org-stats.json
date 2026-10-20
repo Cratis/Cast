@@ -1,0 +1,37 @@
+{
+    "schemaVersion": 1,
+    "generatedAt": "2026-10-21T04:00:00Z",
+    "organization": "Cratis",
+    "scope": "public, non-archived, non-fork repositories",
+    "releases": {
+        "last7Days": 42,
+        "last30Days": 120,
+        "last7DaysByKind": { "major": 1, "minor": 9, "patch": 30, "prerelease": 2 }
+    },
+    "mergedPullRequests": { "last7Days": 18, "last30Days": 67 },
+    "contributors": {
+        "activeLast30Days": 3,
+        "firstTime": [
+            {
+                "login": "Woksin",
+                "name": "Sindre Wilting",
+                "avatarUrl": "https://github.com/woksin.png",
+                "profileUrl": "https://github.com/woksin",
+                "firstMergedAt": "2026-10-20T10:00:00Z",
+                "repository": "Cast",
+                "pullRequestUrl": "https://github.com/Cratis/Cast/pull/1",
+                "pullRequestTitle": "Welcome fixture contribution"
+            },
+            {
+                "login": "newcomer-sample",
+                "name": null,
+                "avatarUrl": "https://github.com/newcomer-sample.png",
+                "profileUrl": "https://github.com/newcomer-sample",
+                "firstMergedAt": "2026-10-19T12:00:00Z",
+                "repository": "Chronicle",
+                "pullRequestUrl": "https://github.com/Cratis/Chronicle/pull/1",
+                "pullRequestTitle": "First contribution fixture"
+            }
+        ]
+    }
+}

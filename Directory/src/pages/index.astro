@@ -5,8 +5,11 @@
 import Directory from '../layouts/Directory.astro';
 import MemberCard from '../components/MemberCard.astro';
 import Section from '../components/Section.astro';
+import WelcomeContributors from '../components/WelcomeContributors.astro';
+import OrganizationActivity from '../components/OrganizationActivity.astro';
+import { orgStats } from 'virtual:cast-directory/profiles';
 import { badgeSvg, Tier } from '@cratis/cast/badges';
-import { avatar, contributors, core, directory, displayName, formatNumber, partners } from '../lib/directory';
+import { avatar, contributors, core, directory, displayName, everyone, formatNumber, partners } from '../lib/directory';
 
 const totals = [
   { value: core.length, label: 'Core', note: 'founders and maintainers', accent: 'text-violet' },
@@ -84,6 +87,13 @@ const jsonLd = {
       </div>
     </div>
   </section>
+
+  {orgStats && (
+    <>
+      <WelcomeContributors contributors={orgStats.contributors.firstTime} members={everyone} />
+      <OrganizationActivity stats={orgStats} />
+    </>
+  )}
 
   <div class="container-x sticky top-[calc(var(--nav-h)+0.75rem)] z-30">
     <label class="panel flex items-center gap-3 px-4 py-1 shadow-2xl shadow-black/40 focus-within:outline-2 focus-within:outline-offset-3 focus-within:outline-command">

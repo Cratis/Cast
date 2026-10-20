@@ -15,6 +15,7 @@ import type { DirectorySnapshot } from './DirectorySnapshot';
 import { castJsonGone, castSummary, discoverContributors, fetchCastJson, fetchProfiles, publicRepositories, verifyCounts } from './fetchDirectory';
 import { memberProfile, usableGitHub, type MemberProfile } from './memberProfile';
 import { profileOverride } from './profileOverride';
+import { fetchOrgStats } from './fetchOrgStats';
 
 const emptySnapshot = (): DirectorySnapshot => ({ version: 1, builtAt: new Date().toISOString(), members: [], contributors: [], pending: 0, counts: {}, profiles: {}, activity: {} });
 
@@ -55,6 +56,8 @@ export default function castDirectory(options: { registry?: string; snapshot?: s
                 const cacheFolder = path.resolve(root, options.cache ?? '.cast/cache');
                 addWatchFile(registryFile);
                 const warn = (message: string) => logger.warn(message);
+                const orgStats = await fetchOrgStats(warn);
+                if (process.env.ORG_STATS_FILE) addWatchFile(path.resolve(process.env.ORG_STATS_FILE));
 
                 const registry = parseRegistry(await readFile(registryFile, 'utf8'));
                 const previous = { ...emptySnapshot(), ...await readJson<DirectorySnapshot>(snapshotFile) };
@@ -138,7 +141,7 @@ export default function castDirectory(options: { registry?: string; snapshot?: s
                         plugins: [{
                             name: 'cratis-cast-directory:profiles',
                             resolveId: (id: string) => (id === moduleId ? resolvedModuleId : undefined),
-                            load: (id: string) => (id === resolvedModuleId ? `export const profiles = ${JSON.stringify(pages)};` : undefined),
+                            load: (id: string) => (id === resolvedModuleId ? `export const profiles = ${JSON.stringify(pages)}; export const orgStats = ${JSON.stringify(orgStats) ?? 'undefined'};` : undefined),
                         }],
                     },
                 });

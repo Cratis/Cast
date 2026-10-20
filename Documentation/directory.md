@@ -26,7 +26,22 @@ Each build with a token also captures every person's contribution calendar and l
 
 Searches are rate-limited, so each build checks people who were never checked first, then the stalest (older than seven days), up to 40 per build plus every registry member. Set `CAST_DIRECTORY_VERIFY_LIMIT` to change the limit. People still waiting are counted on the home page and get no page until they are confirmed.
 
-Everything is kept in `Directory/.cast/directory.json`. A build without `GITHUB_TOKEN`, with GitHub unreachable or rate-limited, keeps that file's values for whatever it could not fetch: a partial contributor discovery adds to the known list instead of replacing it, failed count checks keep their previous counts, and an unknown login in a profile batch does not drop the others. The directory never fails to build because of the network; only an invalid registry stops it.
+The member data is kept in `Directory/.cast/directory.json`. A build without `GITHUB_TOKEN`, with GitHub unreachable or rate-limited, keeps that file's values for whatever it could not fetch: a partial contributor discovery adds to the known list instead of replacing it, failed count checks keep their previous counts, and an unknown login in a profile batch does not drop the others. The directory never fails to build because of the network; only an invalid registry stops it.
+
+## Organization welcome and activity
+
+The home page also reads the optional [organization snapshot](https://raw.githubusercontent.com/Cratis/.github/main/stats/org-stats.json), published daily by Cratis/.github for public, non-archived, non-fork repositories. This needs no GitHub token and is fetched at build time with a 10-second timeout. Only schema version 1 with valid display fields is used; a failed fetch or invalid snapshot omits both sections without failing the build. This data is not kept in the member cache.
+
+**Welcome to the cast** thanks people whose first merged pull request in the organization was in the last 90 days, with their avatar, name, first pull request, repository and UTC date. People with an existing directory page link there; everyone else links to their GitHub profile. An empty list shows no section and does not create member pages or award tiers.
+
+**What we’re building together** shows merged pull requests and releases in the last 7 and 30 days, with the weekly major/minor releases alongside the total. The active-people figure appears only when at least three people have merged work in the last 30 days. The snapshot date makes clear when these rolling windows were captured.
+
+To try a snapshot locally, set `ORG_STATS_FILE` (takes precedence) or `ORG_STATS_URL`. File paths are relative to the directory workspace when using `yarn workspace`:
+
+```sh
+ORG_STATS_FILE=integration/for_fetchOrgStats/given/org-stats.json yarn workspace @cratis/cast-directory build
+ORG_STATS_URL=http://127.0.0.1:1/unreachable.json yarn workspace @cratis/cast-directory build
+```
 
 ## Member pages
 

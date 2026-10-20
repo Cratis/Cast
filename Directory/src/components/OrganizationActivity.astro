@@ -1,0 +1,33 @@
+---
+// Copyright (c) Cratis. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+import type { OrgStats } from '../../integration/OrgStats';
+
+interface Props {
+  stats: OrgStats;
+}
+const { stats } = Astro.props;
+const number = (value: number) => new Intl.NumberFormat('en-US').format(value);
+const asOf = new Date(stats.generatedAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+const figures = [
+  { value: stats.mergedPullRequests.last7Days, label: 'merged pull requests this week', note: `${number(stats.mergedPullRequests.last30Days)} in the last 30 days`, accent: 'text-violet' },
+  { value: stats.releases.last7Days, label: 'releases this week', note: `${number(stats.releases.last7DaysByKind.major)} major · ${number(stats.releases.last7DaysByKind.minor)} minor this week; ${number(stats.releases.last30Days)} releases in the last 30 days`, accent: 'text-teal' },
+  ...(stats.contributors.activeLast30Days >= 3 ? [{ value: stats.contributors.activeLast30Days, label: 'people active this month', note: 'through merged pull requests in the last 30 days', accent: 'text-event' }] : []),
+];
+---
+
+<section id="organization-activity" class="relative py-12 md:py-16" aria-labelledby="organization-activity-title">
+  <div class="container-x">
+    <h2 id="organization-activity-title" class="text-2xl font-[800] tracking-tight">What we’re building together</h2>
+    <p class="mt-3 text-sm text-fg-muted">Across public Cratis repositories · as of <time datetime={stats.generatedAt}>{asOf}</time>. This week means the last 7 days.</p>
+    <dl class:list={['mt-6 grid gap-px overflow-hidden rounded-2xl border border-line bg-line', figures.length === 3 ? 'md:grid-cols-3' : 'md:grid-cols-2']}>
+      {figures.map((figure) => (
+        <div class="flex flex-col gap-3 bg-ink-900 p-6">
+          <dt class="order-2 text-sm text-fg-muted">{figure.label}<span class="mt-2 block text-xs text-fg-faint">{figure.note}</span></dt>
+          <dd class={`font-display text-4xl font-[800] tracking-tight tabular-nums ${figure.accent}`}>{number(figure.value)}</dd>
+        </div>
+      ))}
+    </dl>
+  </div>
+</section>
