@@ -4,7 +4,8 @@
 
 import Directory from '../layouts/Directory.astro';
 import SectionHeader from '@cratis/cast/site/components/SectionHeader.astro';
-import { badgeSvg, Tier, tierStyles } from '@cratis/cast/badges';
+import { Tier, tierStyles } from '@cratis/cast/badges';
+import { badgeImage } from '../lib/badgeImage';
 
 const steps = [
   { command: 'npm create @cratis/cast@latest my-site', text: 'Asks for your GitHub handle, reads your public profile and writes a cast.yaml with every section ready to fill in.' },
@@ -16,10 +17,9 @@ const tiers = [
   { tier: Tier.Partner, how: 'Consultants and companies Cratis vouches for. Open a pull request that adds you to the registry; Cratis reviews it and merges it only when we can vouch for the work.', anchor: 'partner' },
   { tier: Tier.Contributor, how: 'Get a pull request merged in any public Cratis repository. Nothing to apply for: the next build of your site and of the directory shows it.' },
 ];
-const badge = (tier: Tier) => `data:image/svg+xml;utf8,${encodeURIComponent(badgeSvg(tier))}`;
 ---
 
-<Directory title="Join the Cratis Cast" description="Get a Cast site with one command, and learn how the Core, Partner and Contributor badges are verified.">
+<Directory title="Join Cratis Cast: create your site and earn verified badges" description="Get a Cast site with one command, and learn how the Core, Partner and Contributor badges are verified.">
   <section class="relative isolate overflow-hidden pt-[calc(var(--nav-h)+4rem)] pb-12">
     <div class="pointer-events-none absolute -top-32 right-[-10rem] -z-10 size-[40rem] rounded-full bg-violet/15 blur-[140px]" aria-hidden="true"></div>
     <div class="container-x">
@@ -65,7 +65,7 @@ const badge = (tier: Tier) => `data:image/svg+xml;utf8,${encodeURIComponent(badg
       <ul class="grid gap-4 lg:grid-cols-3">
         {tiers.map((entry) => (
           <li id={entry.anchor} class="panel flex flex-col p-6" data-reveal>
-            <img src={badge(entry.tier)} alt={`${tierStyles[entry.tier].label} badge`} height="20" class="h-5 w-auto self-start" />
+            <img {...badgeImage(entry.tier)} loading="lazy" class="h-5 w-auto self-start" />
             <p class="mt-5 text-2xl font-[750] tracking-[-0.03em]">{tierStyles[entry.tier].label}</p>
             <p class="mt-2 text-sm leading-relaxed text-fg-muted">{entry.how}</p>
           </li>

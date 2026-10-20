@@ -4,6 +4,7 @@
 
 // The directory footer: what the Cast is, how badges are checked, and the directory's own links.
 import CratisMark from '@cratis/cast/site/components/CratisMark.astro';
+import { partners } from '../lib/directory';
 
 interface Props {
   /** Repeat the directory navigation, for pages without the directory header (member profiles). */
@@ -12,9 +13,9 @@ interface Props {
 const { navigation = false } = Astro.props;
 const links = [
   { href: '/#core', label: 'Core' },
-  { href: '/#partners', label: 'Partners' },
+  ...(partners.length > 0 ? [{ href: '/#partners', label: 'Partners' }] : []),
   { href: '/#contributors', label: 'Contributors' },
-  { href: '/join', label: 'Join' },
+  { href: '/join/', label: 'Join' },
 ];
 ---
 

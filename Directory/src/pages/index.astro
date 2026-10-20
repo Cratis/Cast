@@ -8,7 +8,8 @@ import Section from '../components/Section.astro';
 import WelcomeContributors from '../components/WelcomeContributors.astro';
 import OrganizationActivity from '../components/OrganizationActivity.astro';
 import { orgStats } from 'virtual:cast-directory/profiles';
-import { badgeSvg, Tier } from '@cratis/cast/badges';
+import { Tier } from '@cratis/cast/badges';
+import { badgeImage } from '../lib/badgeImage';
 import { avatar, contributors, core, directory, displayName, everyone, formatNumber, partners } from '../lib/directory';
 
 const totals = [
@@ -16,7 +17,7 @@ const totals = [
   { value: partners.length, label: 'Partners', note: 'vouched for by Cratis', accent: 'text-teal' },
   { value: contributors.length, label: 'Contributors', note: 'merged public work', accent: 'text-event' },
 ];
-const badges = [Tier.Core, Tier.Partner, Tier.Contributor].map((tier) => `data:image/svg+xml;utf8,${encodeURIComponent(badgeSvg(tier))}`);
+const badges = [Tier.Core, Tier.Partner, Tier.Contributor].map(badgeImage);
 const asOf = directory.fetchedAt ? new Date(directory.fetchedAt).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : undefined;
 const siteUrl = 'https://cast.cratis.io/';
 const description = 'The verified directory of people who build with Cratis: Core, Partners and Contributors. Every badge is checked when the directory builds.';
@@ -67,7 +68,7 @@ const jsonLd = {
         Each one has a Cast site that remembers their career, and a badge anyone can check.
       </p>
       <div class="hero-in mt-10 flex flex-wrap items-center gap-3" style="--d:240ms">
-        <a href="/join" class="btn btn-primary">
+        <a href="/join/" class="btn btn-primary">
           Get your Cast site
           <svg viewBox="0 0 16 16" class="size-4" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
         </a>
@@ -83,7 +84,7 @@ const jsonLd = {
         ))}
       </dl>
       <div class="hero-in mt-8 flex flex-wrap items-center gap-3" style="--d:400ms" aria-label="The three badges">
-        {badges.map((src, index) => <img src={src} alt={['Core badge', 'Partner badge', 'Contributor badge'][index]} height="20" class="h-5 w-auto" />)}
+        {badges.map((badge) => <img {...badge} class="h-5 w-auto" />)}
       </div>
     </div>
   </section>
@@ -111,21 +112,16 @@ const jsonLd = {
     </ul>
   </Section>
 
-  <Section id="partners" index="02" kind="view" label="Tier · Partner" title="The *Partners.*">
-    <p slot="intro" class="mt-6 max-w-[60ch] text-lg text-fg-muted">Consultants and companies Cratis vouches for, added through a reviewed pull request.</p>
-    {partners.length > 0 ? (
+  {partners.length > 0 && (
+    <Section id="partners" index="02" kind="view" label="Tier · Partner" title="The *Partners.*">
+      <p slot="intro" class="mt-6 max-w-[60ch] text-lg text-fg-muted">Consultants and companies Cratis vouches for, added through a reviewed pull request.</p>
       <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {partners.map((member) => <MemberCard member={member} />)}
       </ul>
-    ) : (
-      <div class="panel flex flex-col items-start gap-4 p-8 md:flex-row md:items-center md:justify-between" data-reveal>
-        <p class="max-w-[56ch] text-fg-muted"><span class="font-mono text-sm text-fg-faint">EventNotFound:</span> no partners are listed yet. Cratis adds partners it can vouch for, one reviewed pull request at a time.</p>
-        <a href="/join#partner" class="btn btn-sm">How partners join</a>
-      </div>
-    )}
-  </Section>
+    </Section>
+  )}
 
-  <Section id="contributors" index="03" kind="event" label="Tier · Contributor" title="Everyone with *merged work.*">
+  <Section id="contributors" index={partners.length > 0 ? '03' : '02'} kind="event" label="Tier · Contributor" title="Everyone with *merged work.*">
     <p slot="intro" class="mt-6 max-w-[62ch] text-lg text-fg-muted">
       People with merged pull requests in public Cratis repositories, found and checked against GitHub when the directory builds. Nobody applies; the work is the application.
       {directory.pending > 0 && <span class="text-fg-faint"> {formatNumber(directory.pending)} more are waiting to be checked.</span>}
@@ -157,7 +153,7 @@ const jsonLd = {
         <p class="mt-6 max-w-[54ch] text-lg text-fg-muted">One <code class="inline-code">cast.yaml</code> becomes a site that replays your career, shows your public work as it happens, prints as a CV and carries a badge anyone can verify.</p>
       </div>
       <div class="flex flex-wrap gap-3 lg:justify-end">
-        <a href="/join" class="btn btn-primary">Join the Cast</a>
+        <a href="/join/" class="btn btn-primary">Join the Cast</a>
         <a href="https://www.woksin.com" class="btn" rel="noopener">See a Cast site</a>
       </div>
     </div>
