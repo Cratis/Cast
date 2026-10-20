@@ -1,6 +1,8 @@
 # Cast
 
-**The people behind the play.** Verified, event-sourced profile sites for everyone who builds with [Cratis](https://cratis.io), and the directory of those people at [cast.cratis.io](https://cast.cratis.io).
+Cratis Cast is a profile-site generator and directory for Cratis developers to share career histories and public GitHub work.
+
+**The people behind the play.** Verified, event-sourced profile sites for everyone who builds with [Cratis](https://www.cratis.io), and the directory of those people at [cast.cratis.io](https://cast.cratis.io).
 
 Cratis is *software that remembers*. Cast is *careers that remember*.
 
