@@ -13,6 +13,6 @@
     },
     "dependencies": {
         "@cratis/cast": "workspace:*",
-        "astro": "^7.4.0"
+        "astro": "^7.4.2"
     }
 }
