@@ -3,7 +3,7 @@ title: The directory
 description: What cast.cratis.io shows, where its data comes from and how it is built.
 ---
 
-The directory at [cast.cratis.io](https://cast.cratis.io) is the Cast in one place. Its source is in [`Directory/`](https://github.com/Cratis/Cast/tree/main/Directory).
+The directory at [cast.cratis.io](https://cast.cratis.io) brings the Cast together and verifies each person's relationship to Cratis. A listing can use a reviewed member's published profile or public GitHub data; publishing a site alone does not make it eligible for full-profile import. The directory's source is in [`Directory/`](https://github.com/Cratis/Cast/tree/main/Directory).
 
 ## Pages
 
@@ -15,6 +15,41 @@ The directory at [cast.cratis.io](https://cast.cratis.io) is the Cast in one pla
 | `/<handle>/badge.svg`, `/<handle>/badge-card.svg` | The authoritative badges. |
 | `/join` | How to get a Cast site and how each tier is earned. |
 | `/members.json` | Every verified member as JSON. |
+
+## Member pages
+
+Every person with a page gets a Cast profile at `/<handle>/` and a printable CV at `/<handle>/cv/`. The profile uses the Cratis Cast design: the hero with the event-model board, light and dark themes, the terminal (`` ` ``) and the command palette (⌘K or Ctrl+K). Its content determines which sections appear: Now, stats, the career replay, Cratis, projects, writing, talks, agentic, skills, the contribution heatmap and live pull request feed, and contact.
+
+The directory adds what only it can say:
+
+- **Verification**, right after the hero: the tier from the registry or from verified merged pull requests, since when, the role, a link to the registry line, and the badge embed snippets.
+- **The badge in the navigation reads as verified**, because the directory is the authority. On a member's own site the same badge is a claim that links here.
+- **Provenance**: "This profile is from ada.example, rendered by Cratis Cast", or "built from public GitHub data", with a link to their own site.
+- **The way back**: the Cratis Cast mark in the navigation, "Back to the Cast" above the verification, and the directory links in the footer.
+
+### Where a page's content comes from
+
+Core and Partner membership comes from the reviewed registry. Contributor eligibility comes from verified merged public pull requests in Cratis. See [Badges and the registry](badges-and-registry.md) for joining, identity and verification rules; a profile's own tier claim never decides its listing.
+
+| Who | Content |
+| --- | --- |
+| Core or Partner with a usable `cast.json` | Their full profile from it. The contribution calendar and pull request feed come from its `profile.github`, or from the directory's own GitHub data when it has none. |
+| Core or Partner without one, or whose file cannot be used | A GitHub-only profile. |
+| Verified Contributor | A GitHub-only profile, always. The directory never renders content from a site it has not reviewed. |
+
+A GitHub-only profile shows the public GitHub name, avatar, bio and location, the merged pull requests and commits in the Cratis organization, their rank among the human committers of their top public Cratis repositories, the contribution calendar and the merged pull request feed. Every sentence on it is a fact the directory checked.
+
+To update an imported profile, edit your site's content and publish its `cast.json` again. The directory reads it on its next build. If its address changes, update `site:` or `profile:` in your registry entry through a reviewed pull request. The [registry guide](https://github.com/Cratis/Cast/blob/main/Registry/README.md) explains changes and removal; membership does not require you to supply a full profile. Keep the file's GitHub identity consistent with your registry entry, and publish only the content you intend to share.
+
+In the browser, a member page refreshes that member's merged pull requests and public events from GitHub, the same way a Cast site does, cached per member for five minutes. The page works the same without it.
+
+### Reading cast.json
+
+The directory reads a member's `cast.json` from the registry's `profile:` URL, else from `<site>/cast.json`, over https only, at most 1 MB and within 10 seconds. The rules for identity, tiers, links and text are in the [cast.json reference](cast-json.md#how-the-directory-reads-it). A good copy is kept in `Directory/.cast/cache/profiles/` and used when the next fetch fails. The cache, together with per-person GitHub captures in `Directory/.cast/cache/github/`, is never committed, so a fresh checkout without a token shows GitHub-only profiles without a contribution calendar until a build with a token has run.
+
+### Safety
+
+Member data is shown as text. Inline markup is parsed into elements rather than inserted as HTML, links must be `http(s)` (and `mailto:` for email), links from member data carry `rel="noopener nofollow ugc"`, and the data the browser scripts read is embedded as HTML-safe JSON. The terminal and the command palette work only on that parsed data.
 
 ## Where the data comes from
 
@@ -36,43 +71,23 @@ The home page also reads the optional [organization snapshot](https://raw.github
 
 **What we’re building together** shows merged pull requests and releases in the last 7 and 30 days, with the weekly major/minor releases alongside the total. The active-people figure appears only when at least three people have merged work in the last 30 days. The snapshot date makes clear when these rolling windows were captured.
 
-To try a snapshot locally, set `ORG_STATS_FILE` (takes precedence) or `ORG_STATS_URL`. File paths are relative to the directory workspace when using `yarn workspace`:
+## Building it
+
+The following commands and overrides are for working on the directory itself, not for publishing your own profile.
+
+```sh
+yarn workspace @cratis/cast build                                       # schema and bundled registry
+GITHUB_TOKEN=$(gh auth token) yarn workspace @cratis/cast-directory build
+```
+
+The [Directory Pages](https://github.com/Cratis/Cast/blob/main/.github/workflows/directory-pages.yml) workflow builds and deploys it to GitHub Pages on pushes to `main` that touch `Directory/`, `Registry/` or `Source/Cast/`, every six hours, and on demand. `Directory/public/CNAME` names `cast.cratis.io`.
+
+To try an organization snapshot locally, set `ORG_STATS_FILE` (takes precedence) or `ORG_STATS_URL`. File paths are relative to the directory workspace when using `yarn workspace`:
 
 ```sh
 ORG_STATS_FILE=integration/for_fetchOrgStats/given/org-stats.json yarn workspace @cratis/cast-directory build
 ORG_STATS_URL=http://127.0.0.1:1/unreachable.json yarn workspace @cratis/cast-directory build
 ```
-
-## Member pages
-
-Every person with a page gets a full Cast profile at `/<handle>/`, in the Cratis Cast design, with everything a Cast site has: the hero with the event-model board, the sections their data fills (Now, stats, the career replay, Cratis, projects, writing, talks, agentic, skills, the contribution heatmap and live pull request feed, contact), the terminal (`` ` ``), the command palette (⌘K or Ctrl+K), light and dark themes and a printable CV at `/<handle>/cv/`.
-
-The directory adds what only it can say:
-
-- **Verification**, right after the hero: the tier from the registry or from verified merged pull requests, since when, the role, a link to the registry line, and the badge embed snippets.
-- **The badge in the navigation reads as verified**, because the directory is the authority. On a member's own site the same badge is a claim that links here.
-- **Provenance**: "This profile is from ada.example, rendered by Cratis Cast", or "built from public GitHub data", with a link to their own site.
-- **The way back**: the Cratis Cast mark in the navigation, "Back to the Cast" above the verification, and the directory links in the footer.
-
-### Where a page's content comes from
-
-| Who | Content |
-| --- | --- |
-| Core or Partner with a usable `cast.json` | Their full profile from it. The contribution calendar and pull request feed come from its `profile.github`, or from the directory's own GitHub data when it has none. |
-| Core or Partner without one, or whose file cannot be used | A GitHub-only profile. |
-| Verified Contributor | A GitHub-only profile, always. The directory never renders content from a site it has not reviewed. |
-
-A GitHub-only profile shows the public GitHub name, avatar, bio and location, the merged pull requests and commits in the Cratis organization, their rank among the human committers of their top public Cratis repositories, the contribution calendar and the merged pull request feed. Every sentence on it is a fact the directory checked.
-
-In the browser, a member page refreshes that member's merged pull requests and public events from GitHub, the same way a Cast site does, cached per member for five minutes. The page works the same without it.
-
-### Reading cast.json
-
-The directory reads a member's `cast.json` from the registry's `profile:` URL, else from `<site>/cast.json`, over https only, at most 1 MB and within 10 seconds. The rules for identity, tiers, links and text are in the [cast.json reference](cast-json.md#how-the-directory-reads-it). A good copy is kept in `Directory/.cast/cache/profiles/` and used when the next fetch fails. The cache, together with per-person GitHub captures in `Directory/.cast/cache/github/`, is never committed, so a fresh checkout without a token shows GitHub-only profiles without a contribution calendar until a build with a token has run.
-
-### Safety
-
-Member data is shown as text. Inline markup is parsed into elements rather than inserted as HTML, links must be `http(s)` (and `mailto:` for email), links from member data carry `rel="noopener nofollow ugc"`, and the data the browser scripts read is embedded as HTML-safe JSON. The terminal and the command palette work only on that parsed data.
 
 ### Trying a profile locally
 
@@ -86,12 +101,3 @@ yarn workspace @cratis/cast-directory preview
 ```
 
 The override is for local builds only; never set it in CI. Logins with `-` use `_` in the variable name.
-
-## Building it
-
-```sh
-yarn workspace @cratis/cast build                                       # schema and bundled registry
-GITHUB_TOKEN=$(gh auth token) yarn workspace @cratis/cast-directory build
-```
-
-The [Directory Pages](https://github.com/Cratis/Cast/blob/main/.github/workflows/directory-pages.yml) workflow builds and deploys it to GitHub Pages on pushes to `main` that touch `Directory/`, `Registry/` or `Source/Cast/`, every six hours, and on demand. `Directory/public/CNAME` names `cast.cratis.io`.
