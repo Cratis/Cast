@@ -3,9 +3,9 @@ title: cast.json reference
 description: The cast.json format, version 2. The complete profile a site publishes and the Cast directory renders.
 ---
 
-`cast.json` is a complete, render-ready Cast profile in one JSON file. The [directory](directory.md) renders a registry member's full profile at `https://cast.cratis.io/<login>/` from it. Agents and other tools can read it too.
+`cast.json` carries a render-ready Cast profile in one JSON file. Every Cast site publishes it at `/cast.json`; other sites can produce it from their own data, by hand or in their build. Agents and other tools can read it without scraping a page.
 
-Every Cast site publishes it at `/cast.json`. You do not need Cast to publish one. Any site can write the file from its own data, by hand or in its own build, and the directory renders it the same way.
+The [directory](directory.md) uses it to render a reviewed registry member's full profile at `https://cast.cratis.io/<login>/`. Only Core and Partner members are eligible for this import. Publishing a valid file does not create membership or grant a tier; verified Contributors have GitHub-only directory profiles.
 
 For completion and validation in your editor, point `$schema` at the published JSON Schema:
 
@@ -37,6 +37,8 @@ The schema ships in the `@cratis/cast` package as `cast-json.schema.json`.
   }
 }
 ```
+
+The example supplies the required profile information. Add career events and other sections under `profile.cast` to describe more of your work; optional sections are not populated by the format itself.
 
 ## Top level
 
@@ -88,17 +90,17 @@ The directory reads a registry member's `cast.json` from the registry's `profile
 - **https only**, at most 1 MB, within 10 seconds, also after redirects. A file that cannot be read, is not version 2 or does not validate is not used, and the page falls back to the last good copy the build kept, and then to a GitHub-only profile. When your site answers 404 or 410, the file is treated as removed and the kept copy is dropped too. A broken file never fails the directory build.
 - **Checked the way it renders.** Dates must be real (`2026-02-30` and month `13` are refused), counts whole and not negative, URLs must parse, and the career must replay. No single text may be longer than 20,000 characters, and no list longer than 2,000 entries. Before a file is used, the directory computes what the page shows from it; a file the page could not render is not used. When only `profile.github` or `profile.writing` is the problem, that capture is dropped and the directory uses its own GitHub data.
 - **Identity.** `handle` and `profile.cast.person.handle` must be the registry login, case-insensitively, or the file is ignored.
-- **Tiers.** The directory decides the tier. A `tier` in `profile.cast`, the `verification` object and any other claim are ignored.
+- **Tiers.** The directory decides the tier. A `tier` in `profile.cast`, the `verification` object and any other claim are ignored. See [Badges and the registry](badges-and-registry.md#who-decides) for the verification authority.
 - **Links.** Every URL must be `http://` or `https://`, `person.photo` must be an `https://` URL, and `person.email` must be an email address. A link with another scheme (such as `javascript:` or `data:`) is dropped. When a required link is dropped, the item that needs it goes too: a project whose `url` is dropped is left out. Links in inline text follow the [text formatting](cast-yaml.md#text-formatting) rules, and relative links resolve against your site.
 - **Text.** Everything is shown as text. Inline markup (`*accent*`, `**strong**`, `` `code` ``, `[label](https://…)`) is rendered as elements, never as HTML.
 - **Look.** The page uses the Cratis Cast design. Your `theme.accent` colours it, adjusted for contrast as on a Cast site; `theme.mode` sets the default theme.
 
 ## Producing it without Cast
 
-Write `profile.cast` from your own data using the [cast.yaml reference](cast-yaml.md). Career events, projects, talks, skills and the rest all render on the directory page as they would on a Cast site. Then:
+Keep your existing publisher and write `profile.cast` from your own data using the [cast.yaml reference](cast-yaml.md). It supplies the career events, projects, talks, skills and other sections the directory can render. For full-profile import, you must already be a reviewed Core or Partner member. Then:
 
 1. Validate the file against `https://unpkg.com/@cratis/cast/cast-json.schema.json`.
-2. Serve it at `https://<your site>/cast.json` with `content-type: application/json`, or anywhere over https and set `profile:` in your registry entry to its URL.
-3. The directory picks it up on its next build, within the hour.
+2. Serve it at `https://<your site>/cast.json` with `content-type: application/json`, or anywhere over https and set `profile:` in your registry entry to its URL through a reviewed pull request.
+3. The directory picks it up on its next build.
 
 To check a file before it is public, build the directory locally against it with a development override (see [The directory](directory.md#trying-a-profile-locally)).

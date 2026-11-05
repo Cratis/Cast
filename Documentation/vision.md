@@ -3,31 +3,28 @@ title: Vision
 description: Why Cast exists, what it is, how it earns trust, and where it is going.
 ---
 
-**Cast is how the people who build with Cratis show their work, and how Cratis shows its people.** Each person gets a verified, event-sourced profile site. Cratis gets a living directory of its Core team, Partners and Contributors.
+**Cast is how the people who build with Cratis show their work, and how Cratis shows its people.** A person maintains a profile site from one file; the directory brings Core, Partner and Contributor profiles together with verification of their relationship to Cratis.
 
 > Cratis: *Software that remembers.*
 > Cast: *Careers that remember.*
 
 ## Why
 
-Today, someone who is good at Cratis has no credible way to show it. "Event Sourcing" on a CV says nothing, and a client cannot tell someone who read the docs from someone who ships with Chronicle. Contributors get little recognition outside GitHub, and the community has no face. And event sourcing is easier to show than to explain: most people have never watched a system rebuild its state by replaying facts.
+A profile needs room for both a person's account of their work and the work a visitor can inspect. Cast puts career history, projects and writing alongside public GitHub activity. The directory gives that visitor a place to check the person's relationship to Cratis, without treating a badge as proof of every skill on the page.
 
-Cast changes that:
+Keeping the career as events also makes the profile a demonstration of event sourcing. A visitor can watch roles, organizations and skills rebuild from the history, then read a CV produced from the same events. The owner maintains that history rather than separate accounts for each view.
 
-- **Proof instead of claims.** Tiers come from a registry Cratis reviews, and from merged public pull requests. Numbers come from GitHub on every build. Nobody can give themselves a badge.
-- **Every profile is a demonstration.** A visitor replays a career and watches the projection rebuild. That is event sourcing in ten seconds, on a page they came to for another reason.
-- **Every profile leads to Cratis.** Each site carries the Cast badge and links to the directory and to the projects the person works on.
-- **The network becomes visible.** Anyone can browse the people who build with Cratis.
+The directory connects those individual sites. Someone following a badge can check what earned it, find the person's work in Cratis projects, and browse others in the Cast.
 
 ## What it is
 
 | Piece | What it does |
 | --- | --- |
-| `@cratis/cast` | An Astro integration: one `cast.yaml` becomes a complete site. Home, career replay, live GitHub data, writing, talks, projects, a terminal, a command palette, a printable `/cv`, and light and dark themes in Cratis branding with a personal accent. |
+| `@cratis/cast` | The Astro integration that renders `cast.yaml` as a profile site and printable `/cv`, with career replay and public GitHub data. |
 | `npm create @cratis/cast` | Give it a GitHub handle and it prefills the profile and writes the deploy workflow, with an hourly refresh, for GitHub Pages. |
 | The registry | `Registry/members.yaml`, the source of truth for Core and Partner. Changed only through reviewed pull requests. |
-| Badges | Core (violet to teal, with the Cratis mark), Partner (teal), Contributor (amber, earned automatically). Embeddable images, each linking to a verification page. |
-| The directory | [cast.cratis.io](https://cast.cratis.io): the people behind the play, a verification page per person, embed snippets, how to join, and a wall of everyone with merged work in Cratis. |
+| Badges | The link from a site's claim to directory verification: Core (violet to teal, with the Cratis mark), Partner (teal), Contributor (amber, earned automatically). |
+| The directory | [cast.cratis.io](https://cast.cratis.io): profiles, verification and badge embeds for registry members and verified Contributors. |
 | An open profile format | Every site publishes `/cast.json`, `/resume.json` (JSON Resume) and `/llms.txt`. People, the directory and AI agents read the same data. |
 
 ## How it looks and feels
@@ -37,13 +34,15 @@ Cast changes that:
 1. They land on the consultant's site. A live Event Modeling board drifts behind the headline, and the navigation shows the Cast badge.
 2. A "where the stream is now" read model shows what the person does today.
 3. They press play. The career replays event by event, and the role, organizations and skills rebuild as it goes.
-4. The numbers come from GitHub: merged pull requests, contributions, releases. None are typed in by hand.
+4. They inspect public GitHub work: merged pull requests, contributions and releases, alongside the history the owner wrote.
 5. They click the badge, reach the person's page on cast.cratis.io, and see what verified it and since when, with a link to the registry entry.
 6. They print `/cv` and get a clean CV generated from the same data.
 
 **A member** runs `npm create @cratis/cast`, edits one YAML file with completion in the editor, and pushes. Engine updates arrive as a version bump; a custom domain is one line. The badge goes in their GitHub README, email signature and profiles.
 
-**Cratis** merges a pull request to add a Partner. The directory picks it up right away, since registry merges trigger a deploy; the person's site picks it up on its next hourly build.
+**Cratis** reviews a pull request to add a Partner. A merged registry change triggers the directory workflow; the person's site reads the change when it next builds, hourly with the scaffolded workflow.
+
+To build your own profile, start with [Getting started](getting-started.md). The [directory guide](directory.md) explains which content it imports and how it presents verification.
 
 ## Trust
 
@@ -54,6 +53,8 @@ Cast changes that:
 - **Honest by design.** No invented metrics, testimonials or clients. Not everyone who asks becomes a Partner.
 
 ## Roadmap
+
+These phases describe the intended progression, not a list of capabilities already available. Each linked issue defines the work for that phase.
 
 ### Phase 0: Foundation ([Cratis/Cast#1](https://github.com/Cratis/Cast/issues/1))
 
