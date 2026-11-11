@@ -37,22 +37,22 @@ const ALL_SECTIONS = [
 ] as const;
 
 // --- tiny DOM helpers --------------------------------------------------------------
-const span = (cls: string, text: string): HTMLSpanElement => {
-    const s = document.createElement('span');
-    s.className = cls;
-    s.textContent = text;
-    return s;
+const styledText = ({ className }: { className: string }) => (text: string): HTMLSpanElement => {
+    const element = document.createElement('span');
+    element.className = className;
+    element.textContent = text;
+    return element;
 };
 const c = {
-    ev: (t: string) => span('text-event', t),
-    cmd: (t: string) => span('text-command', t),
-    view: (t: string) => span('text-view', t),
-    muted: (t: string) => span('text-fg-muted', t),
-    faint: (t: string) => span('text-fg-faint', t),
-    fg: (t: string) => span('text-fg', t),
+    ev: styledText({ className: 'text-event' }),
+    cmd: styledText({ className: 'text-command' }),
+    view: styledText({ className: 'text-view' }),
+    muted: styledText({ className: 'text-fg-muted' }),
+    faint: styledText({ className: 'text-fg-faint' }),
+    fg: styledText({ className: 'text-fg' }),
 };
 let linkRel = 'noopener';
-const link = (href: string, text = href.replace(/^https?:\/\/(www\.)?/, '')): HTMLAnchorElement => {
+const link = ({ href, text = href.replace(/^https?:\/\/(www\.)?/, '') }: { href: string; text?: string }): HTMLAnchorElement => {
     const a = document.createElement('a');
     a.href = /^(https?:|mailto:)/i.test(href) ? href : '#';
     a.textContent = text;
@@ -61,10 +61,10 @@ const link = (href: string, text = href.replace(/^https?:\/\/(www\.)?/, '')): HT
     a.className = 'text-command-soft';
     return a;
 };
-const pad = (s: string, n: number) => s + ' '.repeat(Math.max(1, n - s.length));
+const pad = ({ text, width }: { text: string; width: number }) => text + ' '.repeat(Math.max(1, width - text.length));
 
 /** Levenshtein distance, for "did you mean" suggestions. */
-function distance(a: string, b: string): number {
+function distance({ a, b }: { a: string; b: string }): number {
     const row = Array.from({ length: b.length + 1 }, (_, i) => i);
     for (let i = 1; i <= a.length; i++) {
         let prev = row[0]!;
@@ -115,7 +115,7 @@ class Terminal {
     blank(): void {
         this.print(' ');
     }
-    private echo(raw: string): void {
+    private echo({ raw }: { raw: string }): void {
         this.print(c.view(this.prompt), c.faint(':'), c.cmd('~'), c.faint('$ '), c.fg(raw));
     }
     clear(): void {
@@ -156,10 +156,7 @@ class Terminal {
     private bind(): void {
         const { dialog, input, out } = this;
         dialog.addEventListener('close', () => {
-            document.documentElement.style.overflow = '';
-            if (this.returnFocus && this.returnFocus !== document.body && this.returnFocus.isConnected) this.returnFocus.focus({ preventScroll: true });
-            // Nothing to return to: drop focus from the closed dialog once the browser is done closing it.
-            else window.setTimeout(() => dialog.contains(document.activeElement) && (document.activeElement as HTMLElement).blur(), 0);
+            this.restoreFocus();
         });
         dialog.addEventListener('click', (e) => {
             if (e.target === dialog) this.close();
@@ -177,24 +174,42 @@ class Terminal {
         });
         // Clicking the output focuses the prompt, unless the visitor is selecting text or a link.
         out.addEventListener('click', (e) => {
-            if ((e.target as Element).closest('a') || window.getSelection()?.toString()) return;
-            input.focus();
+            if (this.shouldFocusPrompt(e)) input.focus();
         });
         input.addEventListener('keydown', (e) => this.onKey(e));
         // Keep Tab completion inside the prompt and Shift+Tab cycling within the dialog.
-        dialog.addEventListener('keydown', (e) => {
-            if (e.key !== 'Tab' || e.target === input) return;
-            const stops = [...dialog.querySelectorAll<HTMLElement>('input, button, a[href]')];
-            const first = stops[0];
-            const last = stops[stops.length - 1];
-            if (e.shiftKey && document.activeElement === first) {
-                e.preventDefault();
-                last?.focus();
-            } else if (!e.shiftKey && document.activeElement === last) {
-                e.preventDefault();
-                first?.focus();
-            }
-        });
+        dialog.addEventListener('keydown', (e) => this.cycleFocus(e));
+    }
+
+    private shouldFocusPrompt(event: MouseEvent): boolean {
+        if ((event.target as Element).closest('a')) return false;
+        return !window.getSelection()?.toString();
+    }
+
+    private restoreFocus(): void {
+        document.documentElement.style.overflow = '';
+        const target = this.returnFocus;
+        const canRestore = target && target !== document.body && target.isConnected;
+        if (canRestore) target.focus({ preventScroll: true });
+        // Nothing to return to: drop focus from the closed dialog once the browser is done closing it.
+        else window.setTimeout(() => this.blurClosedDialog(), 0);
+    }
+
+    private blurClosedDialog(): void {
+        if (this.dialog.contains(document.activeElement)) (document.activeElement as HTMLElement).blur();
+    }
+
+    private cycleFocus(e: KeyboardEvent): void {
+        if (e.key !== 'Tab') return;
+        if (e.target === this.input) return;
+        const stops = [...this.dialog.querySelectorAll<HTMLElement>('input, button, a[href]')];
+        const first = stops[0];
+        const last = stops[stops.length - 1];
+        const boundary = e.shiftKey ? first : last;
+        if (document.activeElement !== boundary) return;
+        e.preventDefault();
+        const destination = e.shiftKey ? last : first;
+        destination?.focus();
     }
 
     private onKey(e: KeyboardEvent): void {
@@ -212,14 +227,21 @@ class Terminal {
         } else if (e.key === 'Tab' && !e.shiftKey) {
             e.preventDefault();
             this.complete();
-        } else if (e.key.toLowerCase() === 'l' && e.ctrlKey) {
+        } else {
+            this.controlKey(e);
+        }
+    }
+
+    private controlKey(e: KeyboardEvent): void {
+        if (!e.ctrlKey) return;
+        if (e.key.toLowerCase() === 'l') {
             e.preventDefault();
             this.clear();
-        } else if (e.key.toLowerCase() === 'c' && e.ctrlKey && input.selectionStart === input.selectionEnd) {
+        } else if (e.key.toLowerCase() === 'c' && this.input.selectionStart === this.input.selectionEnd) {
             // Ctrl+C with no selection cancels the line, like a shell.
             e.preventDefault();
-            this.echo(`${input.value}^C`);
-            input.value = '';
+            this.echo({ raw: `${this.input.value}^C` });
+            this.input.value = '';
         }
     }
 
@@ -242,23 +264,40 @@ class Terminal {
             input.value = `${parts.join(' ')} `;
         } else if (matches.length > 1) {
             // Extend to the longest common prefix, then list the options.
-            let common = matches[0]!;
-            for (const m of matches) while (!m.startsWith(common)) common = common.slice(0, -1);
+            const common = this.commonPrefix(matches);
             if (common.length > prefix.length) {
                 parts[parts.length - 1] = common;
                 input.value = parts.join(' ');
             } else {
-                this.echo(value);
+                this.echo({ raw: value });
                 this.print(...matches.flatMap((m) => [c.fg(m), '  ']));
             }
         }
     }
 
+    private commonPrefix(matches: string[]): string {
+        let common = matches[0]!;
+        for (const match of matches) while (!match.startsWith(common)) common = common.slice(0, -1);
+        return common;
+    }
+
     async exec(raw: string): Promise<void> {
         const line = raw.trim();
         this.input.value = '';
-        this.echo(line);
+        this.echo({ raw: line });
         if (!line) return;
+        this.remember({ line });
+
+        if (/^sudo\b/.test(line)) return this.print(c.ev('Permission denied:'), ' event streams are append-only.');
+        if (/^rm\b/.test(line)) return this.print(c.ev('Events are immutable.'), ' Try appending a compensating event.');
+
+        const [name = '', ...args] = line.split(/\s+/);
+        const cmd = this.commands[name.toLowerCase()];
+        if (!cmd) return this.unknownCommand({ name });
+        await cmd.run(args, line);
+    }
+
+    private remember({ line }: { line: string }): void {
         if (this.history[this.history.length - 1] !== line) this.history.push(line);
         this.history = this.history.slice(-50);
         this.cursor = this.history.length;
@@ -268,260 +307,343 @@ class Terminal {
         } catch {
             /* ignore */
         }
+    }
 
-        if (/^sudo\b/.test(line)) return this.print(c.ev('Permission denied:'), ' event streams are append-only.');
-        if (/^rm\b/.test(line)) return this.print(c.ev('Events are immutable.'), ' Try appending a compensating event.');
-
-        const [name = '', ...args] = line.split(/\s+/);
-        const cmd = this.commands[name.toLowerCase()];
-        if (!cmd) {
-            const names = Object.entries(this.commands).filter(([, x]) => !x.hidden).map(([n]) => n);
-            const near = names
-                .map((n) => ({ n, d: distance(name.toLowerCase(), n) }))
-                .filter((x) => x.d <= 2 || x.n.startsWith(name.toLowerCase()))
-                .sort((a, b) => a.d - b.d)
-                .slice(0, 3)
-                .map((x) => x.n);
-            this.print(c.ev('command not found: '), c.fg(name));
-            if (near.length) this.print('Did you mean ', ...near.flatMap((n, i) => [c.fg(n), i < near.length - 1 ? ', ' : '']), '? Or type ', c.fg('help'), '.');
-            else this.print('Type ', c.fg('help'), ' for the list of commands.');
-            return;
-        }
-        await cmd.run(args, line);
+    private unknownCommand({ name }: { name: string }): void {
+        const names = Object.entries(this.commands).filter(([, x]) => !x.hidden).map(([n]) => n);
+        const near = names
+            .map((n) => ({ n, d: distance({ a: name.toLowerCase(), b: n }) }))
+            .filter((x) => x.d <= 2 || x.n.startsWith(name.toLowerCase()))
+            .sort((a, b) => a.d - b.d)
+            .slice(0, 3)
+            .map((x) => x.n);
+        this.print(c.ev('command not found: '), c.fg(name));
+        if (near.length) this.print('Did you mean ', ...near.flatMap((n, i) => [c.fg(n), i < near.length - 1 ? ', ' : '']), '? Or type ', c.fg('help'), '.');
+        else this.print('Type ', c.fg('help'), ' for the list of commands.');
     }
 
     // --- commands -------------------------------------------------------------------
     private buildCommands(): Record<string, Command> {
-        const { person, now, careerEvents, skills, cratis, talks, profileLinks, firstName, feedOrg, projects, snapshotDate, themes: blogThemes, posts: blogPosts, blogHost } = this.cast;
-        const SECTIONS = ALL_SECTIONS.filter(([id]) => id === 'top' || this.cast.sections.includes(id));
-        const LINKS: Record<string, string> = {
+        return {
+            help: this.helpCommand(),
+            whoami: this.identityCommand(),
+            now: this.nowCommand(),
+            ls: this.listCommand(),
+            cd: this.sectionCommand(),
+            cat: this.projectCommand(),
+            git: this.careerCommand(),
+            stream: this.streamCommand(),
+            replay: { desc: 'replay my career on the page', run: () => { this.close(false); startReplay(); } },
+            cv: { desc: 'open the printable CV', run: () => this.navigate({ href: profilePath('cv') }) },
+            skills: this.skillsCommand(),
+            contact: this.contactCommand(),
+            open: this.openCommand(),
+            brew: this.brewCommand(),
+            theme: this.themeCommand(),
+            blog: this.blogCommand(),
+            talks: this.talksCommand(),
+            cratis: this.cratisCommand(),
+            ...this.shellCommands(),
+        };
+    }
+
+    private sections() {
+        return ALL_SECTIONS.filter(([id]) => id === 'top' || this.cast.sections.includes(id));
+    }
+
+    private links(): Record<string, string> {
+        const { profileLinks, cratis } = this.cast;
+        return {
             ...Object.fromEntries(profileLinks.map((profile) => [profile.key.toLowerCase(), profile.url])),
             ...(cratis ? { cratis: Object.values(cratis.links)[0] ?? 'https://cratis.io' } : {}),
         };
-        const brewable = projects.filter((p) => p.install?.startsWith('brew'));
+    }
+
+    private helpCommand(): Command {
+        return {
+            desc: 'list commands',
+            run: () => {
+                this.print(c.faint('Commands are projections over the same event stream as the page.'));
+                for (const [name, cmd] of Object.entries(this.commands)) {
+                    if (cmd.hidden) continue;
+                    this.print(c.cmd(pad({ text: cmd.usage ?? name, width: 26 })), cmd.desc);
+                }
+                this.print(c.faint('Keys: ↑/↓ history · Tab complete · Ctrl+L clear · Esc close'));
+            },
+        };
+    }
+
+    private identityCommand(): Command {
+        const { person } = this.cast;
+        return {
+            desc: 'who is behind this stream',
+            run: () => {
+                this.print(c.fg(person.name), c.faint(` (${person.handle})`));
+                this.print(person.title, ...(person.location ? [c.faint(' · '), person.location] : []));
+                this.print(c.ev(plainText(person.tagline)));
+            },
+        };
+    }
+
+    private nowCommand(): Command {
+        const { firstName, careerEvents, now } = this.cast;
+        return {
+            desc: `the ${firstName}.Now read model`,
+            run: () => {
+                this.print(c.faint('Projection: '), c.view(`${firstName}.Now`), c.faint(` · projected from ${careerEvents.length} events`));
+                const rows: [string, string][] = Object.entries(now).map(([key, value]) => [
+                    key,
+                    Array.isArray(value) ? value.join(', ') : /^\d{4}-\d{2}$/.test(value) ? formatMonth(value) : plainText(value),
+                ]);
+                for (const [k, v] of rows) this.print(c.faint(pad({ text: k, width: 12 })), c.fg(v));
+            },
+        };
+    }
+
+    private listCommand(): Command {
+        const { projects } = this.cast;
+        const SECTIONS = this.sections();
+        return {
+            desc: 'list sections, projects or blog posts',
+            usage: 'ls [projects|blog]',
+            complete: () => ['projects', 'blog'],
+            run: ([what]) => {
+                if (what === 'blog') return this.commands['blog']!.run([], 'blog');
+                if (what === 'projects') {
+                    for (const p of projects) this.print(c.view(pad({ text: p.name, width: 12 })), c.faint(pad({ text: p.version ?? '', width: 9 })), c.faint(pad({ text: p.category, width: 8 })), p.pitch);
+                    this.print(c.faint('cat <project> for details'));
+                    return;
+                }
+                if (what) return this.print(c.ev('ls: '), `cannot access '${what}': try `, c.fg('ls'), ' or ', c.fg('ls projects'));
+                this.print(...SECTIONS.flatMap(([id]) => [c.cmd(`${id}/`), '  ']));
+                this.print(c.faint('cd <section> to jump there'));
+            },
+        };
+    }
+
+    private sectionCommand(): Command {
+        const SECTIONS = this.sections();
+        return {
+            desc: 'jump to a section',
+            usage: 'cd <section>',
+            complete: () => SECTIONS.map(([id]) => id),
+            run: ([to]) => {
+                const id = (to ?? '').replace(/\/$/, '');
+                if (['', '~', '/'].includes(id)) return this.navigateSection({ id: 'top' });
+                if (id === 'cv') return this.navigate({ href: profilePath('cv') });
+                if (!SECTIONS.some(([s]) => s === id)) return this.print(c.ev('cd: '), `no such section: ${id}`);
+                this.navigateSection({ id });
+            },
+        };
+    }
+
+    private projectCommand(): Command {
+        const { projects } = this.cast;
         const findProject = (q = '') => projects.find((p) => p.name.toLowerCase() === q.toLowerCase());
         const projectNames = () => projects.map((p) => p.name);
+        return {
+            desc: 'show a project',
+            usage: 'cat <project>',
+            complete: projectNames,
+            run: ([name]) => {
+                const p = findProject(name);
+                if (!p) {
+                    this.print(c.ev('cat: '), name ? `${name}: no such project` : 'missing project name');
+                    return this.print('Try one of: ', ...projectNames().flatMap((n, i, a) => [c.fg(n), i < a.length - 1 ? ', ' : '']));
+                }
+                this.print(c.view(p.name), p.version ? c.faint(` ${p.version}`) : '', c.faint(` · ${p.category}`));
+                this.print(c.fg(p.pitch));
+                for (const f of p.features) this.print(c.ev('  • '), f);
+                this.print(c.faint('stack   '), p.stack.join(', '));
+                if (p.install) this.print(c.faint('install '), c.cmd(p.install));
+                this.print(c.faint('source  '), link({ href: p.url }));
+            },
+        };
+    }
 
-        const cmds: Record<string, Command> = {
-            help: {
-                desc: 'list commands',
-                run: () => {
-                    this.print(c.faint('Commands are projections over the same event stream as the page.'));
-                    for (const [name, cmd] of Object.entries(this.commands)) {
-                        if (cmd.hidden) continue;
-                        this.print(c.cmd(pad(cmd.usage ?? name, 26)), cmd.desc);
-                    }
-                    this.print(c.faint('Keys: ↑/↓ history · Tab complete · Ctrl+L clear · Esc close'));
-                },
-            },
-            whoami: {
-                desc: 'who is behind this stream',
-                run: () => {
-                    this.print(c.fg(person.name), c.faint(` (${person.handle})`));
-                    this.print(person.title, ...(person.location ? [c.faint(' · '), person.location] : []));
-                    this.print(c.ev(plainText(person.tagline)));
-                },
-            },
-            now: {
-                desc: `the ${firstName}.Now read model`,
-                run: () => {
-                    this.print(c.faint('Projection: '), c.view(`${firstName}.Now`), c.faint(` · projected from ${careerEvents.length} events`));
-                    const rows: [string, string][] = Object.entries(now).map(([key, value]) => [
-                        key,
-                        Array.isArray(value) ? value.join(', ') : /^\d{4}-\d{2}$/.test(value) ? formatMonth(value) : plainText(value),
-                    ]);
-                    for (const [k, v] of rows) this.print(c.faint(pad(k, 12)), c.fg(v));
-                },
-            },
-            ls: {
-                desc: 'list sections, projects or blog posts',
-                usage: 'ls [projects|blog]',
-                complete: () => ['projects', 'blog'],
-                run: ([what]) => {
-                    if (what === 'blog') return this.commands['blog']!.run([], 'blog');
-                    if (what === 'projects') {
-                        for (const p of projects) this.print(c.view(pad(p.name, 12)), c.faint(pad(p.version ?? '', 9)), c.faint(pad(p.category, 8)), p.pitch);
-                        this.print(c.faint('cat <project> for details'));
+    private careerCommand(): Command {
+        const { careerEvents } = this.cast;
+        return {
+            desc: 'career events, newest first',
+            usage: 'git log [--oneline]',
+            complete: (args) => (args.length ? ['--oneline'] : ['log']),
+            run: ([sub, flag]) => {
+                if (sub !== 'log') return this.print(c.ev('git: '), `'${sub ?? ''}' is not supported here. Try `, c.fg('git log'), ' or ', c.fg('git log --oneline'));
+                const events = [...careerEvents].reverse();
+                events.forEach((e, i) => {
+                    const head = i === 0 ? [c.faint(' ('), c.cmd('HEAD -> '), c.view('stream'), c.faint(')')] : [];
+                    if (flag === '--oneline') {
+                        this.print(c.ev(`#${String(e.seq).padStart(2, '0')}`), ...head, ' ', c.faint(e.date), ' ', c.ev(e.type), ' ', c.fg(e.title), e.org ? c.faint(` · ${e.org}`) : '');
                         return;
                     }
-                    if (what) return this.print(c.ev('ls: '), `cannot access '${what}': try `, c.fg('ls'), ' or ', c.fg('ls projects'));
-                    this.print(...SECTIONS.flatMap(([id]) => [c.cmd(`${id}/`), '  ']));
-                    this.print(c.faint('cd <section> to jump there'));
-                },
+                    this.print(c.ev(`event #${e.seq}`), ...head);
+                    this.print(c.faint('Type:  '), c.ev(e.type));
+                    this.print(c.faint('Date:  '), formatMonth(e.date));
+                    if (e.org) this.print(c.faint('Org:   '), e.org);
+                    this.blank();
+                    this.print('    ', c.fg(e.title));
+                    this.print('    ', e.summary);
+                    this.blank();
+                });
             },
-            cd: {
-                desc: 'jump to a section',
-                usage: 'cd <section>',
-                complete: () => SECTIONS.map(([id]) => id),
-                run: ([to]) => {
-                    const id = (to ?? '').replace(/\/$/, '');
-                    if (!id || id === '~' || id === '/') return this.navigateSection('top');
-                    if (id === 'cv') return this.navigate(profilePath('cv'));
-                    if (!SECTIONS.some(([s]) => s === id)) return this.print(c.ev('cd: '), `no such section: ${id}`);
-                    this.navigateSection(id);
-                },
+        };
+    }
+
+    private streamCommand(): Command {
+        const { feedOrg, snapshotDate } = this.cast;
+        return {
+            desc: 'latest merged PRs from GitHub',
+            usage: 'stream tail [-n N]',
+            complete: (args) => (args.length ? ['-n'] : ['tail']),
+            run: ([sub, flag, n]) => {
+                if (sub !== 'tail') return this.print(c.ev('stream: '), 'try ', c.fg('stream tail'));
+                const live = getLiveMerged();
+                const prs = live?.latest ?? this.cast.pullRequests;
+                const count = this.tailCount({ flag, n, length: prs.length });
+                this.print(c.faint(`tail ${feedOrg} · ${live ? 'live' : `snapshot taken ${snapshotDate}`} · ${this.mergedTotal()} merged in total`));
+                prs.slice(0, count).forEach((pr, i) => {
+                    this.print(
+                        c.faint(pad({ text: i === 0 ? 'HEAD' : `HEAD~${i}`, width: 8 })),
+                        c.ev('PullRequestMerged '),
+                        c.cmd(`${pr.repository}#${pr.number} `),
+                        link({ href: pr.url, text: pr.title }),
+                        c.faint(` · ${relativeTime(pr.mergedAt)}`),
+                    );
+                });
+                if (!prs.length) this.print(c.faint(live ? 'EventNotFound: the live feed has no merged pull requests.' : 'EventNotFound: the snapshot has no merged pull requests.'));
             },
-            cat: {
-                desc: 'show a project',
-                usage: 'cat <project>',
-                complete: projectNames,
-                run: ([name]) => {
-                    const p = findProject(name);
-                    if (!p) {
-                        this.print(c.ev('cat: '), name ? `${name}: no such project` : 'missing project name');
-                        return this.print('Try one of: ', ...projectNames().flatMap((n, i, a) => [c.fg(n), i < a.length - 1 ? ', ' : '']));
-                    }
-                    this.print(c.view(p.name), p.version ? c.faint(` ${p.version}`) : '', c.faint(` · ${p.category}`));
-                    this.print(c.fg(p.pitch));
-                    for (const f of p.features) this.print(c.ev('  • '), f);
-                    this.print(c.faint('stack   '), p.stack.join(', '));
-                    if (p.install) this.print(c.faint('install '), c.cmd(p.install));
-                    this.print(c.faint('source  '), link(p.url));
-                },
+        };
+    }
+
+    private tailCount({ flag, n, length }: { flag: string | undefined; n: string | undefined; length: number }): number {
+        return flag === '-n' ? Math.max(1, Math.min(length, Number(n) || length)) : length;
+    }
+
+    private skillsCommand(): Command {
+        const { skills } = this.cast;
+        return {
+            desc: 'the toolbox, grouped',
+            run: () => {
+                for (const [group, list] of Object.entries(skills)) {
+                    this.print(c.view(group));
+                    this.print('  ', list.join(' · '));
+                }
             },
-            git: {
-                desc: 'career events, newest first',
-                usage: 'git log [--oneline]',
-                complete: (args) => (args.length ? ['--oneline'] : ['log']),
-                run: ([sub, flag]) => {
-                    if (sub !== 'log') return this.print(c.ev('git: '), `'${sub ?? ''}' is not supported here. Try `, c.fg('git log'), ' or ', c.fg('git log --oneline'));
-                    const events = [...careerEvents].reverse();
-                    events.forEach((e, i) => {
-                        const head = i === 0 ? [c.faint(' ('), c.cmd('HEAD -> '), c.view('stream'), c.faint(')')] : [];
-                        if (flag === '--oneline') {
-                            this.print(c.ev(`#${String(e.seq).padStart(2, '0')}`), ...head, ' ', c.faint(e.date), ' ', c.ev(e.type), ' ', c.fg(e.title), e.org ? c.faint(` · ${e.org}`) : '');
-                            return;
-                        }
-                        this.print(c.ev(`event #${e.seq}`), ...head);
-                        this.print(c.faint('Type:  '), c.ev(e.type));
-                        this.print(c.faint('Date:  '), formatMonth(e.date));
-                        if (e.org) this.print(c.faint('Org:   '), e.org);
-                        this.blank();
-                        this.print('    ', c.fg(e.title));
-                        this.print('    ', e.summary);
-                        this.blank();
-                    });
-                },
+        };
+    }
+
+    private contactCommand(): Command {
+        const { person, profileLinks } = this.cast;
+        return {
+            desc: 'how to reach me',
+            usage: 'contact [--copy]',
+            complete: () => ['--copy'],
+            run: async ([flag]) => {
+                if (person.email) this.print(c.faint(pad({ text: 'email', width: 10 })), link({ href: `mailto:${person.email}`, text: person.email }));
+                for (const profile of profileLinks) this.print(c.faint(pad({ text: profile.key, width: 10 })), link({ href: profile.url }));
+                if (!person.email) return;
+                if (flag === '--copy') this.print((await copyText(person.email)) ? c.view(`✓ copied ${person.email}`) : c.ev('copy failed; select the address above'));
+                else this.print(c.faint('contact --copy copies the email address'));
             },
-            stream: {
-                desc: 'latest merged PRs from GitHub',
-                usage: 'stream tail [-n N]',
-                complete: (args) => (args.length ? ['-n'] : ['tail']),
-                run: ([sub, flag, n]) => {
-                    if (sub !== 'tail') return this.print(c.ev('stream: '), 'try ', c.fg('stream tail'));
-                    const live = getLiveMerged();
-                    const prs = live?.latest ?? this.cast.pullRequests;
-                    const count = flag === '-n' ? Math.max(1, Math.min(prs.length, Number(n) || prs.length)) : prs.length;
-                    this.print(c.faint(`tail ${feedOrg} · ${live ? 'live' : `snapshot taken ${snapshotDate}`} · ${this.mergedTotal()} merged in total`));
-                    prs.slice(0, count).forEach((pr, i) => {
-                        this.print(
-                            c.faint(pad(i === 0 ? 'HEAD' : `HEAD~${i}`, 8)),
-                            c.ev('PullRequestMerged '),
-                            c.cmd(`${pr.repository}#${pr.number} `),
-                            link(pr.url, pr.title),
-                            c.faint(` · ${relativeTime(pr.mergedAt)}`),
-                        );
-                    });
-                    if (!prs.length) this.print(c.faint(live ? 'EventNotFound: the live feed has no merged pull requests.' : 'EventNotFound: the snapshot has no merged pull requests.'));
-                },
+        };
+    }
+
+    private openCommand(): Command {
+        const LINKS = this.links();
+        return {
+            desc: 'open a profile in a new tab',
+            usage: `open ${Object.keys(LINKS).join('|')}`,
+            complete: () => Object.keys(LINKS),
+            run: ([target]) => {
+                const url = LINKS[target ?? ''];
+                if (!url) return this.print(c.ev('open: '), 'choose one of ', ...Object.keys(LINKS).flatMap((k, i, a) => [c.fg(k), i < a.length - 1 ? ', ' : '']));
+                this.print(c.faint('opening '), link({ href: url }));
+                openExternal(url);
             },
-            replay: {
-                desc: 'replay my career on the page',
-                run: () => {
-                    this.close(false);
-                    startReplay();
-                },
+        };
+    }
+
+    private brewCommand(): Command {
+        const brewable = this.cast.projects.filter((p) => p.install?.startsWith('brew'));
+        return {
+            desc: 'install one of my CLI tools',
+            usage: 'brew install <tool>',
+            complete: (args) => (args.length ? brewable.map((p) => p.name) : ['install']),
+            run: async ([sub, name]) => {
+                if (sub !== 'install' || !name) return this.print('Usage: ', c.fg('brew install <tool>'), c.faint(` (${brewable.map((p) => p.name).join(', ')})`));
+                const p = brewable.find((x) => x.name === name.toLowerCase());
+                if (!p?.install) return this.print(c.ev('Error: '), `No available formula with the name "${name}". Try: ${brewable.map((x) => x.name).join(', ')}`);
+                this.print(c.cmd('==> '), c.fg(`${p.name} ${p.version ?? ''}`.trim()), c.faint(` · ${p.pitch}`));
+                this.print(c.faint('Run this in your own terminal:'));
+                this.print('  ', c.cmd(p.install));
+                this.print((await copyText(p.install)) ? c.view('✓ copied to the clipboard') : c.faint('(select the line above to copy it)'));
             },
-            cv: {
-                desc: 'open the printable CV',
-                run: () => this.navigate(profilePath('cv')),
+        };
+    }
+
+    private themeCommand(): Command {
+        return {
+            desc: 'switch the color theme',
+            usage: 'theme light|dark',
+            complete: () => ['light', 'dark'],
+            run: ([t]) => {
+                if (t !== 'light' && t !== 'dark') return this.print('theme is ', c.fg(currentTheme()), c.faint('; use theme light or theme dark'));
+                setTheme(t);
+                this.print(c.view('✓ '), `theme set to ${t}`);
             },
-            skills: {
-                desc: 'the toolbox, grouped',
-                run: () => {
-                    for (const [group, list] of Object.entries(skills)) {
-                        this.print(c.view(group));
-                        this.print('  ', list.join(' · '));
-                    }
-                },
+        };
+    }
+
+    private blogCommand(): Command {
+        const { themes: blogThemes, posts: blogPosts, blogHost } = this.cast;
+        return {
+            desc: blogHost ? `my posts on ${blogHost}` : 'my posts',
+            usage: 'blog [theme]',
+            complete: () => blogThemes.map((t) => t.id),
+            run: ([theme]) => {
+                const t = blogThemes.find((x) => x.id === theme);
+                if (theme && !t) return this.print(c.ev('blog: '), 'themes are ', ...blogThemes.flatMap((x, i, a) => [c.fg(x.id), i < a.length - 1 ? ', ' : '']));
+                const list = t ? blogPosts.filter((p) => p.themes.includes(t.id)) : blogPosts;
+                this.print(c.faint(`${list.length} post${list.length === 1 ? '' : 's'}${t ? ` about ${t.label}` : ''}${blogHost ? ` on ${blogHost}` : ''}`));
+                for (const p of list) this.printPost(p);
             },
-            contact: {
-                desc: 'how to reach me',
-                usage: 'contact [--copy]',
-                complete: () => ['--copy'],
-                run: async ([flag]) => {
-                    if (person.email) this.print(c.faint(pad('email', 10)), link(`mailto:${person.email}`, person.email));
-                    for (const profile of profileLinks) this.print(c.faint(pad(profile.key, 10)), link(profile.url));
-                    if (!person.email) return;
-                    if (flag === '--copy') this.print((await copyText(person.email)) ? c.view(`✓ copied ${person.email}`) : c.ev('copy failed; select the address above'));
-                    else this.print(c.faint('contact --copy copies the email address'));
-                },
+        };
+    }
+
+    private printPost(post: ClientCast['posts'][number]): void {
+        const part = post.part !== undefined ? `Part ${String(post.part).padStart(2, '0')}` : 'Overview';
+        this.print(c.ev(pad({ text: part, width: 9 })), link({ href: post.url, text: post.headline }), c.faint(post.minutes ? ` · ${post.minutes} min` : ''));
+    }
+
+    private talksCommand(): Command {
+        const { talks } = this.cast;
+        return {
+            desc: 'talks & writing',
+            run: () => {
+                for (const t of talks) {
+                    this.print(c.ev(t.date.slice(0, 4)), ' ', c.fg(t.title), c.faint(` · ${t.host}`));
+                    if (t.url) this.print('  ', link({ href: t.url, text: 'watch' }));
+                }
             },
-            open: {
-                desc: 'open a profile in a new tab',
-                usage: `open ${Object.keys(LINKS).join('|')}`,
-                complete: () => Object.keys(LINKS),
-                run: ([target]) => {
-                    const url = LINKS[target ?? ''];
-                    if (!url) return this.print(c.ev('open: '), 'choose one of ', ...Object.keys(LINKS).flatMap((k, i, a) => [c.fg(k), i < a.length - 1 ? ', ' : '']));
-                    this.print(c.faint('opening '), link(url));
-                    openExternal(url);
-                },
+        };
+    }
+
+    private cratisCommand(): Command {
+        const { cratis } = this.cast;
+        const LINKS = this.links();
+        return {
+            desc: 'what Cratis is',
+            run: () => {
+                if (!cratis) return this.print(c.faint('Cratis makes event sourcing practical. '), link({ href: 'https://cratis.io' }));
+                if (cratis.pitch) this.print(c.fg(plainText(cratis.pitch)));
+                this.print(c.faint(`${this.mergedTotal()} merged PRs · `), link({ href: LINKS['cratis'] ?? 'https://cratis.io' }));
+                for (const r of cratis.repos) this.print(c.cmd(pad({ text: r.name, width: 21 })), c.faint(pad({ text: r.role, width: 16 })), r.url ? link({ href: r.url, text: r.desc }) : r.desc);
             },
-            brew: {
-                desc: 'install one of my CLI tools',
-                usage: 'brew install <tool>',
-                complete: (args) => (args.length ? brewable.map((p) => p.name) : ['install']),
-                run: async ([sub, name]) => {
-                    if (sub !== 'install' || !name) return this.print('Usage: ', c.fg('brew install <tool>'), c.faint(` (${brewable.map((p) => p.name).join(', ')})`));
-                    const p = brewable.find((x) => x.name === name.toLowerCase());
-                    if (!p?.install) return this.print(c.ev('Error: '), `No available formula with the name "${name}". Try: ${brewable.map((x) => x.name).join(', ')}`);
-                    this.print(c.cmd('==> '), c.fg(`${p.name} ${p.version ?? ''}`.trim()), c.faint(` · ${p.pitch}`));
-                    this.print(c.faint('Run this in your own terminal:'));
-                    this.print('  ', c.cmd(p.install));
-                    this.print((await copyText(p.install)) ? c.view('✓ copied to the clipboard') : c.faint('(select the line above to copy it)'));
-                },
-            },
-            theme: {
-                desc: 'switch the color theme',
-                usage: 'theme light|dark',
-                complete: () => ['light', 'dark'],
-                run: ([t]) => {
-                    if (t !== 'light' && t !== 'dark') return this.print('theme is ', c.fg(currentTheme()), c.faint('; use theme light or theme dark'));
-                    setTheme(t);
-                    this.print(c.view('✓ '), `theme set to ${t}`);
-                },
-            },
-            blog: {
-                desc: blogHost ? `my posts on ${blogHost}` : 'my posts',
-                usage: 'blog [theme]',
-                complete: () => blogThemes.map((t) => t.id),
-                run: ([theme]) => {
-                    const t = blogThemes.find((x) => x.id === theme);
-                    if (theme && !t) return this.print(c.ev('blog: '), 'themes are ', ...blogThemes.flatMap((x, i, a) => [c.fg(x.id), i < a.length - 1 ? ', ' : '']));
-                    const list = t ? blogPosts.filter((p) => p.themes.includes(t.id)) : blogPosts;
-                    this.print(c.faint(`${list.length} post${list.length === 1 ? '' : 's'}${t ? ` about ${t.label}` : ''}${blogHost ? ` on ${blogHost}` : ''}`));
-                    for (const p of list) this.print(c.ev(pad(p.part !== undefined ? `Part ${String(p.part).padStart(2, '0')}` : 'Overview', 9)), link(p.url, p.headline), c.faint(p.minutes ? ` · ${p.minutes} min` : ''));
-                },
-            },
-            talks: {
-                desc: 'talks & writing',
-                run: () => {
-                    for (const t of talks) {
-                        this.print(c.ev(t.date.slice(0, 4)), ' ', c.fg(t.title), c.faint(` · ${t.host}`));
-                        if (t.url) this.print('  ', link(t.url, 'watch'));
-                    }
-                },
-            },
-            cratis: {
-                desc: 'what Cratis is',
-                run: () => {
-                    if (!cratis) return this.print(c.faint('Cratis makes event sourcing practical. '), link('https://cratis.io'));
-                    if (cratis.pitch) this.print(c.fg(plainText(cratis.pitch)));
-                    this.print(c.faint(`${this.mergedTotal()} merged PRs · `), link(LINKS['cratis'] ?? 'https://cratis.io'));
-                    for (const r of cratis.repos) this.print(c.cmd(pad(r.name, 21)), c.faint(pad(r.role, 16)), r.url ? link(r.url, r.desc) : r.desc);
-                },
-            },
+        };
+    }
+
+    private shellCommands(): Record<string, Command> {
+        return {
             clear: { desc: 'clear the screen (Ctrl+L)', run: () => this.clear() },
             exit: { desc: 'close the terminal (Esc)', run: () => this.close() },
             // Hidden aliases.
@@ -535,14 +657,13 @@ class Terminal {
             man: { desc: '', hidden: true, run: () => this.commands['help']!.run([], 'help') },
             vim: { desc: '', hidden: true, run: () => this.print('You are now trapped. Just kidding: press ', c.fg('Esc'), '.') },
         };
-        return cmds;
     }
 
-    private navigateSection(id: string): void {
+    private navigateSection({ id }: { id: string }): void {
         this.close(false);
         goSection(id);
     }
-    private navigate(href: string): void {
+    private navigate({ href }: { href: string }): void {
         this.print(c.faint(`navigating to ${href}…`));
         this.close(false);
         void go(href);
@@ -557,7 +678,8 @@ export function openTerminal(): void {
     const out = dialog?.querySelector<HTMLElement>('[data-terminal-out]');
     const input = dialog?.querySelector<HTMLInputElement>('[data-terminal-input]');
     const cast = readClientCast();
-    if (!dialog || !out || !input || !cast) return;
+    if (!dialog || !cast) return;
+    if (!out || !input) return;
     let term = instances.get(dialog);
     if (!term) {
         term = new Terminal(cast, dialog, out, input);
