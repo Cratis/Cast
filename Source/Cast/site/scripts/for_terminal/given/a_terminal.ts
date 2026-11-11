@@ -30,12 +30,14 @@ export class ElementStub {
     children: (string | ElementStub)[] = [];
     listeners = new Map<string, (event: unknown) => unknown>();
     focus = vi.fn();
+    blur = vi.fn();
+    contains = (node: unknown): boolean => node === this || this.children.includes(node as ElementStub);
     setSelectionRange = vi.fn();
     addEventListener(type: string, listener: (event: unknown) => unknown): void { this.listeners.set(type, listener); }
     append(...children: (string | ElementStub)[]): void { this.children.push(...children); }
     replaceChildren(): void { this.children = []; }
     showModal(): void { this.open = true; }
-    close(): void { this.open = false; }
+    close(): void { this.open = false; this.listeners.get('close')?.({}); }
     querySelector(): null { return null; }
     text(): string { return this.textContent + this.children.map(child => typeof child === 'string' ? child : child.text()).join(''); }
 }
@@ -45,19 +47,30 @@ export function terminalElements() {
     const out = new ElementStub();
     const input = new ElementStub();
     const form = new ElementStub();
+    const close = new ElementStub();
+    const chips = new ElementStub();
+    const page = { documentElement: { style: { overflow: '' } }, activeElement: null as ElementStub | null, body: new ElementStub() };
+    const browser = { getSelection: vi.fn(() => ''), setTimeout: vi.fn((callback: () => void) => callback()) };
     const elements: Record<string, ElementStub> = {
         '[data-terminal-out]': out, '[data-terminal-input]': input, '[data-terminal-form]': form,
+        '[data-terminal-close]': close, '[data-terminal-chips]': chips,
     };
-    Object.assign(dialog, { querySelector: (selector: string) => elements[selector] ?? null });
+    dialog.children = [out, input, form, close, chips];
+    Object.assign(dialog, {
+        querySelector: (selector: string) => elements[selector] ?? null,
+        querySelectorAll: () => [input, close],
+    });
     vi.stubGlobal('HTMLElement', ElementStub);
     vi.stubGlobal('document', {
         querySelector: () => dialog, createElement: () => new ElementStub(),
-        documentElement: { style: {} }, activeElement: null,
+        ...page,
     });
+    vi.stubGlobal('window', browser);
+    vi.stubGlobal('location', { pathname: '/ada/' });
     vi.stubGlobal('sessionStorage', { getItem: () => '[]', setItem: vi.fn() });
     vi.stubGlobal('requestAnimationFrame', (callback: () => void) => callback());
     return {
-        dialog, out, input,
+        dialog, out, input, close, chips, browser,
         async exec(command: string): Promise<string> {
             out.replaceChildren();
             input.value = command;
