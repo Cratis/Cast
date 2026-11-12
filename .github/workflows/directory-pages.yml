@@ -31,9 +31,9 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 23.x
       - name: Yarn install
@@ -41,7 +41,7 @@ jobs:
       - name: Build the engine (schema and bundled registry)
         run: yarn workspace @cratis/cast build
       - name: Restore the last good member profiles and GitHub data
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: Directory/.cast/cache
           key: directory-cache-${{ github.run_id }}
@@ -53,7 +53,7 @@ jobs:
           # Read-only: public profiles, contributor discovery and merged pull request counts.
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: ./Directory/dist
 
@@ -69,4 +69,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
