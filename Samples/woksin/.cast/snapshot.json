@@ -416,7 +416,7 @@
     }
   },
   "writing": {
-    "fetchedAt": "2026-11-09T14:18:05.765Z",
+    "fetchedAt": "2026-11-16T13:58:32.832Z",
     "sources": [
       "https://blog.cratis.io/authors/sindre-alstad-wilting/"
     ],
@@ -471,6 +471,18 @@
         "tags": [
           "chronicle",
           "concurrency",
+          "event-sourcing"
+        ]
+      },
+      {
+        "title": "Careers that remember: introducing the Cratis Cast",
+        "url": "https://blog.cratis.io/careers-that-remember-introducing-the-cratis-cast/",
+        "date": "2026-11-09T00:00:00.000Z",
+        "minutes": 6,
+        "description": "One cast.yaml becomes a personal site that replays your career as events, shows your public GitHub work as it happens, and carries a badge it can't give itself. The directory at cast.cratis.io is where that badge is checked.",
+        "tags": [
+          "cast",
+          "community",
           "event-sourcing"
         ]
       },
